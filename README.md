@@ -134,11 +134,11 @@ Si usan un issue tracker, pueden agregar el número del issue: `feature/42-match
 
 ```bash
 # 1. Partir de un main actualizado
-git switch main
+git checkout main
 git pull origin main
 
 # 2. Crear tu branch
-git switch -c feature/match-calendar
+git checkout -b feature/match-calendar
 
 # 3. Trabajar y commitear en pasos chicos y enfocados
 git add <archivos>
@@ -214,7 +214,7 @@ El problema que resuelve o la funcionalidad que agrega.
 4. Después del merge se borra el branch. En local:
 
    ```bash
-   git switch main
+   git checkout main
    git pull origin main
    git branch -d feature/match-calendar
    ```
