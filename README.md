@@ -99,7 +99,7 @@ app/                 Rutas (Next.js App Router)
 components/
   ui/                Componentes base de shadcn/ui
   auth/ brand/ club/ modules/   Componentes de cada funcionalidad
-docs/                Documentación (ADRs, integración con la API)
+docs/                Documentación (ADRs, integración con la API, CI)
 hooks/               Hooks de React propios
 lib/                 Auth, datos mock, tenants, helpers
 public/              Archivos estáticos
@@ -188,6 +188,8 @@ Cada pull request a `main`, y cada push a `main`, corre el workflow [`.github/wo
 4. corre `pnpm build`.
 
 El resultado aparece en el PR como un check (✓ o ✗). Con la protección de `main` activa (ver [3.8](#38-configuración-recomendada-del-repositorio-para-maintainers)), un PR con el check en rojo no se puede mergear. Si falla, abrí el detalle del check, corregí el problema en tu branch y pusheá de nuevo: la CI vuelve a correr sola.
+
+La guía completa (errores frecuentes, decisiones técnicas y próximos pasos) está en [docs/ci.md](docs/ci.md).
 
 ### 3.5 Checklist del pull request
 
