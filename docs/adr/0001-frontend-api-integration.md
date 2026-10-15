@@ -1,94 +1,114 @@
-# ADR 0001 — Frontend ↔ Laravel API integration
+# ADR 0001 — Integración Frontend ↔ API Laravel
 
-- **Status:** Accepted
-- **Date:** 2026-10-15
-- **Context source:** OLIM data model and authentication draft (central `olim_platform` DB + one MySQL DB per club)
+- **Estado:** Aceptado
+- **Fecha:** 2026-10-15
+- **Fuente del contexto:** modelo de datos y borrador de autenticación de OLIM (BD central `olim_platform` + una BD MySQL por club)
 
-## Context
+## Contexto
 
-This repository is a Next.js 16 frontend only. A single Laravel application exposes the API. According to the data model:
+Este repositorio es solo el frontend, en Next.js 16. Una única aplicación Laravel expone la API. Según el modelo de datos:
 
-- Users authenticate globally against `olim_platform.users`.
-- `tenant_memberships` is the only source of authorization for accessing a club.
-- A user with several clubs picks one. The session or token is then **bound to that tenant**, and every request must re-validate the user, the club and the membership.
-- Operational data lives in each club's own database. Roles and permissions are per club (`roles`, `permissions`, `club_user_roles`).
+- Los usuarios se autentican de forma global contra `olim_platform.users`.
+- `tenant_memberships` es la única fuente de autorización para acceder a un club.
+- Un usuario con varios clubes elige uno. A partir de ahí, la sesión o el token queda **atado a ese tenant**, y cada request tiene que volver a validar el usuario, el club y la membresía.
+- Los datos operativos viven en la base de datos propia de cada club. Los roles y permisos son por club (`roles`, `permissions`, `club_user_roles`).
 
-We need to decide how the browser, Next.js and Laravel talk to each other, how authentication works, and how the tenant is carried.
+Hay que decidir cómo se comunican el browser, Next.js y Laravel, cómo funciona la autenticación y cómo se transporta el tenant.
 
-## Decision
+## Decisión
 
-### 1. Backend-for-Frontend: the browser only talks to Next.js
+### 1. Backend-for-Frontend: el browser solo habla con Next.js
 
 ```
-Browser ──cookie──▶ Next.js server ──Bearer token──▶ Laravel API ──▶ olim_platform / club DB
+Browser ──cookie──▶ Servidor Next.js ──Bearer token──▶ API Laravel ──▶ olim_platform / BD del club
 ```
 
-- Server Components fetch data and Server Actions run mutations. Both call Laravel from the Next.js server.
-- Client components never call Laravel directly. They call Server Actions.
-- The Laravel URL is a **server-only** variable (`API_URL`, without the `NEXT_PUBLIC_` prefix).
+- Los Server Components obtienen los datos y los Server Actions ejecutan las mutaciones. Los dos llaman a Laravel desde el servidor de Next.js.
+- Los client components nunca llaman a Laravel directamente: llaman a Server Actions.
+- La URL de Laravel es una variable **solo de servidor** (`API_URL`, sin el prefijo `NEXT_PUBLIC_`).
 
-**Why:** the token never reaches browser JavaScript, so an XSS bug cannot steal it. Laravel needs no CORS configuration and no cross-site cookies. The frontend already uses this pattern (`lib/auth.ts` is a Server Action that sets an `httpOnly` cookie).
+**Por qué:**
+- El token nunca llega al JavaScript del browser, así que un XSS no puede robarlo.
+- Laravel no necesita configurar CORS ni cookies cross-site.
+- El frontend ya usa este patrón: `lib/auth.ts` es un Server Action que setea una cookie `httpOnly`.
 
-### 2. Authentication: Laravel Sanctum API tokens, stored in an httpOnly cookie by Next.js
+### 2. Autenticación: API tokens de Laravel Sanctum, guardados por Next.js en una cookie httpOnly
 
-- Laravel issues **Sanctum personal access tokens**. They are opaque, stored server-side and revocable.
-- The `personal_access_tokens` table lives in `olim_platform`, with a `tenant_id` column (nullable) added to it.
-- Next.js stores the token in a cookie with `httpOnly`, `secure` (in production), `sameSite: 'lax'`, `path: '/'`, and the same expiry as the token.
-- On logout, Next.js calls Laravel to revoke the token, then deletes the cookie.
+- Laravel emite **personal access tokens de Sanctum**. Son opacos, se guardan del lado del servidor y se pueden revocar.
+- La tabla `personal_access_tokens` vive en `olim_platform` y se le agrega una columna `tenant_id` (nullable).
+- Next.js guarda el token en una cookie con:
+  - `httpOnly`;
+  - `secure` (en producción);
+  - `sameSite: 'lax'`;
+  - `path: '/'`;
+  - el mismo vencimiento que el token.
+- En el logout, Next.js le pide a Laravel que revoque el token y después borra la cookie.
 
-**Rejected alternatives:**
+**Alternativas descartadas:**
 
-- **Sanctum SPA mode** (stateful cookies + CSRF, with the browser calling Laravel directly). It requires a shared root domain, CORS with credentials and `SANCTUM_STATEFUL_DOMAINS`, and it is a frequent source of session bugs. With a BFF it brings no benefit.
-- **JWT.** Revoking a JWT before it expires needs a denylist. The design asks to check membership on every request anyway, so a stateless token saves nothing.
+- **Modo SPA de Sanctum** (cookies stateful + CSRF, con el browser llamando a Laravel directamente).
+  - Requiere un dominio raíz compartido, CORS con credenciales y `SANCTUM_STATEFUL_DOMAINS`.
+  - Es una fuente frecuente de bugs de sesión.
+  - Con un BFF no aporta ningún beneficio.
+- **JWT.**
+  - Revocar un JWT antes de que venza requiere una denylist.
+  - El diseño exige verificar la membresía en cada request de todos modos, así que un token stateless no ahorra nada.
 
-### 3. The tenant is bound to the token, not sent by the client
+### 3. El tenant queda atado al token, no lo envía el cliente
 
-This follows step 7 of the data model:
+Esto sigue el paso 7 del modelo de datos:
 
-1. `POST /auth/login` (email, password) returns a **pre-tenant token** (`tenant_id = null`, ability `tenant:select` only) and the list of authorized clubs.
-2. With one club, the frontend selects it automatically. With several, it shows the club selector (`/clubes`).
-3. `POST /auth/select-tenant` (`tenant` = slug) makes Laravel re-validate the membership. It then revokes the pre-tenant token and issues a **tenant-scoped token**.
-4. Every operational request uses the tenant-scoped token. Laravel middleware resolves the tenant **from the token**, re-checks user, club and membership status, and switches the DB connection.
-5. Switching club goes through `select-tenant` again.
+1. `POST /auth/login` (email, contraseña) devuelve un **token pre-tenant** (`tenant_id = null`, solo la ability `tenant:select`) y la lista de clubes autorizados.
+2. Con un solo club, el frontend lo selecciona automáticamente. Con varios, muestra el selector de clubes (`/clubes`).
+3. `POST /auth/select-tenant` (`tenant` = slug) hace que Laravel vuelva a validar la membresía. Después revoca el token pre-tenant y emite un **token atado al tenant**.
+4. Cada request operativo usa el token atado al tenant. Un middleware de Laravel:
+   - resuelve el tenant **a partir del token**;
+   - vuelve a verificar el estado del usuario, el club y la membresía;
+   - cambia la conexión de base de datos.
+5. Para cambiar de club se vuelve a pasar por `select-tenant`.
 
-In the frontend, the `[club]` segment of `/c/[club]` is for navigation only. If it doesn't match the token's tenant, the app redirects to `/clubes`. It is **never** sent to the API as a source of authorization.
+En el frontend, el segmento `[club]` de `/c/[club]` es solo para navegar. Si no coincide con el tenant del token, la app redirige a `/clubes`. **Nunca** se envía a la API como fuente de autorización.
 
-**Accepted trade-off:** a browser can only have one active club at a time, so two tabs cannot show two different clubs. This is acceptable for club staff. If it becomes a real need, the API could take the tenant from the path (`/t/{slug}/...`) and validate the membership on each request.
+**Trade-off aceptado:** un browser solo puede tener un club activo a la vez, así que dos pestañas no pueden mostrar dos clubes distintos.
+- Es aceptable para el personal del club.
+- Si se vuelve una necesidad real, la API podría tomar el tenant del path (`/t/{slug}/...`) y validar la membresía en cada request.
 
-### 4. Permissions
+### 4. Permisos
 
-`select-tenant` (and `GET /me`) return the user's club profile and the permission keys of their roles (for example `orders.approve`). The frontend only uses them to **show or hide UI**. Laravel enforces every permission again.
+`select-tenant` (y `GET /me`) devuelven el perfil del usuario en el club y las permission keys de sus roles (por ejemplo `orders.approve`). El frontend las usa solo para **mostrar u ocultar UI**. Laravel vuelve a aplicar cada permiso.
 
-### 5. Frontend code layout
+### 5. Organización del código del frontend
 
-| Piece | Location | Responsibility |
-| ----- | -------- | -------------- |
-| API client | `lib/api/client.ts` (`import 'server-only'`) | Reads the cookie, calls `API_URL`, maps errors. A 401 deletes the cookie and redirects to `/`, a 403 redirects to `/clubes`, a 422 returns field errors to the form. |
-| Session / DAL | `lib/auth.ts` | `login`, `selectTenant`, `logout`, `requireSession()`. These are the only functions that touch the cookie. |
-| Optimistic gate | `proxy.ts` (Next 16 replaces `middleware.ts`) | Only checks that the cookie exists and redirects to `/` if it doesn't. It doesn't call the API: real checks happen in the DAL and in Laravel. |
-| Domain calls | `lib/api/<module>.ts` | One file per module (players, orders, inventory…) returning typed data. |
+| Pieza | Ubicación | Responsabilidad |
+| ----- | --------- | --------------- |
+| Cliente API | `lib/api/client.ts` (`import 'server-only'`) | Lee la cookie, llama a `API_URL` y mapea los errores. Un 401 borra la cookie y redirige a `/`, un 403 redirige a `/clubes` y un 422 devuelve los errores de campo al formulario. |
+| Sesión / DAL | `lib/auth.ts` | `login`, `selectTenant`, `logout`, `requireSession()`. Son las únicas funciones que tocan la cookie. |
+| Gate optimista | `proxy.ts` (en Next 16 reemplaza a `middleware.ts`) | Solo verifica que exista la cookie y, si no existe, redirige a `/`. No llama a la API: los chequeos reales ocurren en el DAL y en Laravel. |
+| Llamadas de dominio | `lib/api/<módulo>.ts` | Un archivo por módulo (jugadores, pedidos, inventario…) que devuelve datos tipados. |
 
-Per-user data is never cached across users. Fetches use `cache: 'no-store'`, and mutations call `revalidatePath`.
+Los datos de un usuario nunca se cachean entre usuarios. Los fetch usan `cache: 'no-store'` y las mutaciones llaman a `revalidatePath`.
 
-### 6. API contract
+### 6. Contrato de la API
 
-Laravel publishes an OpenAPI document, generated from code (for example with `dedoc/scramble`). The frontend generates TypeScript types from it with `openapi-typescript`, so a breaking change in the API shows up as a type error. API enum values stay in English, matching the DB (`pending`, `approved`…). The frontend maps them to Spanish labels.
+- Laravel publica un documento OpenAPI generado a partir del código (por ejemplo, con `dedoc/scramble`).
+- El frontend genera los tipos de TypeScript a partir de ese documento con `openapi-typescript`. Así, un cambio que rompe la API aparece como un error de tipos.
+- Los valores de los enums de la API quedan en inglés, igual que en la BD (`pending`, `approved`…). El frontend los traduce a etiquetas en español.
 
-## Consequences
+## Consecuencias
 
-- `lib/auth.ts` (hardcoded `admin/admin`), `lib/tenants.ts` and `lib/data.ts` (mocks) will be replaced module by module.
-- The current cookie uses `sameSite: 'none'`. It changes to `'lax'`: there is no cross-site use, and `lax` adds CSRF protection.
-- Every request costs one extra hop (browser → Next → Laravel). Next.js and Laravel should be deployed close to each other (same region or network).
-- Next.js must run as a server (no static export).
+- `lib/auth.ts` (con `admin/admin` hardcodeado), `lib/tenants.ts` y `lib/data.ts` (mocks) se van a reemplazar módulo por módulo.
+- La cookie actual usa `sameSite: 'none'` y pasa a `'lax'`: no hay uso cross-site, y `lax` agrega protección contra CSRF.
+- Cada request suma un salto extra (browser → Next → Laravel). Next.js y Laravel conviene desplegarlos cerca (misma región o red).
+- Next.js tiene que correr como servidor (sin static export).
 
-## Gaps found between the current UI and the data model
+## Diferencias detectadas entre la UI actual y el modelo de datos
 
-These need a product decision. The UI shows data that the model doesn't store:
+Estas diferencias requieren una decisión de producto. La UI muestra datos que el modelo no guarda:
 
-- **Standings** (`Standing` in `lib/data.ts`): there is no table for tournaments or positions.
-- **Player objectives** (`Objective`): the model explicitly removed `player_goals` and `goal_progress_updates`.
-- **Coach notes** (`CoachNote`): there is no equivalent table.
-- **Club profile** (`city`, `founded`, `color`, `members` in `lib/tenants.ts`): `tenants` only stores name, slug and connection data.
-- **Order statuses:** the UI uses 4 states. The model has 7 (`draft … rejected`).
+- **Tabla de posiciones** (`Standing` en `lib/data.ts`): no hay tablas de torneos ni de posiciones.
+- **Objetivos de jugador** (`Objective`): el modelo eliminó explícitamente `player_goals` y `goal_progress_updates`.
+- **Notas del entrenador** (`CoachNote`): no hay una tabla equivalente.
+- **Perfil del club** (`city`, `founded`, `color`, `members` en `lib/tenants.ts`): `tenants` solo guarda nombre, slug y datos de conexión.
+- **Estados de pedido:** la UI usa 4 estados y el modelo tiene 7 (`draft … rejected`).
 
-Options for each: remove the screen, keep it as "coming soon", or add the table to the model.
+Opciones para cada una: quitar la pantalla, dejarla como "próximamente" o agregar la tabla al modelo.

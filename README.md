@@ -1,168 +1,171 @@
 # Gestión Operativa — Club Deportivo
 
-Operations dashboard for sports clubs: matches, player records, coaches, equipment and fields, with a separate space for each club.
+Panel de gestión operativa para clubes deportivos: partidos, fichas de jugadores, profes, materiales y canchas, con un espacio separado para cada club.
 
-This repository is **frontend only**. It will consume a separate **Laravel REST API**, which lives in its own repository and owns the business logic, persistence and authentication.
+Este repositorio es **solo el frontend**. Va a consumir una **API REST en Laravel** que vive en su propio repositorio y es dueña de la lógica de negocio, la persistencia y la autenticación.
 
-Built with **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** and **shadcn/ui**.
+Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** y **shadcn/ui**.
 
-> **Status:** prototype, not yet connected to the API. Login is hardcoded (`lib/auth.ts`) and all data is mock data (`lib/data.ts`). Both will be replaced by calls to the Laravel API.
+> **Estado:** prototipo, todavía no conectado a la API. El login está hardcodeado (`lib/auth.ts`) y todos los datos son mock (`lib/data.ts`). Las dos cosas se van a reemplazar por llamadas a la API de Laravel.
 
 ---
 
-## 1. Running the app locally
+## 1. Correr la app en local
 
-### Prerequisites
+### Requisitos previos
 
-| Tool    | Version                      | Check with   |
-| ------- | ---------------------------- | ------------ |
-| Node.js | 20.9 or later (tested on 24) | `node -v`    |
-| pnpm    | 12.x                         | `pnpm -v`    |
-| Git     | any recent version           | `git --version` |
+| Herramienta | Versión                         | Cómo verificarla |
+| ----------- | ------------------------------- | ---------------- |
+| Node.js     | 20.9 o superior (probado con 24) | `node -v`        |
+| pnpm        | 12.x                            | `pnpm -v`        |
+| Git         | cualquier versión reciente      | `git --version`  |
 
-If you don't have pnpm, the simplest way to get it is Corepack, which ships with Node:
+Si no tenés pnpm, la forma más simple de instalarlo es con Corepack, que viene con Node:
 
 ```bash
 corepack enable
 ```
 
-Corepack then uses the pnpm version pinned in `package.json` (`packageManager` field).
+Corepack usa después la versión de pnpm fijada en `package.json` (campo `packageManager`).
 
-> Use **pnpm** only. Don't run `npm install` or `yarn`: they ignore `pnpm-lock.yaml` and create a different lockfile.
+> Usá **solo pnpm**. No corras `npm install` ni `yarn`: ignoran `pnpm-lock.yaml` y generan otro lockfile distinto.
 
-### Steps
+### Pasos
 
 ```bash
-# 1. Clone the repository
+# 1. Clonar el repositorio
 git clone <REPO_URL>
 cd gestion-operativa-club-deportivo
 
-# 2. Install dependencies (exact versions from the lockfile)
+# 2. Instalar dependencias (versiones exactas del lockfile)
 pnpm install --frozen-lockfile
 
-# 3. Start the development server
+# 3. Levantar el servidor de desarrollo
 pnpm dev
 ```
 
-Open <http://localhost:3000> and log in with:
+Abrí <http://localhost:3000> e ingresá con:
 
-- **User:** `admin`
-- **Password:** `admin`
+- **Usuario:** `admin`
+- **Contraseña:** `admin`
 
-### Available scripts
+### Scripts disponibles
 
-| Command                  | What it does                                    |
-| ------------------------ | ----------------------------------------------- |
-| `pnpm dev`               | Development server with hot reload on port 3000 |
-| `pnpm build`             | Production build                                |
-| `pnpm start`             | Serves the production build (run `build` first) |
-| `pnpm exec tsc --noEmit` | Type check (see the note below)                 |
+| Comando                  | Qué hace                                                      |
+| ------------------------ | ------------------------------------------------------------- |
+| `pnpm dev`               | Servidor de desarrollo con hot reload en el puerto 3000       |
+| `pnpm build`             | Build de producción                                           |
+| `pnpm start`             | Sirve el build de producción (primero hay que correr `build`) |
+| `pnpm exec tsc --noEmit` | Chequeo de tipos (ver la nota de abajo)                       |
 
-> **Important:** `next.config.mjs` sets `typescript.ignoreBuildErrors: true`, so `pnpm build` **does not fail on type errors**. Run `pnpm exec tsc --noEmit` before opening a pull request.
+> **Importante:** `next.config.mjs` tiene `typescript.ignoreBuildErrors: true`, así que `pnpm build` **no falla por errores de tipos**. Corré `pnpm exec tsc --noEmit` antes de abrir un pull request.
 
-### Environment variables
+### Variables de entorno
 
-None are needed while the app runs on mock data. Once the Laravel API is connected:
+Mientras la app use datos mock no hace falta ninguna. Cuando se conecte la API de Laravel:
 
-| Variable  | Example                     | Notes                                                        |
-| --------- | --------------------------- | ------------------------------------------------------------ |
-| `API_URL` | `http://localhost:8000/api` | Laravel API base URL. **Server-only**: never use `NEXT_PUBLIC_`. |
+| Variable  | Ejemplo                     | Notas                                                                    |
+| --------- | --------------------------- | ------------------------------------------------------------------------ |
+| `API_URL` | `http://localhost:8000/api` | URL base de la API de Laravel. **Solo de servidor**: nunca usar `NEXT_PUBLIC_`. |
 
-The browser never calls Laravel directly. All calls go through the Next.js server, which keeps the Sanctum token in an `httpOnly` cookie. See [ADR 0001](docs/adr/0001-frontend-api-integration.md) for the reasoning.
+El browser nunca llama a Laravel directamente. Todas las llamadas pasan por el servidor de Next.js, que guarda el token de Sanctum en una cookie `httpOnly`. El razonamiento está en el [ADR 0001](docs/adr/0001-frontend-api-integration.md), y el detalle del login y del contrato de la API, en [docs/integracion-api-laravel.md](docs/integracion-api-laravel.md).
 
-Put local values in `.env.local`. That file is git-ignored, so it is never committed. Document every new variable in this README, and commit a `.env.example` with placeholder values.
+Los valores locales van en `.env.local`. Ese archivo está en el `.gitignore`, así que nunca se commitea. Cada variable nueva se documenta en este README, y se commitea un `.env.example` con valores de ejemplo.
 
-Keep in mind that any variable prefixed with `NEXT_PUBLIC_` is sent to the browser. **Never** put secrets (API keys, tokens) in a `NEXT_PUBLIC_` variable.
+Tené en cuenta que cualquier variable con el prefijo `NEXT_PUBLIC_` se envía al browser. **Nunca** pongas secretos (API keys, tokens) en una variable `NEXT_PUBLIC_`.
 
-### Working against the Laravel API
+### Trabajar contra la API de Laravel
 
-When the integration exists, you will need the Laravel API running locally (or a shared dev URL). See the API repository for setup instructions. Frontend and backend changes that depend on each other need **one PR in each repository**. Link the two PRs and merge the API one first.
+Cuando exista la integración, vas a necesitar la API de Laravel corriendo en local (o una URL de desarrollo compartida). Las instrucciones de instalación están en el repositorio de la API.
 
-### Troubleshooting
+Los cambios de frontend y backend que dependen entre sí necesitan **un PR en cada repositorio**. Vinculá los dos PRs y mergeá primero el de la API.
 
-- **Port 3000 already in use:** run `pnpm dev -- -p 3001`.
-- **Errors after pulling changes:** someone probably changed dependencies. Run `pnpm install` again.
-- **Strange build cache issues:** delete the `.next/` folder and restart `pnpm dev`.
+### Problemas comunes
+
+- **El puerto 3000 ya está en uso:** corré `pnpm dev -- -p 3001`.
+- **Errores después de hacer pull:** probablemente alguien cambió dependencias. Corré `pnpm install` de nuevo.
+- **Problemas raros de caché del build:** borrá la carpeta `.next/` y reiniciá `pnpm dev`.
 
 ---
 
-## 2. Project structure
+## 2. Estructura del proyecto
 
 ```
-app/                 Routes (Next.js App Router)
+app/                 Rutas (Next.js App Router)
   page.tsx           Login
-  clubes/            Club selector
-  c/[club]/          Dashboard for one club (dynamic route)
+  clubes/            Selector de club
+  c/[club]/          Panel de un club (ruta dinámica)
 components/
-  ui/                Base shadcn/ui components
-  auth/ brand/ club/ modules/   Feature components
-hooks/               Custom React hooks
-lib/                 Auth, mock data, tenants, helpers
-public/              Static assets
+  ui/                Componentes base de shadcn/ui
+  auth/ brand/ club/ modules/   Componentes de cada funcionalidad
+docs/                Documentación (ADRs, integración con la API)
+hooks/               Hooks de React propios
+lib/                 Auth, datos mock, tenants, helpers
+public/              Archivos estáticos
 ```
 
-`AGENTS.md` and `CLAUDE.md` are created automatically by `next dev`. They are instructions for AI coding assistants. Commit them like any other file.
+`AGENTS.md` y `CLAUDE.md` los crea automáticamente `next dev`. Son instrucciones para asistentes de código con IA y se commitean como cualquier otro archivo.
 
 ---
 
-## 3. Git workflow: branches and pull requests
+## 3. Flujo de trabajo con Git: branches y pull requests
 
-We use a simple **trunk-based workflow**:
+Usamos un **flujo trunk-based** simple:
 
-- `main` always contains working code that can be deployed.
-- Nobody pushes directly to `main`. Every change goes through a **branch** and a **pull request (PR)**.
-- Branches are short-lived. Aim to merge each one within a few days.
+- `main` siempre tiene código que funciona y se puede desplegar.
+- Nadie pushea directo a `main`. Todo cambio pasa por un **branch** y un **pull request (PR)**.
+- Los branches duran poco: la idea es mergear cada uno en pocos días.
 
-### 3.1 Branch naming
+### 3.1 Nombres de branches
 
-Format: `<type>/<short-description-in-kebab-case>`
+Formato: `<tipo>/<descripcion-corta-en-kebab-case>`
 
-| Type        | Use it for                              | Example                       |
-| ----------- | --------------------------------------- | ----------------------------- |
-| `feature/`  | New functionality                       | `feature/match-calendar`      |
-| `fix/`      | Bug fixes                               | `fix/login-redirect-loop`     |
-| `refactor/` | Code changes that don't change behavior | `refactor/split-data-module`  |
-| `docs/`     | Documentation only                      | `docs/update-readme`          |
-| `chore/`    | Dependencies, config, tooling           | `chore/upgrade-next`          |
+| Tipo        | Para qué se usa                              | Ejemplo                      |
+| ----------- | -------------------------------------------- | ---------------------------- |
+| `feature/`  | Funcionalidad nueva                          | `feature/match-calendar`     |
+| `fix/`      | Corrección de bugs                           | `fix/login-redirect-loop`    |
+| `refactor/` | Cambios de código que no cambian el comportamiento | `refactor/split-data-module` |
+| `docs/`     | Solo documentación                           | `docs/update-readme`         |
+| `chore/`    | Dependencias, configuración, herramientas    | `chore/upgrade-next`         |
 
-If you use an issue tracker, you can add the issue number: `feature/42-match-calendar`.
+Si usan un issue tracker, pueden agregar el número del issue: `feature/42-match-calendar`.
 
-### 3.2 Step by step
+### 3.2 Paso a paso
 
 ```bash
-# 1. Start from an up-to-date main
+# 1. Partir de un main actualizado
 git switch main
 git pull origin main
 
-# 2. Create your branch
+# 2. Crear tu branch
 git switch -c feature/match-calendar
 
-# 3. Work and commit in small, focused steps
-git add <files>
+# 3. Trabajar y commitear en pasos chicos y enfocados
+git add <archivos>
 git commit -m "feat: add monthly match calendar view"
 
-# 4. Before pushing, catch up with main and check that everything still works
+# 4. Antes de pushear, ponerte al día con main y verificar que todo siga funcionando
 git fetch origin
-git rebase origin/main          # or: git merge origin/main
+git rebase origin/main          # o: git merge origin/main
 pnpm exec tsc --noEmit
 pnpm build
 
-# 5. Push your branch
+# 5. Pushear tu branch
 git push -u origin feature/match-calendar
 ```
 
-Then open the pull request on GitHub, either with the **"Compare & pull request"** button or from the command line:
+Después abrí el pull request en GitHub, con el botón **"Compare & pull request"** o desde la línea de comandos:
 
 ```bash
 gh pr create --base main --fill
 ```
 
-### 3.3 Commit messages
+### 3.3 Mensajes de commit
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-<type>: <what changed, in imperative mood>
+<tipo>: <qué cambió, en modo imperativo>
 
 feat: add equipment inventory table
 fix: keep selected club after page refresh
@@ -171,44 +174,44 @@ docs: explain branch workflow
 chore: bump tailwindcss to 4.3.3
 ```
 
-Each commit should do one thing. Don't mix unrelated changes in one commit.
+Cada commit tiene que hacer una sola cosa. No mezcles cambios que no tienen relación en un mismo commit.
 
-### 3.4 Pull request checklist
+### 3.4 Checklist del pull request
 
-Before you ask for a review, check that:
+Antes de pedir una revisión, verificá que:
 
-- [ ] The branch is up to date with `main`.
-- [ ] `pnpm exec tsc --noEmit` passes with no errors.
-- [ ] `pnpm build` succeeds.
-- [ ] You tested the change manually in the browser (`pnpm dev`).
-- [ ] The PR is small and does one thing. Split large changes into several PRs.
-- [ ] The description explains **what** changed, **why**, and **how to test it**. Add screenshots for UI changes.
-- [ ] There are no secrets, `.env` files or unrelated changes.
+- [ ] El branch está al día con `main`.
+- [ ] `pnpm exec tsc --noEmit` pasa sin errores.
+- [ ] `pnpm build` termina bien.
+- [ ] Probaste el cambio a mano en el browser (`pnpm dev`).
+- [ ] El PR es chico y hace una sola cosa. Los cambios grandes se dividen en varios PRs.
+- [ ] La descripción explica **qué** cambió, **por qué** y **cómo probarlo**. Para cambios de UI, agregá capturas.
+- [ ] No hay secretos, archivos `.env` ni cambios ajenos al PR.
 
-Suggested PR description:
+Descripción sugerida para el PR:
 
 ```markdown
-## What
-Short summary of the change.
+## Qué
+Resumen corto del cambio.
 
-## Why
-The problem it solves or the feature it adds.
+## Por qué
+El problema que resuelve o la funcionalidad que agrega.
 
-## How to test
-1. Run `pnpm dev`
-2. Log in as admin/admin
-3. Go to ... and check that ...
+## Cómo probarlo
+1. Correr `pnpm dev`
+2. Ingresar como admin/admin
+3. Ir a ... y verificar que ...
 
-## Screenshots
-(for UI changes)
+## Capturas
+(para cambios de UI)
 ```
 
-### 3.5 Review and merge
+### 3.5 Revisión y merge
 
-1. At least **one other developer** approves the PR.
-2. The author addresses the comments by pushing more commits to the same branch. The PR updates automatically.
-3. Merge with **"Squash and merge"**, so each PR becomes one clean commit on `main`.
-4. Delete the branch after merging. Locally:
+1. Al menos **otro desarrollador** aprueba el PR.
+2. El autor resuelve los comentarios pusheando más commits al mismo branch. El PR se actualiza solo.
+3. Se mergea con **"Squash and merge"**, así cada PR queda como un único commit limpio en `main`.
+4. Después del merge se borra el branch. En local:
 
    ```bash
    git switch main
@@ -216,36 +219,36 @@ The problem it solves or the feature it adds.
    git branch -d feature/match-calendar
    ```
 
-### 3.6 Resolving conflicts
+### 3.6 Resolver conflictos
 
-If your branch conflicts with `main`:
+Si tu branch tiene conflictos con `main`:
 
 ```bash
 git fetch origin
 git rebase origin/main
-# Git stops at each conflict: edit the files, then
-git add <resolved-files>
+# Git se detiene en cada conflicto: editá los archivos y después
+git add <archivos-resueltos>
 git rebase --continue
-# Because rebase rewrites your branch history, push with:
+# Como el rebase reescribe la historia de tu branch, pusheá con:
 git push --force-with-lease
 ```
 
-Only use `--force-with-lease` on **your own** branch, never on `main` or a branch someone else is working on. Unlike `--force`, it refuses to overwrite commits you haven't seen.
+Usá `--force-with-lease` solo en **tu propio** branch, nunca en `main` ni en un branch en el que esté trabajando otra persona. A diferencia de `--force`, se niega a pisar commits que no viste.
 
-If `pnpm-lock.yaml` conflicts, don't fix it by hand. Take the version from `main` and reinstall:
+Si hay conflicto en `pnpm-lock.yaml`, no lo arregles a mano. Tomá la versión de `main` y reinstalá:
 
 ```bash
-git checkout --ours pnpm-lock.yaml   # during a rebase, --ours = main's version
-pnpm install                         # re-applies your branch's package.json changes
+git checkout --ours pnpm-lock.yaml   # durante un rebase, --ours = la versión de main
+pnpm install                         # vuelve a aplicar los cambios de package.json de tu branch
 git add pnpm-lock.yaml
 ```
 
-> During a **rebase**, `--ours` means `main` and `--theirs` means your branch. This is the opposite of a merge. Usually you want main's version (`--ours`), then run `pnpm install` so your dependency changes are added back.
+> Durante un **rebase**, `--ours` es `main` y `--theirs` es tu branch: al revés que en un merge. En general conviene la versión de main (`--ours`) y después correr `pnpm install` para que se vuelvan a agregar tus cambios de dependencias.
 
-### 3.7 Recommended repository settings (for maintainers)
+### 3.7 Configuración recomendada del repositorio (para maintainers)
 
-On GitHub, go to **Settings → Branches → Add branch protection rule** for `main`:
+En GitHub, entrá a **Settings → Branches → Add branch protection rule** para `main`:
 
-- Require a pull request before merging, with at least 1 approval.
-- Block force pushes and branch deletion.
-- Optional: allow squash merging only, and turn on "Automatically delete head branches".
+- Exigir un pull request antes de mergear, con al menos 1 aprobación.
+- Bloquear los force pushes y el borrado del branch.
+- Opcional: permitir solo squash merge y activar "Automatically delete head branches".
