@@ -56,9 +56,10 @@ Abrí <http://localhost:3000> e ingresá con:
 | `pnpm dev`               | Servidor de desarrollo con hot reload en el puerto 3000       |
 | `pnpm build`             | Build de producción                                           |
 | `pnpm start`             | Sirve el build de producción (primero hay que correr `build`) |
-| `pnpm exec tsc --noEmit` | Chequeo de tipos (ver la nota de abajo)                       |
+| `pnpm lint`              | Revisa el código con ESLint (`eslint.config.mjs`)             |
+| `pnpm typecheck`         | Chequeo de tipos con `tsc --noEmit` (ver la nota de abajo)    |
 
-> **Importante:** `next.config.mjs` tiene `typescript.ignoreBuildErrors: true`, así que `pnpm build` **no falla por errores de tipos**. Corré `pnpm exec tsc --noEmit` antes de abrir un pull request.
+> **Importante:** `next.config.mjs` tiene `typescript.ignoreBuildErrors: true`, así que `pnpm build` **no falla por errores de tipos**. Corré `pnpm typecheck` antes de abrir un pull request. La CI también lo corre (ver [3.4](#34-ci-integración-continua)).
 
 ### Variables de entorno
 
@@ -98,7 +99,7 @@ app/                 Rutas (Next.js App Router)
 components/
   ui/                Componentes base de shadcn/ui
   auth/ brand/ club/ modules/   Componentes de cada funcionalidad
-docs/                Documentación (ADRs, integración con la API)
+docs/                Documentación (ADRs, integración con la API, CI)
 hooks/               Hooks de React propios
 lib/                 Auth, datos mock, tenants, helpers
 public/              Archivos estáticos
@@ -147,7 +148,8 @@ git commit -m "feat: add monthly match calendar view"
 # 4. Antes de pushear, ponerte al día con main y verificar que todo siga funcionando
 git fetch origin
 git rebase origin/main          # o: git merge origin/main
-pnpm exec tsc --noEmit
+pnpm lint
+pnpm typecheck
 pnpm build
 
 # 5. Pushear tu branch
@@ -176,13 +178,25 @@ chore: bump tailwindcss to 4.3.3
 
 Cada commit tiene que hacer una sola cosa. No mezcles cambios que no tienen relación en un mismo commit.
 
-### 3.4 Checklist del pull request
+### 3.4 CI (integración continua)
+
+Cada pull request a `main`, y cada push a `main`, corre el workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) en GitHub Actions. El job `verify`:
+
+1. instala las dependencias con `--frozen-lockfile` (falla si `pnpm-lock.yaml` no coincide con `package.json`);
+2. corre `pnpm lint`;
+3. corre `pnpm typecheck`;
+4. corre `pnpm build`.
+
+El resultado aparece en el PR como un check (✓ o ✗). Con la protección de `main` activa (ver [3.8](#38-configuración-recomendada-del-repositorio-para-maintainers)), un PR con el check en rojo no se puede mergear. Si falla, abrí el detalle del check, corregí el problema en tu branch y pusheá de nuevo: la CI vuelve a correr sola.
+
+La guía completa (errores frecuentes, decisiones técnicas y próximos pasos) está en [docs/ci.md](docs/ci.md).
+
+### 3.5 Checklist del pull request
 
 Antes de pedir una revisión, verificá que:
 
 - [ ] El branch está al día con `main`.
-- [ ] `pnpm exec tsc --noEmit` pasa sin errores.
-- [ ] `pnpm build` termina bien.
+- [ ] El check `verify` de la CI está en verde (o corriste `pnpm lint`, `pnpm typecheck` y `pnpm build` en local).
 - [ ] Probaste el cambio a mano en el browser (`pnpm dev`).
 - [ ] El PR es chico y hace una sola cosa. Los cambios grandes se dividen en varios PRs.
 - [ ] La descripción explica **qué** cambió, **por qué** y **cómo probarlo**. Para cambios de UI, agregá capturas.
@@ -206,7 +220,7 @@ El problema que resuelve o la funcionalidad que agrega.
 (para cambios de UI)
 ```
 
-### 3.5 Revisión y merge
+### 3.6 Revisión y merge
 
 1. Al menos **otro desarrollador** aprueba el PR.
 2. El autor resuelve los comentarios pusheando más commits al mismo branch. El PR se actualiza solo.
@@ -219,7 +233,7 @@ El problema que resuelve o la funcionalidad que agrega.
    git branch -d feature/match-calendar
    ```
 
-### 3.6 Resolver conflictos
+### 3.7 Resolver conflictos
 
 Si tu branch tiene conflictos con `main`:
 
@@ -245,10 +259,21 @@ git add pnpm-lock.yaml
 
 > Durante un **rebase**, `--ours` es `main` y `--theirs` es tu branch: al revés que en un merge. En general conviene la versión de main (`--ours`) y después correr `pnpm install` para que se vuelvan a agregar tus cambios de dependencias.
 
-### 3.7 Configuración recomendada del repositorio (para maintainers)
+### 3.8 Configuración recomendada del repositorio (para maintainers)
 
-En GitHub, entrá a **Settings → Branches → Add branch protection rule** para `main`:
+La hace quien tenga permiso de **admin** en el repositorio. En un repo de una cuenta personal, eso es solo el dueño.
 
-- Exigir un pull request antes de mergear, con al menos 1 aprobación.
-- Bloquear los force pushes y el borrado del branch.
-- Opcional: permitir solo squash merge y activar "Automatically delete head branches".
+> **Requisito de plan:** en repos **privados**, la protección de branches solo se aplica con GitHub Pro, Team o Enterprise. Con el plan Free, solo funciona en repos públicos.
+
+En GitHub, entrá a **Settings → Rules → Rulesets → New ruleset → New branch ruleset**:
+
+- **Enforcement status:** Active.
+- **Target branches:** Include default branch (`main`).
+- **Bypass list:** vacía, para que la regla aplique a todos, incluido el dueño.
+- Reglas:
+  - Restrict deletions.
+  - Block force pushes.
+  - Require a pull request before merging, con 1 aprobación como mínimo. Conviene activar también "Dismiss stale pull request approvals when new commits are pushed" y "Require conversation resolution before merging".
+  - Require status checks to pass, agregando el check `verify`. Solo aparece en la lista después de que la CI corrió al menos una vez.
+
+Opcional, en **Settings → General → Pull Requests:** permitir solo squash merge y activar "Automatically delete head branches".
