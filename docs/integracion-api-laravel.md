@@ -1,6 +1,6 @@
 # Integración Frontend Next.js ↔ API Laravel
 
-> Fuente de las decisiones: [ADR 0001](adr/0001-frontend-api-integration.md) (aceptado el 2026-10-15).
+> Fuente de las decisiones: [ADR 0001](adr/0001-frontend-api-integration.md) (aceptado el 2026-10-15) y [ADR 0002](adr/0002-hosting-vercel-laravel-cloud.md) (hosting, propuesto).
 > Este documento las desarrolla como contrato para quien construya la API en Laravel.
 
 ## 1. Contexto
@@ -222,6 +222,89 @@ Convenciones:
 - Idealmente, la API solo es accesible desde el servidor de Next.js (red privada o allowlist).
 - Nunca aceptar `tenant_id` ni el slug del club en el body o la URL como fuente de autorización.
 
+### 5.6 Bases de datos por club
+
+> Probado en Laravel Cloud: ver la evidencia en el [ADR 0002](adr/0002-hosting-vercel-laravel-cloud.md).
+
+#### Dónde vive cada cosa
+
+```
+Cluster MySQL de Laravel Cloud (un servidor, mismo host y usuario)
+├── olim_platform   ← base GENERAL, la única conectada al entorno (DB_DATABASE)
+│     users, tenants, tenant_memberships, personal_access_tokens
+├── club_river      ← la crea la API al dar de alta el club
+│     jugadores, partidos, pedidos, roles, permissions...
+└── club_boca
+      jugadores, partidos, pedidos, roles, permissions...
+```
+
+- El entorno de Laravel Cloud se conecta **solo** a la base general.
+- Las bases de los clubes aparecen en el dashboard, pero **nunca** se eligen en el selector de base del entorno: eso reemplazaría a la general como `DB_DATABASE`.
+- La tabla `tenants` guarda, por cada club, el nombre de su base (`database_name`).
+
+#### Configuración en Laravel
+
+- `config/database.php` tiene dos conexiones:
+  - `mysql`: la base general, con las variables que inyecta Laravel Cloud;
+  - `tenant`: el mismo host, usuario y contraseña, con `database => null`. Se completa en cada request.
+- Las migraciones están separadas:
+  - `database/migrations/`: base general;
+  - `database/migrations/tenant/`: bases de los clubes.
+- Los modelos generales (`User`, `Tenant`, `TenantMembership`) usan la conexión por defecto. Los modelos del club declaran `protected $connection = 'tenant';`.
+
+#### Alta de un club
+
+Se hace con un comando administrativo (por ejemplo `php artisan tenants:create <slug> "<nombre>"`), no con un endpoint público:
+
+1. **Validar el slug** con una regla estricta, por ejemplo `^[a-z0-9_]+$`. Es obligatorio: el nombre de una base no se puede pasar como parámetro en una consulta preparada, así que va concatenado en el SQL.
+2. Insertar en `tenants` con `database_name = club_<slug>` y `status = provisioning`.
+3. Ejecutar `CREATE DATABASE club_<slug>`.
+4. Apuntar la conexión `tenant` a la nueva base y migrarla: `migrate --database=tenant --path=database/migrations/tenant --force`.
+5. Cargar los roles y permisos iniciales del club (seeder).
+6. Crear la membresía del administrador del club y pasar el club a `status = active`.
+
+Si un paso falla, el club queda en `status = failed` y el comando se puede volver a correr sin duplicar nada (idempotente).
+
+#### Cada request operativo
+
+En el middleware de tenant (sección 5.3, paso 4):
+
+```php
+config(['database.connections.tenant.database' => $tenant->database_name]);
+DB::purge('tenant'); // descarta la conexión anterior; la próxima consulta se conecta a la base nueva
+```
+
+**No usar `USE <base>`:** el proxy de Laravel Cloud lo rechaza (`SQL Error 1148`). Laravel no lo necesita, porque abre la conexión directamente con la base indicada.
+
+#### Migraciones en cada deploy
+
+Una migración de club tiene que aplicarse en **todas** las bases de los clubes. Los *deploy commands* de Laravel Cloud tienen que incluir los dos pasos:
+
+```bash
+php artisan migrate --force           # base general
+php artisan tenants:migrate --force   # recorre los clubes activos y migra cada base
+```
+
+Reglas:
+
+- **Migraciones compatibles hacia atrás.** Primero se agrega lo nuevo y recién en un deploy posterior se quita lo viejo. Si la migración falla a mitad de camino, algunos clubes quedan con el esquema nuevo y otros con el viejo, y el código tiene que funcionar con los dos.
+- **`tenants:migrate` informa qué clubes migró y cuáles fallaron**, para poder reintentar solo esos.
+
+#### Usuarios de la base de datos
+
+El usuario por defecto del cluster puede crear bases en todo el cluster: si hay un SQL injection, el impacto sería alto. La propuesta es separar:
+
+| Usuario | Permisos | Lo usa |
+| --- | --- | --- |
+| Operación | *Read-write* sobre las bases | La API en cada request |
+| Provisión | Crear bases | Solo `tenants:create` |
+
+Los usuarios se crean en **Database users** del cluster. A definir al construir la API.
+
+#### Implementación propia o paquete
+
+Paquetes como `stancl/tenancy` ya resuelven el cambio de conexión, el alta y las migraciones por club, pero imponen sus propias convenciones. Se decide en un ADR del repo de la API.
+
 ## 6. Contrato tipado
 
 1. Laravel genera un documento OpenAPI con `dedoc/scramble`. Lo arma a partir de las rutas, los Form Requests y los API Resources, sin anotaciones a mano.
@@ -254,6 +337,9 @@ Opciones para cada una: quitar la pantalla, dejarla como "próximamente" o agreg
 - [ ] Middleware de tenant (re-validación y cambio de conexión)
 - [ ] Errores en JSON, con un `code` estable en los 403
 - [ ] Documento OpenAPI publicado con scramble
+- [ ] Conexión `tenant` y migraciones separadas (`database/migrations/tenant/`)
+- [ ] Comandos `tenants:create` y `tenants:migrate`, y `tenants:migrate` en los deploy commands
+- [ ] Usuarios de base separados para operación y provisión
 - [ ] Definir la duración de los dos tokens
 
 **Frontend**
