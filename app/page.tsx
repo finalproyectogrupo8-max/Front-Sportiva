@@ -44,7 +44,7 @@ export default async function LoginPage() {
         <div className="flex w-full max-w-sm flex-col gap-8">
           <div className="flex flex-col gap-3">
             <Logo className="lg:hidden" />
-            <h2 className="font-display text-4xl font-bold uppercase leading-none">Ingresar</h2>
+            <h2 className="font-display text-4xl font-bold uppercase leading-none">Ingresar neshe</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Accedé al panel de tu club. Para la demo usá <span className="font-medium text-foreground">admin</span> /{' '}
               <span className="font-medium text-foreground">admin</span>.
