@@ -1,23 +1,36 @@
 import Link from 'next/link'
-import { ArrowUpRight, LogOut, Plus } from 'lucide-react'
+import { ArrowUpRight, LogOut, Plus, Settings2 } from 'lucide-react'
 import { ClubCrest, Logo } from '@/components/brand/logo'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { logout, requireSession } from '@/lib/auth'
 import { TENANTS } from '@/lib/tenants'
+import { cn } from '@/lib/utils'
 
 export default async function ClubesPage() {
   const session = await requireSession()
 
   return (
     <main className="min-h-dvh">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-6 sm:px-6">
         <Logo />
-        <form action={logout}>
-          <Button type="submit" variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-            <LogOut className="size-4" aria-hidden="true" />
-            Salir
-          </Button>
-        </form>
+        <nav aria-label="Navegación de la plataforma" className="flex items-center gap-1">
+          <Link
+            href="/admin"
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'gap-2')}
+          >
+            <Settings2 className="size-4" aria-hidden="true" />
+            Administración
+          </Link>
+          <form action={logout}>
+            <button
+              type="submit"
+              className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'gap-2 text-muted-foreground')}
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+              Salir
+            </button>
+          </form>
+        </nav>
       </header>
 
       <section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-16 pt-8">
@@ -58,11 +71,14 @@ export default async function ClubesPage() {
             </li>
           ))}
           <li>
-            <div className="flex h-full min-h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">
-              <Plus className="size-5" aria-hidden="true" />
-              <span className="font-medium text-foreground">Sumar un club</span>
-              <span>Alta de nuevos clubes desde administración central.</span>
-            </div>
+            <Link
+              href="/admin"
+              className="flex h-full min-h-48 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed p-5 text-center text-sm transition hover:border-primary hover:bg-card focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Plus className="size-5 text-muted-foreground" aria-hidden="true" />
+              <span className="font-medium text-foreground">Administrar plataforma</span>
+              <span className="text-muted-foreground">Crear usuarios, clubes y asociaciones.</span>
+            </Link>
           </li>
         </ul>
       </section>
