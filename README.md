@@ -94,6 +94,7 @@ Los cambios de frontend y backend que dependen entre sí necesitan **un PR en ca
 ```
 app/                 Rutas (Next.js App Router)
   page.tsx           Login
+  admin/             Administración de usuarios, clubes y membresías
   clubes/            Selector de club
   c/[club]/          Panel de un club (ruta dinámica)
 components/
