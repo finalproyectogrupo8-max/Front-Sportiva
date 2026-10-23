@@ -6,7 +6,7 @@ Este repositorio es **solo el frontend**. Va a consumir una **API REST en Larave
 
 Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** y **shadcn/ui**.
 
-> **Estado:** prototipo, todavía no conectado a la API. El login está hardcodeado (`lib/auth.ts`) y todos los datos son mock (`lib/data.ts`). Las dos cosas se van a reemplazar por llamadas a la API de Laravel.
+> **Estado:** el login ya va contra la API de Laravel (`lib/auth.ts`). Los datos de los clubes todavía son mock (`lib/data.ts`, `lib/tenants.ts`) y se reemplazan módulo por módulo.
 
 ---
 
