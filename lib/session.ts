@@ -4,12 +4,13 @@ import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { apiFetch, type Schemas } from '@/lib/api/client'
-import { PLATFORM_COOKIE, SESSION_COOKIE } from '@/lib/session-cookies'
+import { PLATFORM_COOKIE, SESSION_COOKIE, SESSION_EXPIRED_PATH } from '@/lib/session-cookies'
 
 // Lectura de la sesión para Server Components. No es 'use server' a propósito:
 // así no queda expuesta como Server Action que cualquiera pueda invocar.
 
 export type Session = Schemas['MeTenantsResource']
+export type ClubSession = Schemas['MeResource']
 
 /**
  * Valida la sesión contra la API y devuelve el usuario (con `is_platform_admin`) y sus clubes.
@@ -24,6 +25,36 @@ export const requireSession = cache(async (): Promise<Session> => {
 
   const result = await apiFetch<Session>('/me/tenants', { auth })
   if (!result.ok) throw new Error(result.message)
+
+  return result.data
+})
+
+/**
+ * Valida la sesión del club contra `GET /api/me`.
+ * Requiere un token atado a un club. Si es pre-tenant o el token no coincide
+ * con el club esperado en la URL, redirige a `/clubes`.
+ */
+export const requireClubSession = cache(async (expectedClub?: string): Promise<ClubSession> => {
+  const store = await cookies()
+  if (!store.has(SESSION_COOKIE)) redirect('/')
+
+  const result = await apiFetch<ClubSession>('/me', {
+    auth: 'session',
+    sessionErrors: 'return',
+  })
+
+  if (!result.ok) {
+    if (result.status === 401) {
+      redirect(SESSION_EXPIRED_PATH)
+    }
+    // Si no es un token de club válido (403 tenant_required, membership_inactive, etc.)
+    redirect('/clubes')
+  }
+
+  if (expectedClub && result.data.tenant.slug !== expectedClub) {
+    // El [club] de la URL es solo navegación: si no coincide con el de la sesión, a /clubes.
+    redirect('/clubes')
+  }
 
   return result.data
 })

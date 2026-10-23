@@ -44,6 +44,20 @@ export const TENANTS: Tenant[] = [
   },
 ]
 
-export function getTenant(slug: string) {
-  return TENANTS.find((t) => t.slug === slug)
+export function getTenant(slug: string): Tenant | undefined {
+  const normalized = slug.replace(/_/g, '-')
+  const found = TENANTS.find((t) => t.slug === slug || t.slug === normalized)
+  if (found) {
+    return { ...found, slug }
+  }
+  return {
+    slug,
+    name: slug.replace(/_/g, ' ').toUpperCase(),
+    short: slug.slice(0, 4).toUpperCase(),
+    city: 'Sede central',
+    founded: 2026,
+    color: 'oklch(0.5 0.2 262)',
+    sports: ['Fútbol', 'Básquet'],
+    members: 0,
+  }
 }

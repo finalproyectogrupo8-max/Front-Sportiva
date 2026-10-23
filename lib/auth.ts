@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { apiFetch, type Schemas } from '@/lib/api/client'
-import { PLATFORM_COOKIE, SESSION_COOKIE } from '@/lib/session-cookies'
+import { cookieOptions, PLATFORM_COOKIE, SESSION_COOKIE } from '@/lib/session-cookies'
 
 // Server Actions de sesión: son las únicas funciones que escriben las cookies.
 // La lectura de la sesión (requireSession) está en lib/session.ts.
@@ -14,17 +14,8 @@ export type LoginState = {
   email?: string
 }
 
-/** Cookie según el contrato (§3.5): solo el token, httpOnly, lax, y vence junto con el token. */
-function cookieOptions(expiresAt: string | null | undefined) {
-  const maxAge = expiresAt ? Math.max(Math.floor((Date.parse(expiresAt) - Date.now()) / 1000), 0) : undefined
-
-  return {
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge,
-  }
+export type SelectTenantState = {
+  error?: string
 }
 
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
@@ -64,7 +55,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     }
   }
 
-  const { token, expires_at, user, platform_token, platform_expires_at } = result.data
+  const { token, expires_at, user, platform_token, platform_expires_at, tenants } = result.data
   const store = await cookies()
 
   store.set(SESSION_COOKIE, token, cookieOptions(expires_at))
@@ -76,7 +67,77 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     store.delete(PLATFORM_COOKIE)
   }
 
-  redirect(user?.is_platform_admin ? '/admin' : '/clubes')
+  if (user?.is_platform_admin) {
+    redirect('/admin')
+  }
+
+  // Si tiene un solo club, entra directo a /c/<slug> sin ver el selector (§3.1 paso 4).
+  if (tenants && tenants.length === 1) {
+    const res = await selectTenant(tenants[0].slug)
+    if (res?.error) {
+      redirect(`/clubes?error=${encodeURIComponent(res.error)}`)
+    }
+  }
+
+  redirect('/clubes')
+}
+
+/**
+ * Revalida la membresía y cambia el token actual por uno atado al club.
+ * Reemplaza la cookie de sesión con el token del club y redirige a /c/<slug>.
+ */
+export async function selectTenant(
+  slugOrState: string | SelectTenantState,
+  formData?: FormData,
+): Promise<SelectTenantState> {
+  const slug =
+    typeof slugOrState === 'string'
+      ? slugOrState
+      : String(formData?.get('slug') ?? formData?.get('tenant') ?? '').trim()
+
+  if (!slug) {
+    return { error: 'Club inválido.' }
+  }
+
+  let result
+  try {
+    result = await apiFetch<Schemas['SelectTenantResource']>('/auth/select-tenant', {
+      method: 'POST',
+      body: { tenant: slug },
+      auth: 'session',
+      sessionErrors: 'return',
+    })
+  } catch {
+    return { error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.' }
+  }
+
+  if (!result.ok) {
+    if (result.status === 401) {
+      const store = await cookies()
+      store.delete(SESSION_COOKIE)
+      store.delete(PLATFORM_COOKIE)
+      redirect('/')
+    }
+
+    if (result.status === 403) {
+      const code = 'code' in result ? result.code : undefined
+      if (code === 'membership_inactive') {
+        return { error: 'No tenés acceso a este club.' }
+      }
+      if (code === 'tenant_inactive') {
+        return { error: 'El club no está activo.' }
+      }
+      return { error: 'No tenés acceso a este club.' }
+    }
+
+    return { error: 'No pudimos seleccionar el club. Probá de nuevo en unos minutos.' }
+  }
+
+  const { token, expires_at } = result.data
+  const store = await cookies()
+  store.set(SESSION_COOKIE, token, cookieOptions(expires_at))
+
+  redirect(`/c/${slug}`)
 }
 
 /** Revoca los tokens en la API y borra las cookies, aunque la API falle. */

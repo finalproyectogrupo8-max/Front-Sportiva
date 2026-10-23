@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
@@ -15,7 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { logout } from '@/lib/auth'
+import { logout, selectTenant } from '@/lib/auth'
+import type { Schemas } from '@/lib/api/client'
 import { MODULES, getModule } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
@@ -32,7 +33,16 @@ const QUICK_CREATE = [
   { module: 'canchas', label: 'Reporte de cancha' },
 ] as const
 
-export function TopBar({ userName, userRole }: { userName: string; userRole: string }) {
+export function TopBar({
+  userName,
+  userRole,
+  userTenants,
+}: {
+  userName: string
+  userRole: string
+  userTenants?: Schemas['TenantSummaryResource'][]
+}) {
+  const router = useRouter()
   const { tenant } = useClub()
   const pathname = usePathname()
   const base = `/c/${tenant.slug}`
@@ -77,16 +87,40 @@ export function TopBar({ userName, userRole }: { userName: string; userRole: str
           <DropdownMenuContent align="start" className="w-72">
             <DropdownMenuGroup>
               <DropdownMenuLabel>Tus clubes</DropdownMenuLabel>
-              {TENANTS.map((t) => (
-                <DropdownMenuItem key={t.slug} render={<Link href={`/c/${t.slug}`} />} className="gap-3 py-2">
-                  <ClubCrest short={t.short} color={t.color} className="size-7 rounded-md text-[10px]" />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate font-medium">{t.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{t.city}</span>
-                  </span>
-                  {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
-                </DropdownMenuItem>
-              ))}
+              {userTenants && userTenants.length > 0
+                ? userTenants.map((t) => (
+                    <DropdownMenuItem
+                      key={t.slug}
+                      onClick={async () => {
+                        if (t.slug !== tenant.slug) {
+                          const res = await selectTenant(t.slug)
+                          if (res?.error) {
+                            router.push(`/clubes?error=${encodeURIComponent(res.error)}`)
+                          }
+                        }
+                      }}
+                      className="gap-3 py-2 cursor-pointer"
+                    >
+                      <div className="flex size-7 items-center justify-center rounded-md bg-muted text-[10px] font-bold text-muted-foreground uppercase">
+                        {t.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate font-medium">{t.name}</span>
+                        <span className="truncate text-xs text-muted-foreground font-mono">{t.slug}</span>
+                      </span>
+                      {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
+                    </DropdownMenuItem>
+                  ))
+                : TENANTS.map((t) => (
+                    <DropdownMenuItem key={t.slug} render={<Link href={`/c/${t.slug}`} />} className="gap-3 py-2">
+                      <ClubCrest short={t.short} color={t.color} className="size-7 rounded-md text-[10px]" />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate font-medium">{t.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">{t.city}</span>
+                      </span>
+                      {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
+                    </DropdownMenuItem>
+                  ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/clubes" />}>
