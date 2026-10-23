@@ -13,20 +13,45 @@ export function LoginForm() {
   return (
     <form action={action} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="usuario">Usuario</Label>
-        <Input id="usuario" name="usuario" autoComplete="username" defaultValue="admin" required className="h-11" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="clave">Contraseña</Label>
+        <Label htmlFor="email">Email</Label>
+        {/* Base UI no deja cambiar defaultValue una vez montado: el key vuelve a crear el campo
+            con el email del intento anterior, para no tener que tipearlo de nuevo. */}
         <Input
-          id="clave"
-          name="clave"
-          type="password"
-          autoComplete="current-password"
-          placeholder="••••••"
+          key={state.email ?? ''}
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="username"
+          defaultValue={state.email ?? ''}
+          aria-invalid={state.fieldErrors?.email ? true : undefined}
+          aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
           required
           className="h-11"
         />
+        {state.fieldErrors?.email && (
+          <p id="email-error" className="text-sm text-destructive">
+            {state.fieldErrors.email}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="password">Contraseña</Label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="••••••"
+          aria-invalid={state.fieldErrors?.password ? true : undefined}
+          aria-describedby={state.fieldErrors?.password ? 'password-error' : undefined}
+          required
+          className="h-11"
+        />
+        {state.fieldErrors?.password && (
+          <p id="password-error" className="text-sm text-destructive">
+            {state.fieldErrors.password}
+          </p>
+        )}
       </div>
       {state.error && (
         <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">

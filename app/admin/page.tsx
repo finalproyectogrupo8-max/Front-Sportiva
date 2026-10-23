@@ -4,7 +4,7 @@ import { AdminConsole } from '@/components/admin/admin-console'
 import { Logo } from '@/components/brand/logo'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { requirePlatformAdmin } from '@/lib/admin-guard'
+import { requirePlatformAdmin } from '@/lib/session'
 import { listMemberships, listTenants, listUsers } from '@/lib/api/admin'
 
 export default async function AdminPage() {

@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { ArrowUpRight, LogOut, Plus, Settings2 } from 'lucide-react'
 import { ClubCrest, Logo } from '@/components/brand/logo'
 import { buttonVariants } from '@/components/ui/button'
-import { logout, requireSession } from '@/lib/auth'
+import { logout } from '@/lib/auth'
+import { requireSession } from '@/lib/session'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 
@@ -35,7 +36,7 @@ export default async function ClubesPage() {
 
       <section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-16 pt-8">
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">Hola, {session.nombre}</p>
+          <p className="text-sm text-muted-foreground">Hola, {session.user.name}</p>
           <h1 className="font-display text-5xl font-bold uppercase leading-none text-balance">¿A qué club entrás hoy?</h1>
           <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
             Cada club tiene su propio espacio en Tribuna: sus datos, sus colores y su equipo de trabajo.

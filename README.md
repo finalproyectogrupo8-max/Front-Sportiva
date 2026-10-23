@@ -6,7 +6,7 @@ Este repositorio es **solo el frontend**. Va a consumir una **API REST en Larave
 
 Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** y **shadcn/ui**.
 
-> **Estado:** prototipo, todavía no conectado a la API. El login está hardcodeado (`lib/auth.ts`) y todos los datos son mock (`lib/data.ts`). Las dos cosas se van a reemplazar por llamadas a la API de Laravel.
+> **Estado:** el login ya va contra la API de Laravel (`lib/auth.ts`). Los datos de los clubes todavía son mock (`lib/data.ts`, `lib/tenants.ts`) y se reemplazan módulo por módulo.
 
 ---
 
@@ -58,16 +58,17 @@ Abrí <http://localhost:3000> e ingresá con:
 | `pnpm start`             | Sirve el build de producción (primero hay que correr `build`) |
 | `pnpm lint`              | Revisa el código con ESLint (`eslint.config.mjs`)             |
 | `pnpm typecheck`         | Chequeo de tipos con `tsc --noEmit` (ver la nota de abajo)    |
+| `pnpm api:types`         | Regenera `lib/api/schema.d.ts` desde el contrato OpenAPI de la API |
 
 > **Importante:** `next.config.mjs` tiene `typescript.ignoreBuildErrors: true`, así que `pnpm build` **no falla por errores de tipos**. Corré `pnpm typecheck` antes de abrir un pull request. La CI también lo corre (ver [3.4](#34-ci-integración-continua)).
 
 ### Variables de entorno
 
-Mientras la app use datos mock no hace falta ninguna. Cuando se conecte la API de Laravel:
+Copiá `.env.example` a `.env.local` (`cp .env.example .env.local`).
 
 | Variable  | Ejemplo                     | Notas                                                                    |
 | --------- | --------------------------- | ------------------------------------------------------------------------ |
-| `API_URL` | `http://localhost:8000/api` | URL base de la API de Laravel. **Solo de servidor**: nunca usar `NEXT_PUBLIC_`. |
+| `API_URL` | `http://127.0.0.1:8000/api` | URL base de la API de Laravel, con `/api`. **Solo de servidor**: nunca usar `NEXT_PUBLIC_`. |
 
 El browser nunca llama a Laravel directamente. Todas las llamadas pasan por el servidor de Next.js, que guarda el token de Sanctum en una cookie `httpOnly`. El razonamiento está en el [ADR 0001](docs/adr/0001-frontend-api-integration.md), y el detalle del login y del contrato de la API, en [docs/integracion-api-laravel.md](docs/integracion-api-laravel.md).
 
@@ -77,7 +78,18 @@ Tené en cuenta que cualquier variable con el prefijo `NEXT_PUBLIC_` se envía a
 
 ### Trabajar contra la API de Laravel
 
-Cuando exista la integración, vas a necesitar la API de Laravel corriendo en local (o una URL de desarrollo compartida). Las instrucciones de instalación están en el repositorio de la API.
+Necesitás la API de Laravel corriendo en local (o una URL de desarrollo compartida). Las instrucciones de instalación están en el repositorio de la API.
+
+Todas las llamadas pasan por `lib/api/client.ts` (`apiFetch`), que solo corre en el servidor: lee el token de la cookie, manda `Authorization: Bearer` y resuelve los errores de sesión (401 → login, 403 de club → `/clubes`). Nunca lo importes desde un client component.
+
+**Tipos del contrato.** `lib/api/schema.d.ts` se genera desde `docs/api/openapi.json` del repo de la API y se commitea. Cuando la API cambie su contrato, regeneralo:
+
+```bash
+pnpm api:types                                         # espera el repo de la API en ../api-sportiva
+API_OPENAPI=/ruta/a/openapi.json pnpm api:types        # si lo tenés en otro lado
+```
+
+Usá esos tipos (`Schemas['LoginResource']`, etc.) en vez de tipar las respuestas a mano.
 
 Los cambios de frontend y backend que dependen entre sí necesitan **un PR en cada repositorio**. Vinculá los dos PRs y mergeá primero el de la API.
 

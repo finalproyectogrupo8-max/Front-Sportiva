@@ -2,10 +2,11 @@ import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { Logo } from '@/components/brand/logo'
 import { LoginForm } from '@/components/auth/login-form'
-import { hasSession } from '@/lib/auth'
+import { landingPath } from '@/lib/session'
 
 export default async function LoginPage() {
-  if (await hasSession()) redirect('/clubes')
+  const landing = await landingPath()
+  if (landing) redirect(landing)
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
@@ -46,8 +47,7 @@ export default async function LoginPage() {
             <Logo className="lg:hidden" />
             <h2 className="font-display text-4xl font-bold uppercase leading-none">Ingresar neshe</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Accedé al panel de tu club. Para la demo usá <span className="font-medium text-foreground">admin</span> /{' '}
-              <span className="font-medium text-foreground">admin</span>.
+              Accedé al panel de tu club con el email y la contraseña que te dio el administrador.
             </p>
           </div>
           <LoginForm />
