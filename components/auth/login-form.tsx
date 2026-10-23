@@ -14,12 +14,15 @@ export function LoginForm() {
     <form action={action} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
+        {/* Base UI no deja cambiar defaultValue una vez montado: el key vuelve a crear el campo
+            con el email del intento anterior, para no tener que tipearlo de nuevo. */}
         <Input
+          key={state.email ?? ''}
           id="email"
           name="email"
           type="email"
           autoComplete="username"
-          defaultValue={state.email}
+          defaultValue={state.email ?? ''}
           aria-invalid={state.fieldErrors?.email ? true : undefined}
           aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
           required
