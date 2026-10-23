@@ -40,6 +40,8 @@ flowchart LR
 
 ### 3.1 Respuesta corta
 
+> Versión para funcionales, sin código: [`docs/login-explicado.md`](https://github.com/finalproyectogrupo8-max/API_Sportiva/blob/main/docs/login-explicado.md) del repo de la API.
+
 1. El usuario ingresa email y contraseña.
 2. Las credenciales se validan contra la **BD central** (`olim_platform.users`), **no contra un club**. El usuario es global: existe una sola vez, aunque pertenezca a varios clubes.
 3. Si las credenciales son válidas, Laravel devuelve:
