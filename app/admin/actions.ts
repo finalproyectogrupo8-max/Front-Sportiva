@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requirePlatformAdmin } from '@/lib/admin-guard'
+import { requirePlatformAdmin } from '@/lib/session'
 import type { AdminActionState } from '@/lib/admin-types'
 import {
   validateMembershipFields,
