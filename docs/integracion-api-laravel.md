@@ -5,7 +5,7 @@
 
 ## 1. Contexto
 
-- **Frontend:** este repo. Next.js 16 (App Router), React 19, TypeScript, Tailwind 4 y shadcn/ui. Por ahora es un prototipo: el login está hardcodeado en `lib/auth.ts` y los datos son mock (`lib/data.ts`, `lib/tenants.ts`).
+- **Frontend:** este repo. Next.js 16 (App Router), React 19, TypeScript, Tailwind 4 y shadcn/ui. El login ya va contra la API (`lib/auth.ts`); los datos de los clubes todavía son mock (`lib/data.ts`, `lib/tenants.ts`).
 - **Backend:** una sola aplicación Laravel, en otro repo. Es dueña de la lógica de negocio, la persistencia y la autenticación.
 - **Datos:**
   - Una BD central `olim_platform`, con usuarios, clubes (`tenants`), membresías (`tenant_memberships`) y tokens.
@@ -21,7 +21,7 @@ El browser solo habla con Next.js, y Next.js es el único cliente de Laravel. As
 ```mermaid
 flowchart LR
     B["Browser<br/>recibe HTML<br/>guarda la cookie<br/>nunca ve el token"]
-    N["Next.js (servidor)<br/>proxy.ts<br/>Server Components / Actions<br/>lib/auth.ts · lib/api/client.ts"]
+    N["Next.js (servidor)<br/>proxy.ts<br/>Server Components / Actions<br/>lib/auth.ts · lib/session.ts · lib/api/client.ts"]
     L["Laravel API<br/>auth:sanctum<br/>middleware de tenant<br/>policies por permiso"]
     P[("olim_platform<br/>usuarios, membresías, tokens")]
     C[("BD de cada club<br/>datos operativos")]
@@ -138,6 +138,8 @@ El token pre-tenant aplica **mínimo privilegio**:
 | `path` | `/` | Toda la app la necesita |
 | `maxAge` / `expires` | igual al `expires_at` del token | La cookie y el token vencen juntos |
 
+**Admins de plataforma.** El login de un admin devuelve además `platform_token`, con la ability `platform:admin`, que es el único que sirve para `/api/admin/*`. El front lo guarda en una segunda cookie (`sportiva_platform`, mismos atributos) y lo manda solo en las llamadas del panel (`apiFetch(..., { auth: 'platform' })`). La cookie principal (`sportiva_session`) guarda el token pre-tenant o el del club. El logout revoca y borra las dos.
+
 ### 3.6 Expiración y errores de sesión
 
 - Cada token tiene su propio `expires_at`. Sanctum lo acepta en `createToken(name, abilities, expiresAt)`.
@@ -155,7 +157,8 @@ El token pre-tenant aplica **mínimo privilegio**:
 | Pieza | Ubicación | Qué hace | Qué no hace |
 | --- | --- | --- | --- |
 | Gate optimista | `proxy.ts` (en Next 16 reemplaza a `middleware.ts`) | Si no hay cookie, redirige a `/` | No llama a la API ni valida el token |
-| Sesión / DAL | `lib/auth.ts` | `login`, `selectTenant`, `logout`, `requireSession()`. Son las únicas funciones que leen o escriben la cookie | No renderiza UI |
+| Sesión (escritura) | `lib/auth.ts` (`'use server'`) | Server Actions `login`, `selectTenant`, `logout`. Son las únicas funciones que escriben las cookies | No renderiza UI |
+| Sesión (lectura) | `lib/session.ts` (`import 'server-only'`) | `requireSession()`, `requirePlatformAdmin()`. Validan el token contra `GET /api/me/tenants` y devuelven `user` y `tenants`. No son Server Actions, así que no quedan expuestas al browser | No escribe cookies |
 | Cliente API | `lib/api/client.ts` (`import 'server-only'`) | Lee la cookie, llama a `API_URL` y mapea 401, 403 y 422 | No se importa desde client components |
 | Llamadas de dominio | `lib/api/<modulo>.ts` | Un archivo por módulo (jugadores, pedidos, inventario…) que devuelve datos tipados | No decide permisos |
 
@@ -344,10 +347,11 @@ Opciones para cada una: quitar la pantalla, dejarla como "próximamente" o agreg
 
 **Frontend**
 
-- [ ] `lib/api/client.ts` server-only, con manejo de 401, 403 y 422
-- [ ] Reescribir `lib/auth.ts` (login real, `selectTenant`, `logout`, `requireSession`) y pasar la cookie a `sameSite: lax`
-- [ ] `proxy.ts` como gate optimista
-- [ ] Generar los tipos con `openapi-typescript`
+- [x] `lib/api/client.ts` server-only, con manejo de 401, 403 y 422
+- [x] Reescribir `lib/auth.ts` (login real, `logout`, `requireSession`) y pasar la cookie a `sameSite: lax`
+- [ ] `selectTenant` y selector `/clubes` desde la API (FRO-3)
+- [x] `proxy.ts` como gate optimista
+- [x] Generar los tipos con `openapi-typescript`
 - [ ] Reemplazar los mocks de `lib/data.ts` y `lib/tenants.ts`, módulo por módulo
 
 **Producto**
