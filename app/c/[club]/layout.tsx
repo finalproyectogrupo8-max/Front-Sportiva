@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { ClubProvider } from '@/components/club/club-provider'
 import { TopBar } from '@/components/club/top-bar'
-import { requireSession } from '@/lib/session'
+import { requireClubSession, requireSession } from '@/lib/session'
 import { getClubData } from '@/lib/data'
 import { getTenant } from '@/lib/tenants'
 
@@ -12,8 +12,11 @@ export default async function ClubLayout({
   children: React.ReactNode
   params: Promise<{ club: string }>
 }) {
-  const session = await requireSession()
   const { club } = await params
+  // El [club] de /c/[club] es solo navegación: si no coincide con el club de la sesión, a /clubes.
+  const clubSession = await requireClubSession(club)
+  const session = await requireSession()
+
   const tenant = getTenant(club)
   if (!tenant) notFound()
   const data = getClubData(tenant)
@@ -23,8 +26,9 @@ export default async function ClubLayout({
       <div className="flex min-h-dvh flex-col">
         {/* El rol dentro del club llega con /me en FRO-4. */}
         <TopBar
-          userName={session.user.name}
-          userRole={session.user.is_platform_admin ? 'Administración de plataforma' : 'Miembro del club'}
+          userName={clubSession.user.name}
+          userRole={clubSession.user.is_platform_admin ? 'Administración de plataforma' : 'Miembro del club'}
+          userTenants={session.tenants}
         />
         <main className="flex-1">{children}</main>
       </div>
