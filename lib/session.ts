@@ -9,12 +9,20 @@ import { PLATFORM_COOKIE, SESSION_COOKIE, SESSION_EXPIRED_PATH } from '@/lib/ses
 // Lectura de la sesión para Server Components. No es 'use server' a propósito:
 // así no queda expuesta como Server Action que cualquiera pueda invocar.
 
-export type Session = Schemas['MeTenantsResource']
+export type Session = {
+  user: Schemas['UserResource']
+  tenants: Schemas['TenantSummaryResource'][]
+  tenant?: Schemas['TenantSummaryResource']
+  profile?: null
+  permissions?: string[]
+}
+
 export type ClubSession = Schemas['MeResource']
 
 /**
- * Valida la sesión contra la API y devuelve el usuario (con `is_platform_admin`) y sus clubes.
- * Usa `GET /api/me/tenants`, que acepta cualquier token del usuario: pre-tenant, de club o de plataforma.
+ * Valida la sesión contra la API y devuelve el usuario, sus clubes y el club activo (si lo hay).
+ * - Si hay token de club activo, consulta `GET /api/me` (que devuelve user y tenant) y `GET /api/me/tenants`.
+ * - Si es pre-tenant o plataforma, consulta `GET /api/me/tenants`.
  * Sin cookie redirige al login; un token vencido lo resuelve el cliente (401 → /sesion-expirada).
  * `cache` evita repetir la llamada si layout y página la piden en el mismo request.
  */
@@ -23,10 +31,35 @@ export const requireSession = cache(async (): Promise<Session> => {
   const auth = store.has(SESSION_COOKIE) ? 'session' : store.has(PLATFORM_COOKIE) ? 'platform' : null
   if (!auth) redirect('/')
 
-  const result = await apiFetch<Session>('/me/tenants', { auth })
+  if (auth === 'session') {
+    const meResult = await apiFetch<Schemas['MeResource']>('/me', {
+      auth: 'session',
+      sessionErrors: 'return',
+    })
+
+    if (meResult.ok) {
+      const tenantsResult = await apiFetch<Schemas['MeTenantsResource']>('/me/tenants', {
+        auth: 'session',
+        sessionErrors: 'return',
+      })
+
+      return {
+        user: meResult.data.user,
+        tenant: meResult.data.tenant,
+        profile: meResult.data.profile,
+        permissions: meResult.data.permissions,
+        tenants: tenantsResult.ok ? tenantsResult.data.tenants : [meResult.data.tenant],
+      }
+    }
+  }
+
+  const result = await apiFetch<Schemas['MeTenantsResource']>('/me/tenants', { auth })
   if (!result.ok) throw new Error(result.message)
 
-  return result.data
+  return {
+    user: result.data.user,
+    tenants: result.data.tenants,
+  }
 })
 
 /**

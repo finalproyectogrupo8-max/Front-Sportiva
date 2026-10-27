@@ -44,20 +44,36 @@ export const TENANTS: Tenant[] = [
   },
 ]
 
-export function getTenant(slug: string): Tenant | undefined {
-  const normalized = slug.replace(/_/g, '-')
-  const found = TENANTS.find((t) => t.slug === slug || t.slug === normalized)
-  if (found) {
-    return { ...found, slug }
-  }
+/**
+ * Normaliza un club proveniente de la API ({ slug, name }) asignando valores
+ * genéricos por defecto (color, city, sports, etc.) para que la UI no se rompa
+ * mientras la API no provea dichos atributos (FRO-8).
+ */
+export function normalizeTenant(t: { slug: string; name: string } & Partial<Tenant>): Tenant {
+  const normalizedSlug = t.slug.replace(/_/g, '-')
+  const found = TENANTS.find((mock) => mock.slug === t.slug || mock.slug === normalizedSlug)
+
+  const nameInitials = t.name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 4)
+    .toUpperCase()
+
+  const short = t.short ?? found?.short ?? (nameInitials || t.slug.slice(0, 4).toUpperCase())
+
   return {
-    slug,
-    name: slug.replace(/_/g, ' ').toUpperCase(),
-    short: slug.slice(0, 4).toUpperCase(),
-    city: 'Sede central',
-    founded: 2026,
-    color: 'oklch(0.5 0.2 262)',
-    sports: ['Fútbol', 'Básquet'],
-    members: 0,
+    slug: t.slug,
+    name: t.name,
+    short,
+    city: t.city ?? found?.city ?? 'Sede central',
+    founded: t.founded ?? found?.founded ?? 2026,
+    color: t.color ?? found?.color ?? 'oklch(0.5 0.2 262)',
+    sports: t.sports ?? found?.sports ?? ['Básquet', 'Fútbol', 'Vóley'],
+    members: t.members ?? found?.members ?? 1200,
   }
+}
+
+export function getTenant(slug: string): Tenant | undefined {
+  return normalizeTenant({ slug, name: slug })
 }
