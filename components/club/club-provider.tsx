@@ -2,7 +2,12 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ClubData } from '@/lib/data'
-import type { Tenant } from '@/lib/tenants'
+import { normalizeTenant, type Tenant } from '@/lib/tenants'
+
+export type ApiTenant = {
+  slug: string
+  name: string
+}
 
 type ClubContextValue = {
   tenant: Tenant
@@ -14,14 +19,15 @@ type ClubContextValue = {
 const ClubContext = createContext<ClubContextValue | null>(null)
 
 export function ClubProvider({
-  tenant,
+  tenant: rawTenant,
   initialData,
   children,
 }: {
-  tenant: Tenant
+  tenant: ApiTenant | Tenant
   initialData: ClubData
   children: React.ReactNode
 }) {
+  const tenant = useMemo(() => normalizeTenant(rawTenant), [rawTenant])
   const [data, setData] = useState(initialData)
 
   useEffect(() => {
