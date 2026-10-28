@@ -1,58 +1,51 @@
-import Image from 'next/image'
-import { redirect } from 'next/navigation'
-import { Logo } from '@/components/brand/logo'
-import { LoginForm } from '@/components/auth/login-form'
-import { landingPath } from '@/lib/session'
+import { hasSession } from '@/lib/session'
+import { HomeHeader } from '@/components/home/home-header'
+import { HeroSection } from '@/components/home/hero-section'
+import { FeatureCarousel } from '@/components/home/feature-carousel'
+import { FeaturesGrid } from '@/components/home/features-grid'
+import { AboutSection } from '@/components/home/about-section'
+import { ContactSection } from '@/components/home/contact-section'
+import { HomeFooter } from '@/components/home/home-footer'
 
-export default async function LoginPage() {
-  const landing = await landingPath()
-  if (landing) redirect(landing)
+export const metadata = {
+  title: 'Sportiva — Gestión operativa para clubes deportivos',
+  description:
+    'Organizá partidos, fichas médicas de jugadores, profes, utilería y canchas en un solo tablero operativo. Cada club con su propio espacio de trabajo.',
+  openGraph: {
+    title: 'Sportiva — Gestión operativa para clubes deportivos',
+    description:
+      'Partidos, fichas de jugadores, profesores, utilería y canchas en un solo lugar.',
+    siteName: 'Sportiva',
+  },
+}
+
+export default async function HomePage() {
+  const sessionActive = await hasSession()
 
   return (
-    <main className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
-      <section className="relative hidden overflow-hidden bg-ink text-ink-foreground lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <Image
-          src="/images/club-gym.png"
-          alt=""
-          fill
-          priority
-          sizes="55vw"
-          className="object-cover opacity-45"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/20" aria-hidden="true" />
-        <div className="relative flex items-center gap-2">
-          <Logo className="[&_span]:text-ink-foreground" />
-        </div>
-        <div className="relative flex max-w-xl flex-col gap-6">
-          <h1 className="font-display text-6xl font-bold uppercase leading-[0.9] text-balance xl:text-7xl">
-            Todo el club, visto desde la tribuna.
-          </h1>
-          <p className="max-w-md text-base leading-relaxed text-ink-foreground/75 text-pretty">
-            Partidos, fichas, profes, utilería y canchas en un solo tablero operativo. Cada club con su propio espacio.
-          </p>
-          <ul className="flex flex-wrap gap-2 text-sm">
-            {['Básquet', 'Fútbol', 'Vóley', 'Multi-sede', 'Multi-club'].map((t) => (
-              <li key={t} className="rounded-full border border-ink-foreground/20 px-3 py-1 text-ink-foreground/85">
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="relative text-xs text-ink-foreground/50">{'© 2026 Tribuna · Gestión operativa para clubes'}</p>
-      </section>
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      {/* 1. Header fijo con navegación */}
+      <HomeHeader hasSession={sessionActive} />
 
-      <section className="flex items-center justify-center px-6 py-12">
-        <div className="flex w-full max-w-sm flex-col gap-8">
-          <div className="flex flex-col gap-3">
-            <Logo className="lg:hidden" />
-            <h2 className="font-display text-4xl font-bold uppercase leading-none">Ingresar neshe</h2>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Accedé al panel de tu club con el email y la contraseña que te dio el administrador.
-            </p>
-          </div>
-          <LoginForm />
-        </div>
-      </section>
-    </main>
+      <main className="flex-1">
+        {/* 2. Hero con título fuerte, bajada, CTAs e imagen de fondo */}
+        <HeroSection hasSession={sessionActive} />
+
+        {/* 3. Carrusel interactivo y accesible */}
+        <FeatureCarousel />
+
+        {/* 4. Funciones con grilla de tarjetas y estados de sesión */}
+        <FeaturesGrid hasSession={sessionActive} />
+
+        {/* 5. Quiénes somos con texto sobrio en español rioplatense */}
+        <AboutSection />
+
+        {/* 6. Contacto con formulario conectado a tickets */}
+        <ContactSection />
+      </main>
+
+      {/* 7. Llamada a la acción final y footer */}
+      <HomeFooter hasSession={sessionActive} />
+    </div>
   )
 }

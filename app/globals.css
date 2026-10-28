@@ -13,6 +13,10 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-cream: var(--cream);
+  --color-cream-foreground: var(--cream-foreground);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -66,8 +70,12 @@
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.72 0.17 55);
   --warning-foreground: oklch(0.21 0.025 262);
-  --ink: oklch(0.21 0.025 262);
-  --ink-foreground: oklch(0.97 0.004 255);
+  --brand: #C8643C;
+  --brand-foreground: #FFFFFF;
+  --cream: #F8F4EC;
+  --cream-foreground: #22252A;
+  --ink: #22252A;
+  --ink-foreground: #F8F4EC;
   --border: oklch(0.905 0.008 255);
   --input: oklch(0.89 0.01 255);
   --ring: oklch(0.5 0.2 262);

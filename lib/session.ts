@@ -29,7 +29,7 @@ export type ClubSession = Schemas['MeResource']
 export const requireSession = cache(async (): Promise<Session> => {
   const store = await cookies()
   const auth = store.has(SESSION_COOKIE) ? 'session' : store.has(PLATFORM_COOKIE) ? 'platform' : null
-  if (!auth) redirect('/')
+  if (!auth) redirect('/login')
 
   if (auth === 'session') {
     const meResult = await apiFetch<Schemas['MeResource']>('/me', {
@@ -69,7 +69,7 @@ export const requireSession = cache(async (): Promise<Session> => {
  */
 export const requireClubSession = cache(async (expectedClub?: string): Promise<ClubSession> => {
   const store = await cookies()
-  if (!store.has(SESSION_COOKIE)) redirect('/')
+  if (!store.has(SESSION_COOKIE)) redirect('/login')
 
   const result = await apiFetch<ClubSession>('/me', {
     auth: 'session',
@@ -107,4 +107,10 @@ export async function landingPath(): Promise<string | null> {
   if (store.has(SESSION_COOKIE)) return '/clubes'
 
   return null
+}
+
+/** Indica si el usuario tiene al menos una cookie de sesión o plataforma (sin llamar a la API). */
+export async function hasSession(): Promise<boolean> {
+  const store = await cookies()
+  return store.has(SESSION_COOKIE) || store.has(PLATFORM_COOKIE)
 }
