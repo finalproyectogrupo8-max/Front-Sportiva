@@ -5,6 +5,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { logout } from '@/lib/auth'
 import { requirePlatformAdmin } from '@/lib/session'
+import { listTickets } from '@/lib/api/admin'
 import { AdminNav } from '@/components/admin/admin-nav'
 import { cn } from '@/lib/utils'
 
@@ -14,6 +15,8 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const session = await requirePlatformAdmin()
+  const newTickets = await listTickets('new')
+  const newTicketsCount = newTickets.length
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -31,7 +34,7 @@ export default async function AdminLayout({
             <div className="hidden h-5 w-px bg-border md:block" aria-hidden="true" />
 
             <div className="hidden md:block">
-              <AdminNav />
+              <AdminNav newTicketsCount={newTicketsCount} />
             </div>
           </div>
 
@@ -72,7 +75,7 @@ export default async function AdminLayout({
 
         {/* Navegación móvil */}
         <div className="border-t px-4 py-2 md:hidden">
-          <AdminNav />
+          <AdminNav newTicketsCount={newTicketsCount} />
         </div>
       </header>
 

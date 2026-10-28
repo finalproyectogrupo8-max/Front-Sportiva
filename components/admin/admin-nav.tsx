@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, Users } from 'lucide-react'
+import { Building2, MessageSquare, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -18,9 +18,19 @@ const NAV_ITEMS = [
     icon: Building2,
     active: (path: string) => path.startsWith('/admin/clubes'),
   },
+  {
+    href: '/admin/tickets',
+    label: 'Tickets',
+    icon: MessageSquare,
+    active: (path: string) => path.startsWith('/admin/tickets'),
+  },
 ]
 
-export function AdminNav() {
+interface AdminNavProps {
+  newTicketsCount?: number
+}
+
+export function AdminNav({ newTicketsCount = 0 }: AdminNavProps) {
   const pathname = usePathname()
 
   return (
@@ -28,6 +38,7 @@ export function AdminNav() {
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon
         const isActive = item.active(pathname)
+        const showBadge = item.href === '/admin/tickets' && newTicketsCount > 0
 
         return (
           <Link
@@ -43,6 +54,19 @@ export function AdminNav() {
           >
             <Icon className="size-4" aria-hidden="true" />
             <span>{item.label}</span>
+            {showBadge && (
+              <span
+                className={cn(
+                  'ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold',
+                  isActive
+                    ? 'bg-primary-foreground text-primary'
+                    : 'bg-sky-500/15 text-sky-600 dark:bg-sky-500/25 dark:text-sky-300',
+                )}
+                aria-label={`${newTicketsCount} tickets nuevos`}
+              >
+                {newTicketsCount}
+              </span>
+            )}
           </Link>
         )
       })}

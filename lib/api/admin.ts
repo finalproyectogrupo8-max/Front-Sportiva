@@ -213,3 +213,71 @@ export async function retryAdminTenant(
     auth: 'platform',
   })
 }
+
+/* ==========================================================================
+   TICKETS DE CONTACTO / SOPORTE
+   Endpoints reales (Laravel API):
+   - GET /api/admin/tickets
+   - GET /api/admin/tickets/{id}
+   - PATCH /api/admin/tickets/{id}
+   ========================================================================== */
+
+import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
+import { ticketsStore } from './tickets-store'
+
+export type { SupportTicket, SupportTicketStatus }
+
+/**
+ * `GET /admin/tickets`
+ * Obtiene el listado de tickets, opcionalmente filtrados por estado.
+ */
+export async function listTickets(status?: SupportTicketStatus): Promise<SupportTicket[]> {
+  let tickets = [...ticketsStore]
+  if (status) {
+    tickets = tickets.filter((t) => t.status === status)
+  }
+  return tickets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+}
+
+/**
+ * `GET /admin/tickets/{id}`
+ * Obtiene el detalle de un ticket específico.
+ */
+export async function getTicket(id: string): Promise<SupportTicket | null> {
+  const ticket = ticketsStore.find((t) => t.id === id)
+  return ticket ? { ...ticket } : null
+}
+
+/**
+ * `PATCH /admin/tickets/{id}`
+ * Actualiza el estado y/o las notas internas de un ticket.
+ */
+export async function updateTicket(
+  id: string,
+  patch: { status?: SupportTicketStatus; admin_notes?: string | null },
+): Promise<SupportTicket> {
+  const index = ticketsStore.findIndex((t) => t.id === id)
+  if (index === -1) {
+    throw new Error('Ticket no encontrado.')
+  }
+
+  const current = ticketsStore[index]
+  const newStatus = patch.status ?? current.status
+
+  const resolvedAt =
+    newStatus === 'resolved'
+      ? current.resolved_at ?? new Date().toISOString()
+      : newStatus !== current.status
+        ? null
+        : current.resolved_at
+
+  const updated: SupportTicket = {
+    ...current,
+    status: newStatus,
+    admin_notes: patch.admin_notes !== undefined ? patch.admin_notes : current.admin_notes,
+    resolved_at: resolvedAt,
+  }
+
+  ticketsStore[index] = updated
+  return { ...updated }
+}
