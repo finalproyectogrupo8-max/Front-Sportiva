@@ -5,21 +5,12 @@ import { CheckCircle2, Loader2, ShieldCheck, UserX, XCircle } from 'lucide-react
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { AssignClubDialog } from '@/components/admin/assign-club-dialog'
 import { toggleUserStatusAction } from '@/app/admin/usuarios/actions'
 import type { AdminUser } from '@/lib/api/admin'
+import { formatShortDate } from '@/lib/format-date'
 
-function formatDate(dateString: string | null) {
-  if (!dateString) return '—'
-  try {
-    return new Intl.DateTimeFormat('es-AR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(dateString))
-  } catch {
-    return dateString
-  }
-}
 
 function StatusToggle({ user }: { user: AdminUser }) {
   const [isPending, startTransition] = useTransition()
@@ -46,7 +37,12 @@ function StatusToggle({ user }: { user: AdminUser }) {
       size="sm"
       onClick={handleToggle}
       disabled={isPending}
-      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+      className={cn(
+        'h-7 px-2 text-xs cursor-pointer',
+        user.is_active
+          ? 'border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive'
+          : 'border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-700 dark:text-emerald-400',
+      )}
       title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
     >
       {isPending ? (
@@ -151,13 +147,17 @@ export function UserTable({ users }: { users: AdminUser[] }) {
                 </td>
 
                 {/* Fecha */}
-                <td className="hidden px-4 py-3 text-xs text-muted-foreground md:table-cell">
-                  {formatDate(user.created_at)}
+                <td className="hidden whitespace-nowrap px-4 py-3 text-xs text-muted-foreground md:table-cell">
+                  {formatShortDate(user.created_at)}
                 </td>
 
                 {/* Acciones */}
                 <td className="px-4 py-3 text-right">
-                  <StatusToggle user={user} />
+                  <div className="flex items-center justify-end gap-1.5">
+                    {/* Los admins de plataforma siempre entran a /admin: una membresía no les sirve. */}
+                    {user.is_active && !user.is_platform_admin && <AssignClubDialog user={user} />}
+                    <StatusToggle user={user} />
+                  </div>
                 </td>
               </tr>
             ))}

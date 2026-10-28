@@ -7,7 +7,8 @@ import {
   CheckCircle2,
   Clock,
   Database,
-  ExternalLink,
+  ChevronRight,
+  Users,
   Loader2,
   PauseCircle,
   PlayCircle,
@@ -20,19 +21,8 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { retryTenantAction, updateTenantStatusAction } from '@/app/admin/clubes/actions'
 import type { AdminTenant, TenantStatus } from '@/lib/api/admin'
+import { formatShortDate } from '@/lib/format-date'
 
-function formatDate(dateString: string | null) {
-  if (!dateString) return '—'
-  try {
-    return new Intl.DateTimeFormat('es-AR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(new Date(dateString))
-  } catch {
-    return dateString
-  }
-}
 
 export function TenantStatusBadge({ status }: { status: string }) {
   switch (status as TenantStatus) {
@@ -53,7 +43,7 @@ export function TenantStatusBadge({ status }: { status: string }) {
           className="gap-1.5 border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-300 text-xs font-normal animate-pulse"
         >
           <Clock className="size-3" aria-hidden="true" />
-          En creación
+          Aprovisionando
         </Badge>
       )
     case 'suspended':
@@ -73,7 +63,7 @@ export function TenantStatusBadge({ status }: { status: string }) {
           className="gap-1.5 border-destructive/25 bg-destructive/10 text-destructive text-xs font-normal"
         >
           <XCircle className="size-3" aria-hidden="true" />
-          Fallido
+          Error
         </Badge>
       )
     default:
@@ -176,22 +166,19 @@ function TenantActions({ tenant }: { tenant: AdminTenant }) {
         </Button>
       )}
 
-      {/* Link de acceso directo si está activo */}
-      {tenant.status === 'active' && (
-        <Link
-          href={`/c/${tenant.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-7 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer',
-          )}
-          title={`Abrir vista de ${tenant.name}`}
-        >
-          <ExternalLink className="size-3" aria-hidden="true" />
-          <span className="sr-only">Ir a {tenant.name}</span>
-        </Link>
-      )}
+      {/* Detalle del club: miembros */}
+      <Link
+        href={`/admin/clubes/${tenant.id}`}
+        className={cn(
+          buttonVariants({ variant: 'outline', size: 'sm' }),
+          'h-7 gap-1 border-primary/25 bg-primary/10 px-2 text-xs font-medium text-primary hover:bg-primary/15 hover:text-primary cursor-pointer',
+        )}
+        title={`Ver y agregar miembros de ${tenant.name}`}
+      >
+        <Users className="size-3" aria-hidden="true" />
+        Miembros
+        <ChevronRight className="size-3" aria-hidden="true" />
+      </Link>
     </div>
   )
 }
@@ -247,7 +234,12 @@ export function ClubTable({ tenants }: { tenants: AdminTenant[] }) {
                       {tenant.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="truncate font-medium text-foreground">{tenant.name}</span>
+                      <Link
+                        href={`/admin/clubes/${tenant.id}`}
+                        className="truncate font-medium text-foreground hover:underline"
+                      >
+                        {tenant.name}
+                      </Link>
                       <code className="text-[11px] text-muted-foreground font-mono">
                         {tenant.slug}
                       </code>
@@ -269,8 +261,8 @@ export function ClubTable({ tenants }: { tenants: AdminTenant[] }) {
                 </td>
 
                 {/* Fecha */}
-                <td className="hidden px-4 py-3 text-xs text-muted-foreground sm:table-cell">
-                  {formatDate(tenant.created_at)}
+                <td className="hidden whitespace-nowrap px-4 py-3 text-xs text-muted-foreground sm:table-cell">
+                  {formatShortDate(tenant.created_at)}
                 </td>
 
                 {/* Acciones */}

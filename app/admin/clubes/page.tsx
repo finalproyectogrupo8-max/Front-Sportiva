@@ -6,10 +6,11 @@ import {
   type AdminTenantsSort,
   type TenantStatus,
 } from '@/lib/api/admin'
-import { ClubForm } from '@/components/admin/club-form'
+import { NewClubSheet } from '@/components/admin/club-form'
 import { ClubFilters } from '@/components/admin/club-filters'
 import { ClubTable } from '@/components/admin/club-table'
 import { Pagination } from '@/components/admin/pagination'
+import { ProvisioningPoller } from '@/components/admin/provisioning-poller'
 
 export default async function AdminClubesPage({
   searchParams,
@@ -58,7 +59,8 @@ export default async function AdminClubesPage({
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
-      {/* Header de la sección */}
+      {/* Header de la sección, con el alta a la derecha */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-semibold uppercase tracking-wider text-primary">
           Administración central
@@ -73,16 +75,13 @@ export default async function AdminClubesPage({
           Alta, aprovisionamiento y administración del estado de los inquilinos (tenants) en la plataforma.
         </p>
       </div>
-
-      {/* Grid: Formulario a la izquierda / Listado a la derecha */}
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* Formulario de Alta */}
-        <aside className="lg:col-span-4" aria-label="Formulario de alta de club">
-          <ClubForm />
-        </aside>
+        <div className="shrink-0">
+          <NewClubSheet />
+        </div>
+      </div>
 
         {/* Listado con filtros y paginación */}
-        <section className="flex flex-col gap-4 lg:col-span-8" aria-label="Listado de clubes">
+        <section className="flex flex-col gap-4" aria-label="Listado de clubes">
           <ClubFilters />
 
           {connectionError ? (
@@ -108,11 +107,15 @@ export default async function AdminClubesPage({
           ) : (
             <>
               <ClubTable tenants={result.data.data} />
-              <Pagination meta={result.data.meta} />
+              <Pagination meta={result.data.meta} label={{ one: 'club', many: 'clubes' }} />
+              <ProvisioningPoller
+                tenantIds={result.data.data
+                  .filter((tenant) => tenant.status === 'provisioning')
+                  .map((tenant) => tenant.id)}
+              />
             </>
           )}
         </section>
-      </div>
     </div>
   )
 }

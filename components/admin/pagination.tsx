@@ -5,7 +5,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { PaginatedAdminUsers } from '@/lib/api/admin'
 
-export function Pagination({ meta }: { meta: PaginatedAdminUsers['meta'] }) {
+export function Pagination({
+  meta,
+  label = { one: 'usuario', many: 'usuarios' },
+}: {
+  meta: PaginatedAdminUsers['meta']
+  /** Cómo se llaman los elementos del listado (en singular y plural). */
+  label?: { one: string; many: string }
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -17,7 +24,7 @@ export function Pagination({ meta }: { meta: PaginatedAdminUsers['meta'] }) {
       return (
         <div className="flex items-center justify-between px-1 pt-2 text-xs text-muted-foreground">
           <span>
-            Total: <strong className="font-medium text-foreground">{total}</strong> {total === 1 ? 'usuario registrado' : 'usuarios registrados'}
+            Total: <strong className="font-medium text-foreground">{total}</strong> {total === 1 ? `${label.one} registrado` : `${label.many} registrados`}
           </span>
         </div>
       )
@@ -66,7 +73,7 @@ export function Pagination({ meta }: { meta: PaginatedAdminUsers['meta'] }) {
       <p className="text-xs text-muted-foreground">
         Mostrando del <strong className="font-medium text-foreground">{from ?? 0}</strong> al{' '}
         <strong className="font-medium text-foreground">{to ?? 0}</strong> de{' '}
-        <strong className="font-medium text-foreground">{total}</strong> usuarios
+        <strong className="font-medium text-foreground">{total}</strong> {label.many}
       </p>
 
       <div className="flex items-center gap-1.5 self-center sm:self-auto">
