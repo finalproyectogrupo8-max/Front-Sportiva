@@ -9,5 +9,5 @@ export async function GET() {
   const store = await cookies()
   store.delete(SESSION_COOKIE)
   store.delete(PLATFORM_COOKIE)
-  redirect('/')
+  redirect('/login')
 }

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       const store = await cookies()
       store.delete(SESSION_COOKIE)
       store.delete(PLATFORM_COOKIE)
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL('/login', request.url))
     }
 
     const code = 'code' in result ? result.code : undefined

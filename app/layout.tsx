@@ -12,10 +12,15 @@ const barlow = Barlow_Condensed({
 })
 
 export const metadata: Metadata = {
-  title: 'Tribuna — Gestión operativa para clubes',
+  title: 'Sportiva — Gestión operativa para clubes',
   description:
-    'Tribuna digitaliza la operación de tu club: indumentaria, materiales, partidos, jugadores, profes y canchas en un solo lugar.',
-  generator: 'v0.app',
+    'Sportiva digitaliza la operación de tu club: indumentaria, materiales, partidos, jugadores, profes y canchas en un solo lugar.',
+  openGraph: {
+    title: 'Sportiva — Gestión operativa para clubes',
+    description:
+      'Plataforma integral de gestión operativa deportiva para clubes, ligas y federaciones.',
+    siteName: 'Sportiva',
+  },
 }
 
 export const viewport: Viewport = {

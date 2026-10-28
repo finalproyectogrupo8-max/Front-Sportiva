@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { club, modulo } = await params
   const m = getModule(modulo)
   const t = getTenant(club)
-  return { title: m && t ? `${m.name} · ${t.short} — Tribuna` : 'Tribuna' }
+  return { title: m && t ? `${m.name} · ${t.short} — Sportiva` : 'Sportiva' }
 }
 
 export default async function ModulePage({ params }: Props) {

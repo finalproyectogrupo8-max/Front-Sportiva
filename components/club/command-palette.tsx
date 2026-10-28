@@ -28,7 +28,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
   }
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} title="Buscar en Tribuna" description="Módulos, jugadores y acciones">
+    <CommandDialog open={open} onOpenChange={onOpenChange} title="Buscar en Sportiva" description="Módulos, jugadores y acciones">
       <Command>
         <CommandInput placeholder="Buscá un jugador, módulo o acción…" />
         <CommandList className="max-h-96">

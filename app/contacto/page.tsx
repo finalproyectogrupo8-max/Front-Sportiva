@@ -1,52 +1,30 @@
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { Logo } from '@/components/brand/logo'
-import { buttonVariants } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ContactForm } from '@/components/contact/contact-form'
-import { cn } from '@/lib/utils'
+import type { Metadata } from 'next'
+import { ContactForm, PageShell } from '@/components/SiteChrome'
 
-export const metadata = {
-  title: 'Contacto | Sportiva',
-  description: 'Comunicate con el equipo de Sportiva. Envianos tu consulta o solicitud de soporte.',
+export const metadata: Metadata = {
+  title: 'Contacto',
+  description: 'Solicitá una demo y descubrí cómo Sportiva puede ordenar la operación de tu club.',
 }
 
 export default function ContactoPage() {
   return (
-    <main className="min-h-dvh bg-muted/30">
-      <header className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
-        <Logo />
-        <Link
-          href="/"
-          className={cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'gap-2 text-xs text-muted-foreground hover:text-foreground',
-          )}
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Volver al inicio
-        </Link>
-      </header>
-
-      <section className="mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-16 pt-4 sm:px-6">
-        <Card className="border-border/60 shadow-xs">
-          <CardHeader className="gap-2 sm:p-8">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Contacto y Soporte
-            </span>
-            <CardTitle className="font-display text-3xl font-bold uppercase tracking-tight text-foreground sm:text-4xl">
-              Hablemos de tu club
-            </CardTitle>
-            <CardDescription className="text-sm leading-relaxed text-muted-foreground">
-              Completá el formulario con tus datos y tu consulta. Si formás parte de un club, podés indicarlo para agilizar la respuesta.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="sm:p-8 sm:pt-0">
-            <ContactForm />
-          </CardContent>
-        </Card>
+    <PageShell>
+      <section className="contact-route">
+        <div className="contact-route-copy">
+          <span className="route-eyebrow"><i />Hablemos de tu club</span>
+          <h1>LA PRÓXIMA JUGADA<br /><em>EMPIEZA ACÁ.</em></h1>
+          <p>Contanos cómo trabajan hoy. Te mostramos cómo Sportiva puede ordenar la operación y devolverle tiempo a tu equipo.</p>
+          <div className="contact-data">
+            <div><span>01</span><p><b>Demo personalizada</b><small>Recorré las funciones que tu club necesita.</small></p></div>
+            <div><span>02</span><p><b>Implementación acompañada</b><small>No vas a estar solo en el cambio.</small></p></div>
+          </div>
+        </div>
+        <div className="contact-route-card">
+          <span>Solicitar demo</span>
+          <h2>ORDENEMOS EL JUEGO.</h2>
+          <ContactForm />
+        </div>
       </section>
-    </main>
+    </PageShell>
   )
 }
-

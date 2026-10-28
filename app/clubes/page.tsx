@@ -56,7 +56,7 @@ export default async function ClubesPage({
           <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
             {hasNoTenants
               ? 'Tu cuenta no tiene acceso activo a ningún club en este momento.'
-              : 'Cada club tiene su propio espacio en Tribuna: sus datos, sus colores y su equipo de trabajo.'}
+              : 'Cada club tiene su propio espacio en Sportiva: sus datos, sus colores y su equipo de trabajo.'}
           </p>
         </div>
 
