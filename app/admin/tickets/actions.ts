@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requirePlatformAdmin } from '@/lib/session'
-import { updateTicket } from '@/lib/api/admin'
+import { updateAdminTicket } from '@/lib/api/admin'
 import { validateUpdateTicketFields } from '@/lib/admin-validation'
 import type { AdminActionState, SupportTicketStatus } from '@/lib/admin-types'
 
@@ -12,11 +12,12 @@ export async function updateTicketAction(
 ): Promise<AdminActionState> {
   await requirePlatformAdmin()
 
-  const id = String(formData.get('id') ?? '').trim()
-  if (!id) {
+  const idRaw = String(formData.get('id') ?? '').trim()
+  const ticketId = parseInt(idRaw, 10)
+  if (!idRaw || isNaN(ticketId) || ticketId <= 0) {
     return {
       ok: false,
-      message: 'Falta el identificador del ticket.',
+      message: 'Falta un identificador de ticket válido.',
     }
   }
 
@@ -38,10 +39,24 @@ export async function updateTicketAction(
   }
 
   try {
-    await updateTicket(id, {
+    const result = await updateAdminTicket(ticketId, {
       status: status ? (status as SupportTicketStatus) : undefined,
       admin_notes: admin_notes !== undefined ? (admin_notes || null) : undefined,
     })
+
+    if (!result.ok) {
+      if (result.kind === 'validation') {
+        return {
+          ok: false,
+          errors: result.errors,
+          message: result.message || 'Revisá los datos ingresados.',
+        }
+      }
+      return {
+        ok: false,
+        message: result.message || 'Error al actualizar el ticket.',
+      }
+    }
 
     revalidatePath('/admin')
     revalidatePath('/admin/tickets')
@@ -57,4 +72,3 @@ export async function updateTicketAction(
     }
   }
 }
-

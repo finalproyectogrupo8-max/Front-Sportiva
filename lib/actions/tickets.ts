@@ -13,15 +13,9 @@ export async function submitTicket(
   _prev: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  // Campo honeypot oculto para protección antispam básica: si viene completo,
-  // fingimos éxito sin guardar el ticket.
-  const honeypot = String(formData.get('hp') ?? '').trim()
-  if (honeypot) {
-    return {
-      ok: true,
-      message: '¡Gracias por contactarnos! Tu mensaje fue recibido correctamente.',
-    }
-  }
+  // Campo honeypot oculto ('website'): si viene completo,
+  // la API de Laravel lo detecta y rechaza silenciosamente devolviendo id 0.
+  const website = String(formData.get('website') ?? formData.get('hp') ?? '').trim()
 
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim()
@@ -29,7 +23,7 @@ export async function submitTicket(
   const subject = String(formData.get('subject') ?? '').trim()
   const message = String(formData.get('message') ?? '').trim()
 
-  const errors = validateTicketFields({ name, email, club_name, subject, message })
+  const errors = validateTicketFields({ name, email, club_name, subject, message, website })
   if (Object.keys(errors).length > 0) {
     return {
       ok: false,
@@ -39,16 +33,42 @@ export async function submitTicket(
   }
 
   try {
-    await createTicket({
+    const result = await createTicket({
       name,
       email,
       club_name: club_name || null,
       subject,
       message,
+      website: website || null,
     })
 
-    revalidatePath('/admin/tickets')
+    if (!result.ok) {
+      if (result.kind === 'validation') {
+        return {
+          ok: false,
+          errors: result.errors,
+          message: result.message || 'Revisá los campos marcados para continuar.',
+        }
+      }
+
+      if (result.kind === 'rate_limited') {
+        const retryText = result.retryAfter
+          ? ` Por favor esperá ${result.retryAfter} segundos antes de reintentar.`
+          : ' Por favor esperá unos minutos antes de volver a enviar.'
+        return {
+          ok: false,
+          message: `Demasiados intentos de envío.${retryText}`,
+        }
+      }
+
+      return {
+        ok: false,
+        message: result.message || 'No pudimos enviar tu mensaje. Probá de nuevo.',
+      }
+    }
+
     revalidatePath('/admin')
+    revalidatePath('/admin/tickets')
 
     return {
       ok: true,
@@ -57,8 +77,7 @@ export async function submitTicket(
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message : 'No pudimos enviar tu mensaje. Probá de nuevo.',
+      message: error instanceof Error ? error.message : 'No pudimos conectar con el servidor. Probá de nuevo más tarde.',
     }
   }
 }
-

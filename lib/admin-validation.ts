@@ -6,6 +6,7 @@ export interface CreateTicketFields {
   club_name?: string
   subject: string
   message: string
+  website?: string
   hp?: string
 }
 

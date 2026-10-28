@@ -1,8 +1,6 @@
 import 'server-only'
 
 import { apiFetch, type ApiResult, type Schemas } from './client'
-import { ticketsStore } from './tickets-store'
-import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
 
 /* ==========================================================================
    USUARIOS
@@ -231,68 +229,93 @@ export async function retryAdminTenant(
 
 /* ==========================================================================
    TICKETS DE CONTACTO / SOPORTE
-   Endpoints reales (Laravel API):
-   - GET /api/admin/tickets
-   - GET /api/admin/tickets/{id}
-   - PATCH /api/admin/tickets/{id}
    ========================================================================== */
 
-export type { SupportTicket, SupportTicketStatus }
+export type SupportTicket = Schemas['SupportTicketResource']
+export type TicketStatus = Schemas['TicketStatus']
+export type SupportTicketStatus = TicketStatus
+
+export type PaginatedAdminTickets = {
+  data: SupportTicket[]
+  links: {
+    first: string | null
+    last: string | null
+    prev: string | null
+    next: string | null
+  }
+  meta: {
+    current_page: number
+    from: number | null
+    last_page: number
+    links: {
+      url: string | null
+      label: string
+      active: boolean
+    }[]
+    path: string | null
+    per_page: number
+    to: number | null
+    total: number
+  }
+}
+
+export type AdminTicketsSort = 'created_at' | '-created_at' | 'status' | '-status'
+
+export type AdminTicketsQuery = {
+  status?: TicketStatus
+  per_page?: number
+  page?: number
+  sort?: AdminTicketsSort
+}
+
+export type UpdateAdminTicketData = Schemas['UpdateSupportTicketRequest']
 
 /**
  * `GET /admin/tickets`
- * Obtiene el listado de tickets, opcionalmente filtrados por estado.
+ * Listado paginado de tickets de soporte usando el token de plataforma.
  */
-export async function listTickets(status?: SupportTicketStatus): Promise<SupportTicket[]> {
-  let tickets = [...ticketsStore]
-  if (status) {
-    tickets = tickets.filter((t) => t.status === status)
-  }
-  return tickets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+export async function getAdminTickets(
+  query: AdminTicketsQuery = {},
+): Promise<ApiResult<PaginatedAdminTickets>> {
+  return apiFetch<PaginatedAdminTickets>('/admin/tickets', {
+    method: 'GET',
+    auth: 'platform',
+    query: query as Record<string, string | number | boolean | undefined | null>,
+  })
 }
 
 /**
- * `GET /admin/tickets/{id}`
- * Obtiene el detalle de un ticket específico.
+ * `GET /admin/tickets/{ticket}`
+ * Detalle de un ticket de soporte específico.
  */
-export async function getTicket(id: string): Promise<SupportTicket | null> {
-  const ticket = ticketsStore.find((t) => t.id === id)
-  return ticket ? { ...ticket } : null
+export async function getAdminTicket(
+  ticketId: number,
+): Promise<ApiResult<{ data: SupportTicket }>> {
+  return apiFetch<{ data: SupportTicket }>(`/admin/tickets/${ticketId}`, {
+    method: 'GET',
+    auth: 'platform',
+  })
 }
 
 /**
- * `PATCH /admin/tickets/{id}`
- * Actualiza el estado y/o las notas internas de un ticket.
+ * `PATCH /admin/tickets/{ticket}`
+ * Actualiza estado y notas internas de un ticket usando el token de plataforma.
  */
-export async function updateTicket(
-  id: string,
-  patch: { status?: SupportTicketStatus; admin_notes?: string | null },
-): Promise<SupportTicket> {
-  const index = ticketsStore.findIndex((t) => t.id === id)
-  if (index === -1) {
-    throw new Error('Ticket no encontrado.')
-  }
-
-  const current = ticketsStore[index]
-  const newStatus = patch.status ?? current.status
-
-  const resolvedAt =
-    newStatus === 'resolved'
-      ? current.resolved_at ?? new Date().toISOString()
-      : newStatus !== current.status
-        ? null
-        : current.resolved_at
-
-  const updated: SupportTicket = {
-    ...current,
-    status: newStatus,
-    admin_notes: patch.admin_notes !== undefined ? patch.admin_notes : current.admin_notes,
-    resolved_at: resolvedAt,
-  }
-
-  ticketsStore[index] = updated
-  return { ...updated }
+export async function updateAdminTicket(
+  ticketId: number,
+  data: UpdateAdminTicketData,
+): Promise<ApiResult<{ data: SupportTicket }>> {
+  return apiFetch<{ data: SupportTicket }>(`/admin/tickets/${ticketId}`, {
+    method: 'PATCH',
+    auth: 'platform',
+    body: data,
+  })
 }
+
+// Aliases para compatibilidad con código existente
+export const listTickets = getAdminTickets
+export const getTicket = getAdminTicket
+export const updateTicket = updateAdminTicket
 
 /* ==========================================================================
    MEMBRESÍAS (usuarios de un club)

@@ -14,7 +14,7 @@ export const TENANT_STATUS_LABELS: Record<AdminTenantStatus, string> = {
   provisioning: 'En preparación',
   active: 'Activo',
   failed: 'Fallido',
-  inactive: 'Inactivo',
+  suspended: 'Suspendido',
 }
 
 export const MEMBERSHIP_STATUS_LABELS: Record<AdminMembershipStatus, string> = {

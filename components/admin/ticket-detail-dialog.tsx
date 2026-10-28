@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
 import { updateTicketAction } from '@/app/admin/tickets/actions'
-import { INITIAL_ADMIN_ACTION_STATE, type SupportTicket } from '@/lib/admin-types'
+import { INITIAL_ADMIN_ACTION_STATE, type SupportTicket, type SupportTicketStatus } from '@/lib/admin-types'
 import { TICKET_STATUS_LABELS } from '@/lib/admin-labels'
 
 interface TicketDetailDialogProps {
@@ -60,9 +60,9 @@ export function TicketDetailDialog({ ticket, open, onOpenChange }: TicketDetailD
         <DialogHeader className="gap-1.5 pb-2 border-b">
           <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Ticket #{ticket.id.slice(-6)}
+              Ticket #{ticket.id}
             </span>
-            <TicketStatusBadge status={ticket.status} />
+            <TicketStatusBadge status={ticket.status as SupportTicketStatus} />
           </div>
           <DialogTitle className="text-xl font-bold leading-snug">
             {ticket.subject}

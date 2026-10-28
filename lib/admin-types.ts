@@ -1,17 +1,7 @@
-export type SupportTicketStatus = 'new' | 'in_review' | 'resolved' | 'discarded'
+import type { Schemas } from '@/lib/api/client'
 
-export interface SupportTicket {
-  id: string
-  name: string
-  email: string
-  club_name: string | null
-  subject: string
-  message: string
-  status: SupportTicketStatus
-  admin_notes: string | null
-  resolved_at: string | null
-  created_at: string
-}
+export type SupportTicketStatus = Schemas['TicketStatus']
+export type SupportTicket = Schemas['SupportTicketResource']
 
 export type AdminFieldErrors = Record<string, string[]>
 
@@ -25,30 +15,9 @@ export interface AdminActionState {
 export const INITIAL_ADMIN_ACTION_STATE: AdminActionState = { ok: false }
 
 /* Tipos legacy para compatibilidad */
-export type AdminTenantStatus = 'provisioning' | 'active' | 'failed' | 'inactive'
+export type AdminTenantStatus = Schemas['TenantStatus']
 export type AdminMembershipStatus = 'active' | 'inactive'
 
-export interface AdminUser {
-  id: string
-  name: string
-  email: string
-  is_platform_admin: boolean
-  created_at: string
-}
-
-export interface AdminTenant {
-  id: string
-  slug: string
-  name: string
-  status: AdminTenantStatus
-  created_at: string
-}
-
-export interface AdminMembership {
-  id: string
-  status: AdminMembershipStatus
-  created_at: string
-  user: Pick<AdminUser, 'id' | 'name' | 'email'>
-  tenant: Pick<AdminTenant, 'id' | 'slug' | 'name'>
-}
-
+export type AdminUser = Schemas['App.Http.Resources.Admin.UserResource']
+export type AdminTenant = Schemas['TenantResource']
+export type AdminMembership = Schemas['TenantMembershipResource']

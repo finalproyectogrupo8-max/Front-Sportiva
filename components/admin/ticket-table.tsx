@@ -5,9 +5,10 @@ import { Eye, Inbox } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
 import { TicketDetailDialog } from '@/components/admin/ticket-detail-dialog'
-import type { SupportTicket } from '@/lib/admin-types'
+import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
 
-function formatDate(dateString: string) {
+function formatDate(dateString: string | null) {
+  if (!dateString) return '—'
   try {
     return new Intl.DateTimeFormat('es-AR', {
       day: '2-digit',
@@ -122,7 +123,7 @@ export function TicketTable({ tickets }: TicketTableProps) {
 
                   {/* Estado */}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <TicketStatusBadge status={ticket.status} />
+                    <TicketStatusBadge status={ticket.status as SupportTicketStatus} />
                   </td>
 
                   {/* Acción */}

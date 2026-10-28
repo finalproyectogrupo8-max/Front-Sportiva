@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { logout } from '@/lib/auth'
 import { requirePlatformAdmin } from '@/lib/session'
-import { listTickets } from '@/lib/api/admin'
+import { getAdminTickets } from '@/lib/api/admin'
 import { AdminNav } from '@/components/admin/admin-nav'
 import { ProvisioningWatcher } from '@/components/admin/provisioning-watcher'
 
@@ -15,8 +15,15 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const session = await requirePlatformAdmin()
-  const newTickets = await listTickets('new')
-  const newTicketsCount = newTickets.length
+  let newTicketsCount = 0
+  try {
+    const newTicketsRes = await getAdminTickets({ status: 'new', per_page: 1 })
+    if (newTicketsRes.ok) {
+      newTicketsCount = newTicketsRes.data.meta.total
+    }
+  } catch {
+    // Si la API falla, mantenemos el contador en 0 para no romper el layout
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">

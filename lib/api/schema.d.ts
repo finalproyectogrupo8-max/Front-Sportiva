@@ -231,6 +231,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envío público de tickets de contacto */
+        post: operations["supportTicket.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista paginada de tickets de soporte para administradores de plataforma */
+        get: operations["tickets.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tickets/{ticket}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de un ticket de soporte */
+        get: operations["tickets.show"];
+        /** Actualizar estado y notas administrativas del ticket */
+        put: operations["tickets.update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/tenants/{tenant}/retry": {
         parameters: {
             query?: never;
@@ -497,6 +549,21 @@ export interface components {
             name: string;
             is_active?: boolean;
         };
+        /** StoreSupportTicketRequest */
+        StoreSupportTicketRequest: {
+            name: string;
+            /** Format: email */
+            email: string;
+            club_name?: string | null;
+            subject: string;
+            message: string;
+            website?: string | null;
+            /** @description Inmutables y de servidor: rechazar explícitamente si se envían */
+            status?: string;
+            admin_notes?: string;
+            handled_by?: string;
+            resolved_at?: string;
+        };
         /** StoreTenantMembershipRequest */
         StoreTenantMembershipRequest: {
             user_id: number;
@@ -527,6 +594,25 @@ export interface components {
             password: string;
             is_platform_admin?: string;
             is_active?: string;
+        };
+        /** SupportTicketCreatedResource */
+        SupportTicketCreatedResource: {
+            id: string | number;
+        };
+        /** SupportTicketResource */
+        SupportTicketResource: {
+            id: number;
+            name: string;
+            email: string;
+            club_name: string | null;
+            subject: string;
+            message: string;
+            status: string | components["schemas"]["TicketStatus"];
+            admin_notes: string | null;
+            handled_by: number | null;
+            resolved_at: string | null;
+            created_at: string | null;
+            updated_at: string | null;
         };
         /** TenantMembershipResource */
         TenantMembershipResource: {
@@ -560,6 +646,11 @@ export interface components {
             slug: string;
             name: string;
         };
+        /**
+         * TicketStatus
+         * @enum {string}
+         */
+        TicketStatus: "new" | "in_review" | "resolved" | "discarded";
         /** UpdateCategoryRequest */
         UpdateCategoryRequest: {
             sport_id?: number;
@@ -594,6 +685,20 @@ export interface components {
         UpdateSportRequest: {
             name?: string;
             is_active?: boolean;
+        };
+        /** UpdateSupportTicketRequest */
+        UpdateSupportTicketRequest: {
+            status?: components["schemas"]["TicketStatus"];
+            admin_notes?: string | null;
+            /** @description Inmutables tras la creación */
+            name?: string;
+            email?: string;
+            club_name?: string;
+            subject?: string;
+            message?: string;
+            website?: string;
+            handled_by?: string;
+            resolved_at?: string;
         };
         /** UpdateTenantMembershipRequest */
         UpdateTenantMembershipRequest: {
@@ -1538,6 +1643,148 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "supportTicket.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreSupportTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description `SupportTicketCreatedResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SupportTicketCreatedResource"];
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "tickets.index": {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["TicketStatus"];
+                per_page?: number;
+                sort?: "created_at" | "-created_at" | "status" | "-status";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `SupportTicketResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SupportTicketResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "tickets.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ticket ID */
+                ticket: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `SupportTicketResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SupportTicketResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "tickets.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The ticket ID */
+                ticket: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateSupportTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description `SupportTicketResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SupportTicketResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "tenant.retry": {
