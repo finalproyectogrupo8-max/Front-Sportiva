@@ -161,16 +161,40 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
         <section className="hero" id="inicio" style={{ '--hero-image': `url(${heroImage})` } as React.CSSProperties}>
           <div className="hero-grain" />
           <div className="hero-content">
-            <div className="eyebrow"><i /> Plataforma de gestión operativa para clubes</div>
-            <h1>Toda la operación de tu club<br /><em>en un solo tablero.</em></h1>
-            <p>Partidos, fichas médicas, profes, utilería e instalaciones organizados en tiempo real. Sin planillas perdidas ni cadenas de mensajes desordenadas.</p>
-            <Link className="primary-cta" href={hasSession ? '/clubes' : '/login'}>
-              <span>{hasSession ? 'Ir a mis clubes' : 'Empezá a gestionar tu club hoy'}</span>
-              <ArrowUpRight />
-            </Link>
-            <div className="trust-line">
-              <div className="avatar-stack"><span>RB</span><span>CA</span><span>+8</span></div>
-              <p><strong>Todo el club, alineado.</strong><br />Desde la comisión hasta la cancha.</p>
+            <div className="eyebrow">
+              <i />
+              <span>Plataforma de gestión operativa para clubes</span>
+            </div>
+
+            <h1>
+              Toda la operación de tu club
+              <br />
+              <em>en un solo tablero.</em>
+            </h1>
+
+            <p>
+              Partidos, fichas médicas, profes, utilería e instalaciones organizados en tiempo real.
+              Sin planillas perdidas ni cadenas de mensajes desordenadas.
+            </p>
+
+            <div className="hero-cta-group">
+              <Link className="primary-cta" href={hasSession ? '/clubes' : '/login'}>
+                <span>{hasSession ? 'Ir a mis clubes' : 'Empezá a gestionar tu club hoy'}</span>
+                <ArrowUpRight />
+              </Link>
+
+              <div className="trust-line">
+                <div className="avatar-stack">
+                  <span>RB</span>
+                  <span>CA</span>
+                  <span>+8</span>
+                </div>
+                <p>
+                  <strong>Todo el club, alineado.</strong>
+                  <br />
+                  Desde la comisión hasta la cancha.
+                </p>
+              </div>
             </div>
           </div>
           <a className="scroll-cue" href="#funciones" aria-label="Ver funciones">
