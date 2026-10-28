@@ -100,6 +100,74 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
   )
 }
 
+export function NewsletterForm() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      await axios.post('http://localhost:8000/api/newsletter', { email })
+      setSuccess(true)
+      setEmail('')
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response) {
+        if (err.response.status === 422) {
+          const apiMsg =
+            err.response.data?.errors?.email?.[0] ||
+            err.response.data?.message ||
+            'Este email ya está registrado.'
+          setError(apiMsg)
+        } else {
+          setError(err.response.data?.message || 'Error al procesar la suscripción. Probá de nuevo.')
+        }
+      } else {
+        setError('Error al conectar con el servidor. Revisá tu conexión.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="newsletter-success" role="status">
+        <p>¡Gracias por suscribirte a nuestro newsletter!</p>
+      </div>
+    )
+  }
+
+  return (
+    <form className="newsletter-form" onSubmit={handleSubmit}>
+      <span className="newsletter-label">Newsletter</span>
+      <div className="newsletter-row">
+        <input
+          type="email"
+          name="email"
+          placeholder="vos@tuclub.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={loading}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Suscribiendo...' : 'Suscribirse'}
+        </button>
+      </div>
+      {error && (
+        <p className="newsletter-error" role="alert">
+          {error}
+        </p>
+      )}
+    </form>
+  )
+}
+
 export function SiteFooter() {
   return (
     <footer className="route-footer">
@@ -110,7 +178,10 @@ export function SiteFooter() {
       <div className="route-footer-links">
         {nav.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
       </div>
-      <Link className="footer-demo-link" href="/contacto">Solicitar demo <ArrowUpRight /></Link>
+      <div className="route-footer-right">
+        <NewsletterForm />
+        <Link className="footer-demo-link" href="/contacto">Solicitar demo <ArrowUpRight /></Link>
+      </div>
     </footer>
   )
 }
