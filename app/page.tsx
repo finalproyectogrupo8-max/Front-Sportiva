@@ -1,11 +1,5 @@
 import { hasSession } from '@/lib/session'
-import { HomeHeader } from '@/components/home/home-header'
-import { HeroSection } from '@/components/home/hero-section'
-import { FeatureCarousel } from '@/components/home/feature-carousel'
-import { FeaturesGrid } from '@/components/home/features-grid'
-import { AboutSection } from '@/components/home/about-section'
-import { ContactSection } from '@/components/home/contact-section'
-import { HomeFooter } from '@/components/home/home-footer'
+import HomePage from '@/components/HomePage'
 
 export const metadata = {
   title: 'Sportiva — Gestión operativa para clubes deportivos',
@@ -19,33 +13,8 @@ export const metadata = {
   },
 }
 
-export default async function HomePage() {
+export default async function Page() {
   const sessionActive = await hasSession()
 
-  return (
-    <div className="flex min-h-dvh flex-col bg-background text-foreground">
-      {/* 1. Header fijo con navegación */}
-      <HomeHeader hasSession={sessionActive} />
-
-      <main className="flex-1">
-        {/* 2. Hero con título fuerte, bajada, CTAs e imagen de fondo */}
-        <HeroSection hasSession={sessionActive} />
-
-        {/* 3. Carrusel interactivo y accesible */}
-        <FeatureCarousel />
-
-        {/* 4. Funciones con grilla de tarjetas y estados de sesión */}
-        <FeaturesGrid hasSession={sessionActive} />
-
-        {/* 5. Quiénes somos con texto sobrio en español rioplatense */}
-        <AboutSection />
-
-        {/* 6. Contacto con formulario conectado a tickets */}
-        <ContactSection />
-      </main>
-
-      {/* 7. Llamada a la acción final y footer */}
-      <HomeFooter hasSession={sessionActive} />
-    </div>
-  )
+  return <HomePage hasSession={sessionActive} />
 }
