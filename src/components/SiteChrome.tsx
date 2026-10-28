@@ -23,7 +23,7 @@ export function SiteHeader() {
         {nav.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
       </nav>
       <Link className="header-cta" href="/login">
-        <span>Ir a mis clubes</span><ArrowUpRight />
+        <span>Iniciar sesión</span><ArrowUpRight />
       </Link>
       <button
         className={open ? 'menu-button is-open' : 'menu-button'}

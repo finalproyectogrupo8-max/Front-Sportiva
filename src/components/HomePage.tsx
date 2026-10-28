@@ -73,7 +73,7 @@ const features: Feature[] = [
   {
     kicker: 'Agenda',
     title: 'Calendario y asistencia',
-    accent: '#dfc5a7',
+    accent: '#d36f45',
     preview: (
       <div className="calendar-preview" aria-hidden="true">
         <div className="preview-topline">
@@ -143,7 +143,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           <Link href="/contacto" onClick={() => setMenuOpen(false)}>Contacto</Link>
         </nav>
         <Link className="header-cta" href={hasSession ? '/clubes' : '/login'}>
-          <span>{hasSession ? 'Ir a mis clubes' : 'Iniciar sesión'}</span>
+          <span>Iniciar sesión</span>
           <ArrowUpRight />
         </Link>
         <button
@@ -230,7 +230,11 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           <div className="carousel-wrap">
             <div className="feature-carousel" ref={carouselRef}>
               {features.map((feature, index) => (
-                <article className="feature-card" key={feature.title} style={{ '--accent': feature.accent } as React.CSSProperties}>
+                <article
+                  className="feature-card"
+                  key={feature.title}
+                  style={{ '--accent': feature.accent, '--card-index': index } as React.CSSProperties}
+                >
                   <div className="card-number">0{index + 1}</div>
                   <div className="product-preview">{feature.preview}</div>
                   <div className="glass-lock">

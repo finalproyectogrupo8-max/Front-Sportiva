@@ -1,5 +1,6 @@
 'use client'
 
+import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { PageShell } from './SiteChrome'
@@ -20,6 +21,7 @@ type InternalPageProps = {
   items: Item[]
   statement: string
   statementAccent: string
+  children?: ReactNode
 }
 
 const reveal = {
@@ -35,6 +37,7 @@ export default function InternalPage({
   items,
   statement,
   statementAccent,
+  children,
 }: InternalPageProps) {
   return (
     <PageShell>
@@ -92,6 +95,8 @@ export default function InternalPage({
           ))}
         </div>
       </section>
+
+      {children}
 
       <section className="route-statement">
         <span>Sportiva</span>

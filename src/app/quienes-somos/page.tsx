@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import InternalPage from '@/components/InternalPage'
+import { Equipo } from '@/components/Equipo'
 
 export const metadata: Metadata = {
   title: 'Quiénes somos',
@@ -23,6 +24,8 @@ export default function QuienesSomosPage() {
       items={items}
       statement="AUTOMATIZAMOS LO ABURRIDO."
       statementAccent="POTENCIAMOS LO HUMANO."
-    />
+    >
+      <Equipo />
+    </InternalPage>
   )
 }
