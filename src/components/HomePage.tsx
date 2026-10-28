@@ -3,6 +3,7 @@
 import { FormEvent, ReactNode, useRef, useState } from 'react'
 import Link from 'next/link'
 import { submitTicket } from '@/lib/actions/tickets'
+import { NewsletterForm } from './SiteChrome'
 
 const heroImage = '/hero-court.jpg'
 
@@ -273,6 +274,9 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
             <Link href={hasSession ? '/clubes' : '/login'}>
               {hasSession ? 'Ir a mis clubes' : 'Iniciar sesión'}
             </Link>
+            <div className="mt-4">
+              <NewsletterForm />
+            </div>
           </div>
           <div className="contact-form-wrap">
             <span>Hablemos de tu club</span>
