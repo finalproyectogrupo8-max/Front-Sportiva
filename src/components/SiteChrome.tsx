@@ -3,7 +3,7 @@
 import { FormEvent, ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { submitTicket } from '@/lib/actions/tickets'
+import axios from 'axios'
 import Brand from './Brand'
 import { ArrowUpRight } from './icons'
 
@@ -54,16 +54,28 @@ export function SiteHeader() {
 
 export function ContactForm({ compact = false }: { compact?: boolean }) {
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const form = event.currentTarget
-    const formData = new FormData(form)
-    formData.set('subject', 'Solicitud de contacto desde el sitio')
-    setSent(true)
+    setLoading(true)
+
+    const formData = new FormData(event.currentTarget)
+    const payload = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      message: formData.get('message'),
+    }
+
     try {
-      await submitTicket({ ok: false }, formData)
-    } catch {
-      // optimistic
+      // Apuntamos directo al backend de Laravel
+      await axios.post('http://localhost:8000/api/contacto', payload)
+      setSent(true)
+    } catch (error) {
+      console.error('Error al enviar el contacto:', error)
+      alert('Hubo un error al enviar el mensaje. Revisá la consola.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -81,7 +93,9 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
       <label><span>Nombre</span><input required name="name" placeholder="Tu nombre" /></label>
       <label><span>Email</span><input required type="email" name="email" placeholder="vos@tuclub.com" /></label>
       {!compact && <label className="message-field"><span>¿Qué necesita tu club?</span><textarea name="message" placeholder="Contanos brevemente..." /></label>}
-      <button type="submit">Quiero una demo <ArrowUpRight /></button>
+      <button type="submit" disabled={loading}>
+        {loading ? 'Enviando...' : <>Quiero una demo <ArrowUpRight /></>}
+      </button>
     </form>
   )
 }
