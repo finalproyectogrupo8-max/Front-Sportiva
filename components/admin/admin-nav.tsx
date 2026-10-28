@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Building2, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
 
 const NAV_ITEMS = [
   {
@@ -18,8 +17,6 @@ const NAV_ITEMS = [
     label: 'Clubes',
     icon: Building2,
     active: (path: string) => path.startsWith('/admin/clubes'),
-    disabled: true,
-    badge: 'Próximamente',
   },
 ]
 
@@ -31,24 +28,6 @@ export function AdminNav() {
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon
         const isActive = item.active(pathname)
-
-        if (item.disabled) {
-          return (
-            <div
-              key={item.label}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground/60 select-none cursor-not-allowed"
-              title="Disponible en FRO-6"
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              <span>{item.label}</span>
-              {item.badge && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal">
-                  {item.badge}
-                </Badge>
-              )}
-            </div>
-          )
-        }
 
         return (
           <Link
@@ -70,4 +49,3 @@ export function AdminNav() {
     </nav>
   )
 }
-
