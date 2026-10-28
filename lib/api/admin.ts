@@ -1,6 +1,8 @@
 import 'server-only'
 
 import { apiFetch, type ApiResult, type Schemas } from './client'
+import { ticketsStore } from './tickets-store'
+import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
 
 /* ==========================================================================
    USUARIOS
@@ -151,6 +153,8 @@ export type AdminTenantsQuery = {
 export type CreateAdminTenantData = {
   name: string
   slug: string
+  /** Opcional: se crea este usuario y se lo asocia al club como administrador. */
+  admin?: { name: string; email: string; password: string }
 }
 
 export type UpdateAdminTenantData = {
@@ -187,7 +191,18 @@ export async function createAdminTenant(
 }
 
 /**
- * `PUT /admin/tenants/{tenant}`
+ * `GET /admin/tenants/{tenant}`
+ * Detalle de un club. Lo usa la pantalla del club y el polling del estado.
+ */
+export async function getAdminTenant(tenantId: number): Promise<ApiResult<{ data: AdminTenant }>> {
+  return apiFetch<{ data: AdminTenant }>(`/admin/tenants/${tenantId}`, {
+    method: 'GET',
+    auth: 'platform',
+  })
+}
+
+/**
+ * `PATCH /admin/tenants/{tenant}`
  * Actualiza el club (nombre o cambio de estado active/suspended) usando el token de plataforma.
  */
 export async function updateAdminTenant(
@@ -195,7 +210,7 @@ export async function updateAdminTenant(
   data: UpdateAdminTenantData,
 ): Promise<ApiResult<{ data: AdminTenant }>> {
   return apiFetch<{ data: AdminTenant }>(`/admin/tenants/${tenantId}`, {
-    method: 'PUT',
+    method: 'PATCH',
     auth: 'platform',
     body: data,
   })
@@ -221,9 +236,6 @@ export async function retryAdminTenant(
    - GET /api/admin/tickets/{id}
    - PATCH /api/admin/tickets/{id}
    ========================================================================== */
-
-import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
-import { ticketsStore } from './tickets-store'
 
 export type { SupportTicket, SupportTicketStatus }
 
@@ -280,4 +292,85 @@ export async function updateTicket(
 
   ticketsStore[index] = updated
   return { ...updated }
+}
+
+/* ==========================================================================
+   MEMBRESÍAS (usuarios de un club)
+   ========================================================================== */
+
+export type AdminMembership = Schemas['TenantMembershipResource']
+export type MembershipRole = Schemas['MembershipRole']
+
+export type PaginatedAdminMemberships = Omit<PaginatedAdminUsers, 'data'> & {
+  data: AdminMembership[]
+}
+
+export type AdminMembershipsQuery = {
+  is_active?: boolean
+  per_page?: number
+  page?: number
+}
+
+/**
+ * `GET /admin/tenants/{tenant}/memberships`
+ * Miembros del club, paginados, con el nombre y el email de cada usuario.
+ */
+export async function getTenantMemberships(
+  tenantId: number,
+  query?: AdminMembershipsQuery,
+): Promise<ApiResult<PaginatedAdminMemberships>> {
+  return apiFetch<PaginatedAdminMemberships>(`/admin/tenants/${tenantId}/memberships`, {
+    method: 'GET',
+    auth: 'platform',
+    query,
+  })
+}
+
+/**
+ * `POST /admin/tenants/{tenant}/memberships`
+ * Asocia un usuario existente al club. 422 si ya es miembro.
+ */
+export async function createTenantMembership(
+  tenantId: number,
+  data: { user_id: number; role: MembershipRole },
+): Promise<ApiResult<{ data: AdminMembership }>> {
+  return apiFetch<{ data: AdminMembership }>(`/admin/tenants/${tenantId}/memberships`, {
+    method: 'POST',
+    auth: 'platform',
+    body: data,
+  })
+}
+
+/**
+ * `PATCH /admin/tenants/{tenant}/memberships/{membership}`
+ * Cambia el rol o activa/desactiva la membresía. Desactivar revoca los tokens del usuario en ese club.
+ */
+export async function updateTenantMembership(
+  tenantId: number,
+  membershipId: number,
+  data: { role?: MembershipRole; is_active?: boolean },
+): Promise<ApiResult<{ data: AdminMembership }>> {
+  return apiFetch<{ data: AdminMembership }>(
+    `/admin/tenants/${tenantId}/memberships/${membershipId}`,
+    {
+      method: 'PATCH',
+      auth: 'platform',
+      body: data,
+    },
+  )
+}
+
+/**
+ * `GET /admin/users/{user}/memberships`
+ * Clubes de un usuario (sus membresías con el club en cada una), sin clubes dados de baja.
+ */
+export async function getUserMemberships(
+  userId: number,
+  query?: AdminMembershipsQuery,
+): Promise<ApiResult<PaginatedAdminMemberships>> {
+  return apiFetch<PaginatedAdminMemberships>(`/admin/users/${userId}/memberships`, {
+    method: 'GET',
+    auth: 'platform',
+    query,
+  })
 }

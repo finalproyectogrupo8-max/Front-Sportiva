@@ -129,7 +129,7 @@ export function ClubFilters() {
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              En creación
+              Aprovisionando
             </button>
             <button
               type="button"

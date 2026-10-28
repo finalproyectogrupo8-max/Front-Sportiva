@@ -1,13 +1,13 @@
 import Link from 'next/link'
-import { ArrowLeft, LogOut, Shield } from 'lucide-react'
+import { LogOut, Shield } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { logout } from '@/lib/auth'
 import { requirePlatformAdmin } from '@/lib/session'
 import { listTickets } from '@/lib/api/admin'
 import { AdminNav } from '@/components/admin/admin-nav'
-import { cn } from '@/lib/utils'
+import { ProvisioningWatcher } from '@/components/admin/provisioning-watcher'
 
 export default async function AdminLayout({
   children,
@@ -39,19 +39,6 @@ export default async function AdminLayout({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/clubes"
-              className={cn(
-                buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'gap-1.5 text-xs text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <ArrowLeft className="size-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Ir a</span> Clubes
-            </Link>
-
-            <div className="hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
-
             <div className="hidden items-center gap-2 text-right sm:flex">
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-foreground">{session.user.name}</span>
@@ -79,7 +66,9 @@ export default async function AdminLayout({
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <ProvisioningWatcher>{children}</ProvisioningWatcher>
+      </main>
     </div>
   )
 }
