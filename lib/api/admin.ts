@@ -228,6 +228,96 @@ export async function retryAdminTenant(
 }
 
 /* ==========================================================================
+   TICKETS DE CONTACTO / SOPORTE
+   ========================================================================== */
+
+export type SupportTicket = Schemas['SupportTicketResource']
+export type TicketStatus = Schemas['TicketStatus']
+export type SupportTicketStatus = TicketStatus
+
+export type PaginatedAdminTickets = {
+  data: SupportTicket[]
+  links: {
+    first: string | null
+    last: string | null
+    prev: string | null
+    next: string | null
+  }
+  meta: {
+    current_page: number
+    from: number | null
+    last_page: number
+    links: {
+      url: string | null
+      label: string
+      active: boolean
+    }[]
+    path: string | null
+    per_page: number
+    to: number | null
+    total: number
+  }
+}
+
+export type AdminTicketsSort = 'created_at' | '-created_at' | 'status' | '-status'
+
+export type AdminTicketsQuery = {
+  status?: TicketStatus
+  per_page?: number
+  page?: number
+  sort?: AdminTicketsSort
+}
+
+export type UpdateAdminTicketData = Schemas['UpdateSupportTicketRequest']
+
+/**
+ * `GET /admin/tickets`
+ * Listado paginado de tickets de soporte usando el token de plataforma.
+ */
+export async function getAdminTickets(
+  query: AdminTicketsQuery = {},
+): Promise<ApiResult<PaginatedAdminTickets>> {
+  return apiFetch<PaginatedAdminTickets>('/admin/tickets', {
+    method: 'GET',
+    auth: 'platform',
+    query: query as Record<string, string | number | boolean | undefined | null>,
+  })
+}
+
+/**
+ * `GET /admin/tickets/{ticket}`
+ * Detalle de un ticket de soporte específico.
+ */
+export async function getAdminTicket(
+  ticketId: number,
+): Promise<ApiResult<{ data: SupportTicket }>> {
+  return apiFetch<{ data: SupportTicket }>(`/admin/tickets/${ticketId}`, {
+    method: 'GET',
+    auth: 'platform',
+  })
+}
+
+/**
+ * `PATCH /admin/tickets/{ticket}`
+ * Actualiza estado y notas internas de un ticket usando el token de plataforma.
+ */
+export async function updateAdminTicket(
+  ticketId: number,
+  data: UpdateAdminTicketData,
+): Promise<ApiResult<{ data: SupportTicket }>> {
+  return apiFetch<{ data: SupportTicket }>(`/admin/tickets/${ticketId}`, {
+    method: 'PATCH',
+    auth: 'platform',
+    body: data,
+  })
+}
+
+// Aliases para compatibilidad con código existente
+export const listTickets = getAdminTickets
+export const getTicket = getAdminTicket
+export const updateTicket = updateAdminTicket
+
+/* ==========================================================================
    MEMBRESÍAS (usuarios de un club)
    ========================================================================== */
 
