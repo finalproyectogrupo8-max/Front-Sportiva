@@ -51,3 +51,4 @@ export interface AdminMembership {
   user: Pick<AdminUser, 'id' | 'name' | 'email'>
   tenant: Pick<AdminTenant, 'id' | 'slug' | 'name'>
 }
+

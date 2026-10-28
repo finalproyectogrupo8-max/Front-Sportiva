@@ -21,3 +21,4 @@ export const MEMBERSHIP_STATUS_LABELS: Record<AdminMembershipStatus, string> = {
   active: 'Activa',
   inactive: 'Inactiva',
 }
+

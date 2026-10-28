@@ -53,3 +53,4 @@ export const ticketsStore: SupportTicket[] =
 if (process.env.NODE_ENV !== 'production') {
   globalForTickets.__supportTicketsMockStore = ticketsStore
 }
+

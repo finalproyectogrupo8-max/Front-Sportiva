@@ -73,3 +73,4 @@ export function TicketStatusBadge({ status, className }: TicketStatusBadgeProps)
       )
   }
 }
+

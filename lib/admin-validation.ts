@@ -107,3 +107,4 @@ export function validateMembershipFields(fields: CreateMembershipFields): AdminF
   if (!fields.tenant_slug) errors.tenant_slug = ['Elegí un club.']
   return errors
 }
+

@@ -39,3 +39,4 @@ export async function createTicket(input: CreateTicketInput): Promise<SupportTic
   ticketsStore.unshift(newTicket)
   return { ...newTicket }
 }
+
