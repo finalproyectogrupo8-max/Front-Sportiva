@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminUser, updateAdminUser } from '@/lib/api/admin'
+import { fieldError } from '@/lib/api/validation-messages'
 import { requirePlatformAdmin } from '@/lib/session'
 
 export type CreateUserState = {
@@ -17,6 +18,8 @@ export type CreateUserState = {
     name?: string
     email?: string
   }
+  /** Usuario creado: el panel lo usa para ofrecer asociarlo a clubes. */
+  user?: { id: number; name: string; email: string }
   timestamp?: number
 }
 
@@ -64,9 +67,9 @@ export async function createUserAction(
       return {
         ok: false,
         fieldErrors: {
-          name: result.errors.name?.[0],
-          email: result.errors.email?.[0],
-          password: result.errors.password?.[0],
+          name: fieldError(result.errors, 'name'),
+          email: fieldError(result.errors, 'email'),
+          password: fieldError(result.errors, 'password'),
         },
         values: { name, email },
       }
@@ -93,6 +96,7 @@ export async function createUserAction(
   return {
     ok: true,
     message: `Usuario ${result.data.data.name} creado correctamente.`,
+    user: { id: result.data.data.id, name: result.data.data.name, email: result.data.data.email },
     timestamp: Date.now(),
   }
 }

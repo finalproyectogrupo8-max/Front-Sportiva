@@ -287,7 +287,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Miembros de un club, con el nombre y el email de cada usuario */
+        get: operations["tenantMembership.index"];
         put?: never;
         post: operations["tenantMembership.store"];
         delete?: never;
@@ -337,6 +338,23 @@ export interface paths {
         };
         get: operations["users.show"];
         put: operations["users.update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{user}/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Clubes de un usuario: sus membresías, con el club en cada una. No incluye clubes dados de baja */
+        get: operations["userMembership.index"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -493,6 +511,13 @@ export interface components {
             /** @description Los fija el servidor */
             database_name?: string;
             status?: string;
+            /** @description Opcional: el administrador del club, que se crea y se asocia junto con el club. */
+            admin?: {
+                name?: string;
+                /** Format: email */
+                email?: string;
+                password?: string;
+            };
         };
         /** StoreUserRequest */
         StoreUserRequest: {
@@ -510,6 +535,8 @@ export interface components {
             tenant_id: number;
             role: string;
             is_active: boolean;
+            user?: components["schemas"]["App.Http.Resources.Admin.UserResource"];
+            tenant?: components["schemas"]["TenantResource"];
             created_at: string | null;
             updated_at: string | null;
         };
@@ -1724,6 +1751,64 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "tenantMembership.index": {
+        parameters: {
+            query?: {
+                is_active?: boolean;
+                per_page?: number;
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `TenantMembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["TenantMembershipResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "tenantMembership.store": {
         parameters: {
             query?: never;
@@ -1929,6 +2014,64 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: components["schemas"]["App.Http.Resources.Admin.UserResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "userMembership.index": {
+        parameters: {
+            query?: {
+                is_active?: boolean;
+                per_page?: number;
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description The user ID */
+                user: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `TenantMembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["TenantMembershipResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
                     };
                 };
             };

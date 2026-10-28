@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { AlertTriangle, Users } from 'lucide-react'
 import { requirePlatformAdmin } from '@/lib/session'
 import { getAdminUsers, type AdminUsersSort } from '@/lib/api/admin'
-import { UserForm } from '@/components/admin/user-form'
+import { NewUserSheet } from '@/components/admin/user-form'
 import { UserFilters } from '@/components/admin/user-filters'
 import { UserTable } from '@/components/admin/user-table'
 import { Pagination } from '@/components/admin/pagination'
@@ -56,7 +56,8 @@ export default async function AdminUsuariosPage({
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
-      {/* Header de la sección */}
+      {/* Header de la sección, con el alta a la derecha */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex flex-col gap-1.5">
         <p className="text-xs font-semibold uppercase tracking-wider text-primary">
           Administración central
@@ -71,16 +72,13 @@ export default async function AdminUsuariosPage({
           Alta y administración de las cuentas de acceso globales a la plataforma.
         </p>
       </div>
-
-      {/* Grid: Formulario visible a la izquierda / Listado a la derecha */}
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* Formulario de Alta */}
-        <aside className="lg:col-span-4" aria-label="Formulario de alta de usuario">
-          <UserForm />
-        </aside>
+        <div className="shrink-0">
+          <NewUserSheet />
+        </div>
+      </div>
 
         {/* Listado con filtros y paginación */}
-        <section className="flex flex-col gap-4 lg:col-span-8" aria-label="Listado de usuarios">
+        <section className="flex flex-col gap-4" aria-label="Listado de usuarios">
           <UserFilters />
 
           {connectionError ? (
@@ -110,7 +108,6 @@ export default async function AdminUsuariosPage({
             </>
           )}
         </section>
-      </div>
     </div>
   )
 }
