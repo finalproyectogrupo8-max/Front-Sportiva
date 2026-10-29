@@ -1,9 +1,11 @@
 'use client'
 
-import { FormEvent, ReactNode, useState } from 'react'
+import { ReactNode, useActionState, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import axios from 'axios'
+import { submitDemoRequest, type DemoRequestState } from '@/lib/actions/tickets'
+import { subscribe, type NewsletterState } from '@/lib/actions/newsletter'
+import type { AdminActionState } from '@/lib/admin-types'
 import Brand from './Brand'
 import { ArrowUpRight } from './icons'
 
@@ -52,34 +54,32 @@ export function SiteHeader() {
   )
 }
 
+/** Campo trampa para bots: invisible para personas, la API descarta el envío si viene completo. */
+export function Honeypot() {
+  return (
+    <input
+      type="text"
+      name="website"
+      tabIndex={-1}
+      autoComplete="off"
+      aria-hidden="true"
+      style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+    />
+  )
+}
+
+function FieldError({ errors, field }: { errors?: AdminActionState['errors']; field: string }) {
+  const message = errors?.[field]?.[0]
+  return message ? <small className="route-form-error">{message}</small> : null
+}
+
 export function ContactForm({ compact = false }: { compact?: boolean }) {
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
+  // Server Action: el envío va desde el servidor a POST /api/tickets y el admin lo ve en /admin/tickets.
+  const [state, action, pending] = useActionState<DemoRequestState, FormData>(submitDemoRequest, { ok: false })
+  // React resetea el form después del action: defaultValue + key lo vuelven a llenar si hubo error.
+  const v = state.values
 
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setLoading(true)
-
-    const formData = new FormData(event.currentTarget)
-    const payload = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      message: formData.get('message'),
-    }
-
-    try {
-      // Apuntamos directo al backend de Laravel
-      await axios.post('http://localhost:8000/api/contacto', payload)
-      setSent(true)
-    } catch (error) {
-      console.error('Error al enviar el contacto:', error)
-      alert('Hubo un error al enviar el mensaje. Revisá la consola.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (sent) {
+  if (state.ok) {
     return (
       <motion.div className="route-success" role="status" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <b>Consulta recibida.</b>
@@ -89,52 +89,40 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <form className={compact ? 'route-form compact' : 'route-form'} onSubmit={submit}>
-      <label><span>Nombre</span><input required name="name" placeholder="Tu nombre" /></label>
-      <label><span>Email</span><input required type="email" name="email" placeholder="vos@tuclub.com" /></label>
-      {!compact && <label className="message-field"><span>¿Qué necesita tu club?</span><textarea name="message" placeholder="Contanos brevemente..." /></label>}
-      <button type="submit" disabled={loading}>
-        {loading ? 'Enviando...' : <>Quiero una demo <ArrowUpRight /></>}
+    <form key={JSON.stringify(v ?? {})} className={compact ? 'route-form compact' : 'route-form'} action={action} noValidate>
+      <input type="hidden" name="subject" value="Consulta desde la página de contacto" />
+      <Honeypot />
+      <label>
+        <span>Nombre</span>
+        <input required name="name" placeholder="Tu nombre" defaultValue={v?.name} aria-invalid={state.errors?.name ? true : undefined} />
+        <FieldError errors={state.errors} field="name" />
+      </label>
+      <label>
+        <span>Email</span>
+        <input required type="email" name="email" placeholder="vos@tuclub.com" defaultValue={v?.email} aria-invalid={state.errors?.email ? true : undefined} />
+        <FieldError errors={state.errors} field="email" />
+      </label>
+      {!compact && (
+        <label className="message-field">
+          <span>¿Qué necesita tu club?</span>
+          <textarea name="message" placeholder="Contanos brevemente..." defaultValue={v?.message} aria-invalid={state.errors?.message ? true : undefined} />
+          <FieldError errors={state.errors} field="message" />
+        </label>
+      )}
+      {state.message && !state.ok && (
+        <p className="route-form-error" role="alert">{state.message}</p>
+      )}
+      <button type="submit" disabled={pending}>
+        {pending ? 'Enviando...' : <>Quiero una demo <ArrowUpRight /></>}
       </button>
     </form>
   )
 }
 
 export function NewsletterForm() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, action, pending] = useActionState<NewsletterState, FormData>(subscribe, { ok: false })
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      await axios.post('http://localhost:8000/api/newsletter', { email })
-      setSuccess(true)
-      setEmail('')
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response) {
-        if (err.response.status === 422) {
-          const apiMsg =
-            err.response.data?.errors?.email?.[0] ||
-            err.response.data?.message ||
-            'Este email ya está registrado.'
-          setError(apiMsg)
-        } else {
-          setError(err.response.data?.message || 'Error al procesar la suscripción. Probá de nuevo.')
-        }
-      } else {
-        setError('Error al conectar con el servidor. Revisá tu conexión.')
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (success) {
+  if (state.ok) {
     return (
       <div className="newsletter-success" role="status">
         <p>¡Gracias por suscribirte a nuestro newsletter!</p>
@@ -143,25 +131,17 @@ export function NewsletterForm() {
   }
 
   return (
-    <form className="newsletter-form" onSubmit={handleSubmit}>
+    <form className="newsletter-form" action={action} noValidate>
       <span className="newsletter-label">Newsletter</span>
       <div className="newsletter-row">
-        <input
-          type="email"
-          name="email"
-          placeholder="vos@tuclub.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Suscribiendo...' : 'Suscribirse'}
+        <input type="email" name="email" placeholder="vos@tuclub.com" required disabled={pending} />
+        <button type="submit" disabled={pending}>
+          {pending ? 'Suscribiendo...' : 'Suscribirse'}
         </button>
       </div>
-      {error && (
+      {state.error && (
         <p className="newsletter-error" role="alert">
-          {error}
+          {state.error}
         </p>
       )}
     </form>

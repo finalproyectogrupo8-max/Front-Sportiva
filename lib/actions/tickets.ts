@@ -81,3 +81,44 @@ export async function submitTicket(
     }
   }
 }
+
+const DEFAULT_DEMO_MESSAGE = 'Quiero solicitar una demo de Sportiva para mi club.'
+
+/** Igual que AdminActionState, más lo que escribió la persona para no perderlo si hay error. */
+export type DemoRequestState = AdminActionState & {
+  values?: { name: string; email: string; message: string }
+}
+
+/**
+ * Formularios de la landing (home y /contacto): siempre terminan en un ticket,
+ * que el admin ve en /admin/tickets. Completa asunto y mensaje cuando el
+ * formulario no los tiene (la home solo pide nombre y email).
+ */
+export async function submitDemoRequest(
+  prev: DemoRequestState,
+  formData: FormData,
+): Promise<DemoRequestState> {
+  const data = new FormData()
+  for (const field of ['name', 'email', 'club_name', 'website'] as const) {
+    data.set(field, String(formData.get(field) ?? ''))
+  }
+
+  const subject = String(formData.get('subject') ?? '').trim() || 'Solicitud de demo'
+  const message = String(formData.get('message') ?? '').trim()
+  data.set('subject', subject)
+  data.set('message', message || DEFAULT_DEMO_MESSAGE)
+
+  const result = await submitTicket(prev, data)
+  if (result.ok) {
+    return { ok: true, message: 'Consulta recibida. Pronto vamos a hablar sobre tu club.' }
+  }
+
+  return {
+    ...result,
+    values: {
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      message,
+    },
+  }
+}

@@ -1,10 +1,10 @@
 'use client'
 
-import { FormEvent, ReactNode, useRef, useState } from 'react'
+import { ReactNode, useActionState, useRef, useState } from 'react'
 import Link from 'next/link'
-import { submitTicket } from '@/lib/actions/tickets'
+import { submitDemoRequest, type DemoRequestState } from '@/lib/actions/tickets'
 import Brand from './Brand'
-import { NewsletterForm } from './SiteChrome'
+import { Honeypot, NewsletterForm } from './SiteChrome'
 
 const heroImage = '/hero-court.jpg'
 
@@ -100,24 +100,12 @@ export type HomePageProps = {
 
 export default function HomePage({ hasSession = false }: HomePageProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [sent, setSent] = useState(false)
+  // Server Action: termina en un ticket (POST /api/tickets) que el admin ve en /admin/tickets.
+  const [demo, demoAction, demoPending] = useActionState<DemoRequestState, FormData>(submitDemoRequest, { ok: false })
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const scrollCards = (direction: number) => {
     carouselRef.current?.scrollBy({ left: direction * 420, behavior: 'smooth' })
-  }
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const form = event.currentTarget
-    const formData = new FormData(form)
-    formData.set('subject', 'Solicitud de demo desde la home')
-    setSent(true)
-    try {
-      await submitTicket({ ok: false }, formData)
-    } catch {
-      // optimistic success UI
-    }
   }
 
   return (
@@ -296,22 +284,31 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           <div className="contact-form-wrap">
             <span>Hablemos de tu club</span>
             <h3>¿Listo para ordenar el juego?</h3>
-            {sent ? (
+            {demo.ok ? (
               <div className="success-message" role="status">
                 <span>✓</span>
                 <p><b>Recibimos tu consulta.</b><br />Pronto vamos a ponernos en contacto.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form action={demoAction} noValidate>
+                <input type="hidden" name="subject" value="Solicitud de demo desde la home" />
+                <Honeypot />
                 <label>
                   <span>Nombre</span>
-                  <input required name="name" placeholder="Tu nombre" autoComplete="name" />
+                  <input required name="name" placeholder="Tu nombre" autoComplete="name" defaultValue={demo.values?.name} />
+                  {demo.errors?.name && <small className="route-form-error">{demo.errors.name[0]}</small>}
                 </label>
                 <label>
                   <span>Email</span>
-                  <input required type="email" name="email" placeholder="vos@tuclub.com" autoComplete="email" />
+                  <input required type="email" name="email" placeholder="vos@tuclub.com" autoComplete="email" defaultValue={demo.values?.email} />
+                  {demo.errors?.email && <small className="route-form-error">{demo.errors.email[0]}</small>}
                 </label>
-                <button type="submit">Quiero una demo <ArrowUpRight /></button>
+                {demo.message && !demo.ok && !demo.errors && (
+                  <p className="route-form-error" role="alert">{demo.message}</p>
+                )}
+                <button type="submit" disabled={demoPending}>
+                  {demoPending ? 'Enviando...' : <>Quiero una demo <ArrowUpRight /></>}
+                </button>
               </form>
             )}
           </div>
