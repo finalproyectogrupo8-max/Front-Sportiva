@@ -4,7 +4,7 @@ import { Barlow_Condensed, Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
-// Root layout del sistema interno (login, registro, panel admin, selector y módulos del club).
+// Root layout del sistema interno (login, panel admin, selector y módulos del club).
 // Usa el tema shadcn de globals.css. La landing tiene su propio root layout en app/(marketing),
 // así que su CSS nunca se carga acá.
 
