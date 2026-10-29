@@ -2477,3 +2477,27 @@ html.marketing footer {
     min-width: 0;
   }
 }
+
+/* Errores de los formularios de la landing (contacto, demo de la home) */
+.route-form-error {
+  display: block;
+  margin-top: 6px;
+  color: #f19a74;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+p.route-form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(241, 154, 116, 0.35);
+  background: rgba(211, 111, 69, 0.12);
+  font-size: 13px;
+}
+
+html.marketing [aria-invalid='true'] {
+  border-color: #f19a74;
+}
