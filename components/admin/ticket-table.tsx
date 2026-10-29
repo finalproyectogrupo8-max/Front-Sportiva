@@ -6,21 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
 import { TicketDetailDialog } from '@/components/admin/ticket-detail-dialog'
 import type { SupportTicket, SupportTicketStatus } from '@/lib/admin-types'
-
-function formatDate(dateString: string | null) {
-  if (!dateString) return '—'
-  try {
-    return new Intl.DateTimeFormat('es-AR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dateString))
-  } catch {
-    return dateString
-  }
-}
+import { formatDateTime } from '@/lib/format-date'
 
 interface TicketTableProps {
   tickets: SupportTicket[]
@@ -88,7 +74,7 @@ export function TicketTable({ tickets }: TicketTableProps) {
                 >
                   {/* Fecha */}
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDate(ticket.created_at)}
+                    {formatDateTime(ticket.created_at)}
                   </td>
 
                   {/* Remitente */}

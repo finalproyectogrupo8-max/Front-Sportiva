@@ -18,26 +18,12 @@ import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
 import { updateTicketAction } from '@/app/(app)/admin/tickets/actions'
 import { INITIAL_ADMIN_ACTION_STATE, type SupportTicket, type SupportTicketStatus } from '@/lib/admin-types'
 import { TICKET_STATUS_LABELS } from '@/lib/admin-labels'
+import { formatDateTime } from '@/lib/format-date'
 
 interface TicketDetailDialogProps {
   ticket: SupportTicket | null
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-function formatDate(dateString: string | null) {
-  if (!dateString) return '—'
-  try {
-    return new Intl.DateTimeFormat('es-AR', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(dateString))
-  } catch {
-    return dateString
-  }
 }
 
 export function TicketDetailDialog({ ticket, open, onOpenChange }: TicketDetailDialogProps) {
@@ -68,7 +54,7 @@ export function TicketDetailDialog({ ticket, open, onOpenChange }: TicketDetailD
             {ticket.subject}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Enviado el {formatDate(ticket.created_at)}
+            Enviado el {formatDateTime(ticket.created_at)}
           </DialogDescription>
         </DialogHeader>
 
@@ -149,7 +135,7 @@ export function TicketDetailDialog({ ticket, open, onOpenChange }: TicketDetailD
                 Resolución
               </Label>
               <div className="flex h-9 items-center rounded-lg border border-input/40 bg-muted/20 px-3 text-xs text-muted-foreground">
-                {ticket.resolved_at ? formatDate(ticket.resolved_at) : 'Pendiente'}
+                {ticket.resolved_at ? formatDateTime(ticket.resolved_at) : 'Pendiente'}
               </div>
             </div>
           </div>
