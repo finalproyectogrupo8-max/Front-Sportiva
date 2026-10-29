@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ContactForm, PageShell } from '@/components/SiteChrome'
+import { ContactForm, PageShell } from '@/components/marketing/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'Contacto',

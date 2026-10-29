@@ -1,5 +1,5 @@
 import { hasSession } from '@/lib/session'
-import HomePage from '@/components/HomePage'
+import HomePage from '@/components/marketing/HomePage'
 
 export const metadata = {
   title: 'Sportiva — Gestión operativa para clubes deportivos',
