@@ -8,7 +8,8 @@ export default function Brand({ light = true }: { light?: boolean }) {
         <i />
       </span>
       <span className="brand-word">
-        sport<span>i</span>va
+        {/* "ı" sin punto: el punto lo pone el ::before en naranja */}
+        sport<span>ı</span>va
       </span>
     </Link>
   )

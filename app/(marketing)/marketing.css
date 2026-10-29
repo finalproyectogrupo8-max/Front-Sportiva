@@ -159,15 +159,17 @@ html.marketing ::selection {
   position: relative;
 }
 
+/* La "i" del logo es una "ı" sin punto: el único punto es este, en naranja. */
 .brand-word span::before {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 0.2em;
+  height: 0.2em;
   border-radius: 50%;
   background: var(--orange);
-  top: -2px;
-  left: 4px;
+  top: 0.17em;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .nav-links {

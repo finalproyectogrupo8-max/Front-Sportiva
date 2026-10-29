@@ -3,6 +3,7 @@
 import { FormEvent, ReactNode, useRef, useState } from 'react'
 import Link from 'next/link'
 import { submitTicket } from '@/lib/actions/tickets'
+import Brand from './Brand'
 import { NewsletterForm } from './SiteChrome'
 
 const heroImage = '/hero-court.jpg'
@@ -22,20 +23,6 @@ function LockIcon() {
       <path d="M8 9V6.8a4 4 0 0 1 8 0V9" stroke="currentColor" strokeWidth="1.6" />
       <circle cx="12" cy="15" r="1.2" fill="currentColor" />
     </svg>
-  )
-}
-
-function Brand({ light = true }: { light?: boolean }) {
-  return (
-    <Link className={`brand ${light ? 'brand--light' : ''}`} href="/" aria-label="Sportiva, inicio">
-      <span className="brand-mark" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-      <span className="brand-word">
-        sport<span>i</span>va
-      </span>
-    </Link>
   )
 }
 
