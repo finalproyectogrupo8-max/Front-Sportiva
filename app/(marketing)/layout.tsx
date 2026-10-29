@@ -1,8 +1,12 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Barlow_Condensed, Inter } from 'next/font/google'
-import { Toaster } from '@/components/ui/sonner'
-import './globals.css'
+import './marketing.css'
+
+// Root layout de la landing pública (/, /funciones, /quienes-somos, /contacto).
+// Tiene su propio CSS (marketing.css), con todo scopeado bajo html.marketing.
+// Pasar de acá al sistema interno (app/(app)) hace una recarga completa, así que
+// los estilos de la landing no llegan al panel.
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const barlow = Barlow_Condensed({
@@ -28,16 +32,15 @@ export const viewport: Viewport = {
   themeColor: '#f5f6f9',
 }
 
-export default function RootLayout({
+export default function MarketingRootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${barlow.variable} bg-background`}>
+    <html lang="es" className={`marketing ${inter.variable} ${barlow.variable}`}>
       <body className="font-sans antialiased">
         {children}
-        <Toaster position="bottom-right" toastOptions={{ style: { fontFamily: 'var(--font-inter), system-ui, sans-serif' } }} />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

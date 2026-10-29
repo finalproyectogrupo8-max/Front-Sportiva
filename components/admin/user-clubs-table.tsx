@@ -11,7 +11,7 @@ import {
   type ClubOption,
   type ClubsForUser,
   type UserClub,
-} from '@/app/admin/clubes/[id]/actions'
+} from '@/app/(app)/admin/clubes/[id]/actions'
 import { MEMBERSHIP_ROLES } from '@/lib/membership-roles'
 
 type Props = {

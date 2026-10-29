@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { getTenantStatusesAction } from '@/app/admin/clubes/actions'
+import { getTenantStatusesAction } from '@/app/(app)/admin/clubes/actions'
 
 // Sigue los clubes recién creados mientras su base se aprovisiona en segundo plano, en cualquier
 // pantalla del admin, y avisa con un toast cuando quedan activos (o si fallan).

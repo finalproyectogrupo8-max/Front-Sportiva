@@ -19,7 +19,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { retryTenantAction, updateTenantStatusAction } from '@/app/admin/clubes/actions'
+import { retryTenantAction, updateTenantStatusAction } from '@/app/(app)/admin/clubes/actions'
 import type { AdminTenant, TenantStatus } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
 

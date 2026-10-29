@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 
-:root {
+/*
+ * Estilos de la landing pública. Solo los carga app/(marketing)/layout.tsx,
+ * que pone la clase "marketing" en <html>. Todo selector de elemento va
+ * scopeado bajo html.marketing para no pisar nunca al sistema interno.
+ */
+
+html.marketing {
   --ink: #10100f;
   --ink-soft: #191918;
   --cream: #eee5d8;
@@ -11,33 +17,33 @@
 }
 
 @layer base {
-  html {
+  html.marketing {
     scroll-behavior: smooth;
   }
 
-  body {
+  html.marketing body {
     background: var(--ink);
     color: #fff;
     font-family: 'Manrope', 'Inter', Arial, sans-serif;
     min-width: 320px;
   }
 
-  a {
+  html.marketing a {
     color: inherit;
     text-decoration: none;
   }
 
-  button,
-  input {
+  html.marketing button,
+  html.marketing input {
     font: inherit;
   }
 
-  button {
+  html.marketing button {
     cursor: pointer;
   }
 }
 
-::selection {
+html.marketing ::selection {
   background: var(--orange);
   color: white;
 }
@@ -1200,7 +1206,7 @@
   background: var(--ink);
 }
 
-footer {
+html.marketing footer {
   background: #0d0d0c;
 }
 
@@ -1651,13 +1657,13 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html.marketing {
     scroll-behavior: auto;
   }
 
-  *,
-  *::before,
-  *::after {
+  html.marketing *,
+  html.marketing *::before,
+  html.marketing *::after {
     transition-duration: .01ms !important;
   }
 }
