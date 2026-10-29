@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet'
 import { useWatchProvisioning } from '@/components/admin/provisioning-watcher'
 import { Label } from '@/components/ui/label'
-import { createTenantAction, type CreateTenantState } from '@/app/admin/clubes/actions'
+import { createTenantAction, type CreateTenantState } from '@/app/(app)/admin/clubes/actions'
 import { formKey } from '@/lib/form-key'
 
 function slugify(text: string): string {

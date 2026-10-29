@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import axios from 'axios'
@@ -10,8 +10,6 @@ import { SESSION_COOKIE, PLATFORM_COOKIE } from '@/lib/session-cookies'
 
 function LoginForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const registrado = searchParams.get('registrado')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -83,23 +81,6 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {/* Mensaje de registro exitoso si viene de /registro */}
-      {registrado && !error && (
-        <div
-          role="status"
-          className="flex items-start gap-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-sm text-emerald-400 animate-in fade-in duration-200"
-        >
-          <svg className="size-5 shrink-0 text-emerald-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span className="leading-snug">¡Cuenta creada con éxito! Ya podés ingresar con tus credenciales.</span>
-        </div>
-      )}
-
       {/* Alerta de error */}
       {error && (
         <div
@@ -179,15 +160,18 @@ function LoginForm() {
         )}
       </button>
 
-      {/* Enlaces a registro y home */}
+      {/* Sin registro público: las cuentas las crea el admin o llegan por invitación */}
       <div className="mt-4 flex flex-col items-center gap-3 text-center">
         <p className="text-sm text-zinc-400">
-          ¿No tenés cuenta?{' '}
+          ¿No tenés acceso? Pedíselo al administrador de tu club.
+        </p>
+        <p className="text-sm text-zinc-400">
+          ¿Tu club todavía no usa Sportiva?{' '}
           <Link
-            href="/registro"
+            href="/contacto"
             className="font-semibold text-[#C8643C] transition hover:text-[#d97349] hover:underline"
           >
-            Registrate
+            Solicitá una demo
           </Link>
         </p>
         <Link href="/" className="text-xs text-zinc-500 transition hover:text-zinc-300">

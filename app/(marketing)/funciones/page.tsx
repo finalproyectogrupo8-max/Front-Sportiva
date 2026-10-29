@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import InternalPage from '@/components/InternalPage'
+import InternalPage from '@/components/marketing/InternalPage'
 
 export const metadata: Metadata = {
   title: 'Funciones',

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getTenantStatusesAction } from '@/app/admin/clubes/actions'
+import { getTenantStatusesAction } from '@/app/(app)/admin/clubes/actions'
 
 const POLL_INTERVAL_MS = 2500
 

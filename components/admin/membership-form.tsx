@@ -19,7 +19,7 @@ import {
   searchUsersAction,
   type AddMembershipState,
   type UserOption,
-} from '@/app/admin/clubes/[id]/actions'
+} from '@/app/(app)/admin/clubes/[id]/actions'
 import { MEMBERSHIP_ROLES } from '@/lib/membership-roles'
 
 const SEARCH_DEBOUNCE_MS = 300

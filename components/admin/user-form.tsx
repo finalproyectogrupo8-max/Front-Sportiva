@@ -13,7 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { createUserAction, type CreateUserState } from '@/app/admin/usuarios/actions'
+import { createUserAction, type CreateUserState } from '@/app/(app)/admin/usuarios/actions'
 import { formKey } from '@/lib/form-key'
 import { UserClubsTable } from '@/components/admin/user-clubs-table'
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import InternalPage from '@/components/InternalPage'
-import { Equipo } from '@/components/Equipo'
+import InternalPage from '@/components/marketing/InternalPage'
+import { Equipo } from '@/components/marketing/Equipo'
 
 export const metadata: Metadata = {
   title: 'Quiénes somos',

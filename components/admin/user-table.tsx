@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AssignClubDialog } from '@/components/admin/assign-club-dialog'
-import { toggleUserStatusAction } from '@/app/admin/usuarios/actions'
+import { toggleUserStatusAction } from '@/app/(app)/admin/usuarios/actions'
 import type { AdminUser } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
 

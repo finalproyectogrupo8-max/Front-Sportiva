@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
-import { updateTicketAction } from '@/app/admin/tickets/actions'
+import { updateTicketAction } from '@/app/(app)/admin/tickets/actions'
 import { INITIAL_ADMIN_ACTION_STATE, type SupportTicket, type SupportTicketStatus } from '@/lib/admin-types'
 import { TICKET_STATUS_LABELS } from '@/lib/admin-labels'
 
