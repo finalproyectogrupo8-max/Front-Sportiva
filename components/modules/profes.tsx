@@ -14,7 +14,8 @@ import { cn } from '@/lib/utils'
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie']
 
 export function ProfesModule() {
-  const { data, update } = useClub()
+  const { data, update, can } = useClub()
+  const canRecord = can('attendance.record')
   const [openId, setOpenId] = useState<string | null>(null)
   const today = TODAY.getDay() - 1
 
@@ -84,7 +85,7 @@ export function ProfesModule() {
                           <button
                             key={d}
                             type="button"
-                            disabled={future}
+                            disabled={future || !canRecord}
                             onClick={() => toggle(c, i)}
                             aria-label={`${d}: ${future ? 'pendiente' : v ? 'presente' : 'ausente'}`}
                             className={cn(
@@ -147,7 +148,7 @@ export function ProfesModule() {
 }
 
 function CoachSheet({ c }: { c: Coach }) {
-  const { data, update, playerName } = useClub()
+  const { data, update, playerName, can } = useClub()
   const players = data.players.filter((p) => p.coachId === c.id)
   const [playerId, setPlayerId] = useState(players[0]?.id ?? '')
   const [tipo, setTipo] = useState<string>('Mejora')
@@ -179,35 +180,37 @@ function CoachSheet({ c }: { c: Coach }) {
         </SheetDescription>
       </SheetHeader>
       <div className="flex flex-col gap-6 px-4 pb-6">
-        <form onSubmit={add} className="flex flex-col gap-3 rounded-xl bg-muted p-4">
-          <h3 className="text-sm font-semibold">Nueva observación</h3>
-          <div className="grid grid-cols-[1fr_8rem] gap-2">
-            <FormSelect
-              id="seg-jugador"
-              label="Jugador"
-              value={playerId}
-              onChange={setPlayerId}
-              options={players.map((p) => ({ value: p.id, label: `${p.nombre} ${p.apellido}` }))}
+        {can('coaches.update') && (
+          <form onSubmit={add} className="flex flex-col gap-3 rounded-xl bg-muted p-4">
+            <h3 className="text-sm font-semibold">Nueva observación</h3>
+            <div className="grid grid-cols-[1fr_8rem] gap-2">
+              <FormSelect
+                id="seg-jugador"
+                label="Jugador"
+                value={playerId}
+                onChange={setPlayerId}
+                options={players.map((p) => ({ value: p.id, label: `${p.nombre} ${p.apellido}` }))}
+              />
+              <FormSelect
+                id="seg-tipo"
+                label="Tipo"
+                value={tipo}
+                onChange={setTipo}
+                options={['Mejora', 'Seguimiento', 'Alerta'].map((t) => ({ value: t, label: t }))}
+              />
+            </div>
+            <Textarea
+              aria-label="Observación"
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              placeholder="Qué mejoró, qué hay que trabajar, próximos pasos…"
+              className="bg-card"
             />
-            <FormSelect
-              id="seg-tipo"
-              label="Tipo"
-              value={tipo}
-              onChange={setTipo}
-              options={['Mejora', 'Seguimiento', 'Alerta'].map((t) => ({ value: t, label: t }))}
-            />
-          </div>
-          <Textarea
-            aria-label="Observación"
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="Qué mejoró, qué hay que trabajar, próximos pasos…"
-            className="bg-card"
-          />
-          <Button type="submit" size="sm" className="w-fit">
-            Registrar
-          </Button>
-        </form>
+            <Button type="submit" size="sm" className="w-fit">
+              Registrar
+            </Button>
+          </form>
+        )}
 
         <section className="flex flex-col gap-2">
           <h3 className="text-sm font-semibold">Historial</h3>

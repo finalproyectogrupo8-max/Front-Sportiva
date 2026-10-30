@@ -27,9 +27,16 @@ export default async function ClubLayout({
   // Se normaliza el tenant de la sesión asignando valores por defecto para que la UI no se rompa.
   const tenant = normalizeTenant(session.tenant)
   const data = getClubData(tenant)
+  const roles = session.profile?.roles.map((role) => role.name) ?? []
 
   return (
-    <ClubProvider key={session.tenant.slug} tenant={session.tenant} initialData={data}>
+    <ClubProvider
+      key={session.tenant.slug}
+      tenant={session.tenant}
+      initialData={data}
+      permissions={session.permissions ?? []}
+      permissionScopes={session.permissionScopes}
+    >
       <div className="flex min-h-dvh flex-col">
         {/* Decisión de arquitectura (FRO-8 - Opción A):
             Para la demo, mantenemos los datos mockeados en las vistas internas de los módulos (getClubData),
@@ -40,7 +47,7 @@ export default async function ClubLayout({
 
         <TopBar
           userName={session.user.name}
-          userRole="Miembro del club"
+          userRole={roles.length > 0 ? roles.join(' · ') : 'Sin rol en el club'}
           userTenants={session.tenants}
         />
         <main className="flex-1">{children}</main>

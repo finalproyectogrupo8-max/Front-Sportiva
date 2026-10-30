@@ -26,7 +26,9 @@ function health(c: Court) {
 }
 
 export function CanchasModule() {
-  const { data, update } = useClub()
+  const { data, update, can } = useClub()
+  const canReport = can('repairs.create')
+  const canUpdate = can('facilities.update')
   const [open, setOpen] = useCreateDialog()
   const [preset, setPreset] = useState<{ courtId: string; elemento: string }>({ courtId: '', elemento: '' })
   const today = TODAY.toISOString().slice(0, 10)
@@ -88,10 +90,12 @@ export function CanchasModule() {
         title="Estado de canchas"
         description="Aros, tableros, piso, arcos, relojes e iluminación. Limpieza diaria y mantenimiento con historial."
         actions={
-          <Button onClick={() => report('', '')} className="gap-1.5">
-            <Wrench className="size-4" aria-hidden="true" />
-            Reportar problema
-          </Button>
+          canReport && (
+            <Button onClick={() => report('', '')} className="gap-1.5">
+              <Wrench className="size-4" aria-hidden="true" />
+              Reportar problema
+            </Button>
+          )
         }
       />
       <PageBody>
@@ -143,7 +147,7 @@ export function CanchasModule() {
                         <span className="text-muted-foreground"> · {formatDay(c.limpieza.ultima, { day: 'numeric', month: 'short' })}</span>
                       </span>
                     </span>
-                    {c.limpieza.estado === 'Pendiente' ? (
+                    {c.limpieza.estado === 'Pendiente' && can('maintenance.update') ? (
                       <Button size="sm" variant="outline" className="h-7" onClick={() => clean(c)}>
                         Marcar hecha
                       </Button>
@@ -160,8 +164,9 @@ export function CanchasModule() {
                           <button
                             type="button"
                             onClick={() => cycle(c, e.id)}
-                            className="flex min-w-0 flex-1 items-center gap-3 rounded text-left"
-                            aria-label={`${e.nombre}: ${LABEL[e.estado]}. Cambiar estado`}
+                            disabled={!canUpdate}
+                            className="flex min-w-0 flex-1 items-center gap-3 rounded text-left disabled:cursor-default"
+                            aria-label={canUpdate ? `${e.nombre}: ${LABEL[e.estado]}. Cambiar estado` : `${e.nombre}: ${LABEL[e.estado]}`}
                           >
                             <Icon
                               className={cn(
@@ -178,7 +183,7 @@ export function CanchasModule() {
                           <Pill tone={TONE[e.estado]} className="hidden sm:inline-flex">
                             {LABEL[e.estado]}
                           </Pill>
-                          {e.estado !== 'ok' && (
+                          {e.estado !== 'ok' && canReport && (
                             <Button
                               size="icon"
                               variant="ghost"
@@ -217,7 +222,7 @@ export function CanchasModule() {
                     <Pill tone={i.prioridad === 'Alta' ? 'bad' : i.prioridad === 'Media' ? 'warn' : 'neutral'}>
                       Prioridad {i.prioridad.toLowerCase()}
                     </Pill>
-                    {i.estado !== 'Resuelto' && (
+                    {i.estado !== 'Resuelto' && can('repairs.update') && (
                       <Button size="sm" variant="ghost" className="h-7 text-primary" onClick={() => resolve(i)}>
                         {i.estado === 'Abierto' ? 'Tomar' : 'Resolver'}
                       </Button>
@@ -230,7 +235,7 @@ export function CanchasModule() {
         </div>
       </PageBody>
 
-      <ReportDialog key={`${open}-${preset.courtId}-${preset.elemento}`} open={open} onOpenChange={setOpen} preset={preset} />
+      {canReport && <ReportDialog key={`${open}-${preset.courtId}-${preset.elemento}`} open={open} onOpenChange={setOpen} preset={preset} />}
     </>
   )
 }

@@ -9,7 +9,9 @@ import { JugadoresModule } from '@/components/modules/jugadores'
 import { MaterialesModule } from '@/components/modules/materiales'
 import { PartidosModule } from '@/components/modules/partidos'
 import { ProfesModule } from '@/components/modules/profes'
-import { getModule, type ModuleId } from '@/lib/modules'
+import { NoAccess } from '@/components/club/no-access'
+import { canSeeModule, getModule, type ModuleId } from '@/lib/modules'
+import { requireSession } from '@/lib/session'
 import { getTenant } from '@/lib/tenants'
 
 const VIEWS: Record<ModuleId, () => React.JSX.Element> = {
@@ -33,9 +35,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ModulePage({ params }: Props) {
-  const { modulo } = await params
+  const { club, modulo } = await params
   const mod = getModule(modulo)
   if (!mod) notFound()
+
+  // El layout ya validó la sesión y el club; requireSession está cacheada por request.
+  const session = await requireSession()
+  if (!canSeeModule(mod, session.permissions ?? [])) {
+    return <NoAccess moduleName={mod.name} homeHref={`/c/${club}`} />
+  }
+
   const View = VIEWS[mod.id]
   return (
     <Suspense>

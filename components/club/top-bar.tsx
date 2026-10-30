@@ -17,21 +17,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logout, selectTenant } from '@/lib/auth'
 import type { Schemas } from '@/lib/api/client'
-import { MODULES, getModule } from '@/lib/modules'
+import { QUICK_CREATE, getModule } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
 import { CommandPalette } from './command-palette'
 import { Initials } from './shared'
 import { useAlerts } from './use-alerts'
-
-const QUICK_CREATE = [
-  { module: 'indumentaria', label: 'Pedido de indumentaria' },
-  { module: 'materiales', label: 'Solicitud de materiales' },
-  { module: 'partidos', label: 'Partido' },
-  { module: 'jugadores', label: 'Ficha de jugador' },
-  { module: 'canchas', label: 'Reporte de cancha' },
-] as const
 
 export function TopBar({
   userName,
@@ -43,10 +35,11 @@ export function TopBar({
   userTenants?: Schemas['TenantSummaryResource'][]
 }) {
   const router = useRouter()
-  const { tenant } = useClub()
+  const { tenant, modules, can, canSee } = useClub()
   const pathname = usePathname()
   const base = `/c/${tenant.slug}`
   const current = getModule(pathname.split('/')[3] ?? '')
+  const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
   const alerts = useAlerts()
 
@@ -146,7 +139,7 @@ export function TopBar({
               <span className="font-medium">Hoy en el club</span>
             </DropdownMenuItem>
             <div className="grid grid-cols-2 gap-1">
-              {MODULES.map((m) => (
+              {modules.map((m) => (
                 <DropdownMenuItem
                   key={m.id}
                   render={<Link href={`${base}/${m.id}`} />}
@@ -179,26 +172,28 @@ export function TopBar({
             </kbd>
           </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button className="h-9 gap-1.5 px-2.5" />} aria-label="Crear">
-              <Plus className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Crear</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Carga rápida</DropdownMenuLabel>
-                {QUICK_CREATE.map((q) => {
-                  const Icon = getModule(q.module)!.icon
-                  return (
-                    <DropdownMenuItem key={q.module} render={<Link href={`${base}/${q.module}?nuevo=1`} />}>
-                      <Icon className="size-4" aria-hidden="true" />
-                      {q.label}
-                    </DropdownMenuItem>
-                  )
-                })}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {quickCreate.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button className="h-9 gap-1.5 px-2.5" />} aria-label="Crear">
+                <Plus className="size-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Crear</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Carga rápida</DropdownMenuLabel>
+                  {quickCreate.map((q) => {
+                    const Icon = getModule(q.module)!.icon
+                    return (
+                      <DropdownMenuItem key={q.module} render={<Link href={`${base}/${q.module}?nuevo=1`} />}>
+                        <Icon className="size-4" aria-hidden="true" />
+                        {q.label}
+                      </DropdownMenuItem>
+                    )
+                  })}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -232,10 +227,14 @@ export function TopBar({
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon" className="size-9 rounded-full" />}
-              aria-label="Cuenta"
+              render={<Button variant="ghost" className="h-9 gap-2 rounded-full px-0.5 lg:pr-3" />}
+              aria-label={`Cuenta: ${userName}, ${userRole}`}
             >
               <Initials name={userName} className="size-8 bg-ink text-ink-foreground" />
+              <span className="hidden max-w-44 flex-col items-start leading-tight lg:flex">
+                <span className="max-w-full truncate text-xs font-medium">{userName}</span>
+                <span className="max-w-full truncate text-[11px] font-normal text-muted-foreground">{userRole}</span>
+              </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>

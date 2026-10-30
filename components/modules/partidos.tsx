@@ -19,7 +19,8 @@ import { cn } from '@/lib/utils'
 type View = 'proximos' | 'jugados'
 
 export function PartidosModule() {
-  const { tenant, data } = useClub()
+  const { tenant, data, can } = useClub()
+  const canCreate = can('matches.create')
   const [sport, setSport] = useState<'Todos' | Sport>('Todos')
   const [view, setView] = useState<View>('proximos')
   const [open, setOpen] = useCreateDialog()
@@ -41,10 +42,12 @@ export function PartidosModule() {
         title="Partidos"
         description="Día, horario, sede y color de ropa de juego para cada categoría. Compartilo con planteles y familias."
         actions={
-          <Button onClick={() => setOpen(true)} className="gap-1.5">
-            <Plus className="size-4" aria-hidden="true" />
-            Cargar partido
-          </Button>
+          canCreate && (
+            <Button onClick={() => setOpen(true)} className="gap-1.5">
+              <Plus className="size-4" aria-hidden="true" />
+              Cargar partido
+            </Button>
+          )
         }
       >
         <div className="flex flex-wrap items-center gap-2">
@@ -93,7 +96,7 @@ export function PartidosModule() {
         {list.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">No hay partidos para este filtro.</p>}
       </PageBody>
 
-      <NewMatchDialog open={open} onOpenChange={setOpen} />
+      {canCreate && <NewMatchDialog open={open} onOpenChange={setOpen} />}
     </>
   )
 }
