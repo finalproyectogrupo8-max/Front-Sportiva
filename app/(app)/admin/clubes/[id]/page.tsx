@@ -2,9 +2,10 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { AlertTriangle, ArrowLeft, Database, Info, UserCheck, UserX, Users } from 'lucide-react'
 import { requirePlatformAdmin } from '@/lib/session'
-import { getAdminTenant, getTenantMemberships, getTenantRoles } from '@/lib/api/admin'
+import { getAdminTenant, getTenantMemberships, getTenantPermissions, getTenantRoles } from '@/lib/api/admin'
 import { TenantStatusBadge } from '@/components/admin/club-table'
 import { AddMemberSheet } from '@/components/admin/membership-form'
+import { ClubRolesSection } from '@/components/admin/club-roles-section'
 import { MembershipTable } from '@/components/admin/membership-table'
 import { Pagination } from '@/components/admin/pagination'
 import { ProvisioningPoller } from '@/components/admin/provisioning-poller'
@@ -29,14 +30,16 @@ export default async function AdminClubDetailPage({
   let membershipsResult
   let activeResult
   let rolesResult
+  let permissionsResult
   try {
-    ;[tenantResult, membershipsResult, activeResult, rolesResult] = await Promise.all([
+    ;[tenantResult, membershipsResult, activeResult, rolesResult, permissionsResult] = await Promise.all([
       getAdminTenant(tenantId),
       getTenantMemberships(tenantId, { page, per_page: 20 }),
       // Solo para contar los activos: con per_page=1 alcanza el `meta.total`.
       getTenantMemberships(tenantId, { is_active: true, per_page: 1 }),
       // Vacío si el club todavía no está activo.
       getTenantRoles(tenantId),
+      getTenantPermissions(tenantId),
     ])
   } catch {
     return <ConnectionError />
@@ -53,6 +56,7 @@ export default async function AdminClubDetailPage({
   const totalMembers = membershipsResult.ok ? membershipsResult.data.meta.total : null
   const activeMembers = activeResult.ok ? activeResult.data.meta.total : null
   const roles = rolesResult.ok ? rolesResult.data.data : []
+  const modules = permissionsResult.ok ? permissionsResult.data.data : []
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
@@ -125,6 +129,8 @@ export default async function AdminClubDetailPage({
           </div>
         )}
       </section>
+
+      <ClubRolesSection tenantId={tenant.id} roles={roles} modules={modules} disabled={!isActive} />
     </div>
   )
 }
