@@ -183,6 +183,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de permisos agrupado por módulo, para armar la grilla de checks */
+        get: operations["role.permissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Roles del club con sus permisos: primero los estándar */
+        get: operations["roles.index"];
+        put?: never;
+        /** Crea un rol custom. Solo se pueden dar permisos (y alcances) que el usuario tiene */
+        post: operations["roles.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["roles.show"];
+        /** Edita un rol custom. Los estándar responden 403 `role_is_system` */
+        put: operations["roles.update"];
+        post?: never;
+        /** Borra un rol custom. 403 `role_is_system` si es estándar; 409 `role_in_use` si alguien lo tiene */
+        delete: operations["roles.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles/{role}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copia un rol (estándar o custom) como rol custom nuevo */
+        post: operations["role.duplicate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/seasons": {
         parameters: {
             query?: never;
@@ -381,6 +451,23 @@ export interface paths {
         patch: operations["tenantMembership.update"];
         trace?: never;
     };
+    "/admin/tenants/{tenant}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de permisos agrupado por módulo, para armar la grilla de checks */
+        get: operations["tenantRole.permissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/tenants/{tenant}/roles": {
         parameters: {
             query?: never;
@@ -389,12 +476,44 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Roles del club, para asignarlos a sus miembros. Primero los estándar, después los custom.
-         *     Un club que todavía no está activo no tiene base: devuelve una lista vacía
+         * Roles del club con sus permisos: primero los estándar. Un club que todavía no está activo no
+         *     tiene base: devuelve una lista vacía
          */
         get: operations["tenantRole.index"];
         put?: never;
+        post: operations["tenantRole.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tenants/{tenant}/roles/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tenantRole.show"];
+        put?: never;
         post?: never;
+        delete: operations["tenantRole.destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["tenantRole.update"];
+        trace?: never;
+    };
+    "/admin/tenants/{tenant}/roles/{role}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["tenantRole.duplicate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -491,9 +610,15 @@ export interface components {
             slug: string;
             name: string;
             description: string | null;
+            /** @description Estándar: no se edita ni se borra, se duplica. */
             is_system: boolean;
             /** @description Cuántos usuarios del club tienen el rol. */
             users_count?: number;
+            /** @description Permisos del rol con su alcance: all (todo el club) u own (sus categorías). */
+            permissions?: {
+                name: string;
+                scope: string;
+            }[];
         };
         /** CoachResource */
         CoachResource: {
@@ -537,6 +662,22 @@ export interface components {
         MeTenantsResource: {
             user: components["schemas"]["UserResource"];
             tenants: components["schemas"]["TenantSummaryResource"][];
+        };
+        /** PermissionModuleResource */
+        PermissionModuleResource: {
+            key: string;
+            label: string;
+            /** @description Recursos del módulo. `scopable`: la acción admite "sus categorías". */
+            resources: {
+                key: string;
+                label: string;
+                actions: {
+                    name: string;
+                    action: string;
+                    label: string;
+                    scopable: boolean;
+                }[];
+            }[];
         };
         /** SeasonResource */
         SeasonResource: {
@@ -590,6 +731,19 @@ export interface components {
             email?: string | null;
             /** @enum {string} */
             status: "active" | "inactive";
+        };
+        /**
+         * StoreRoleRequest
+         * @description Rol custom. Que los permisos existan y que el actor pueda darlos lo valida ManageClubRoles.
+         */
+        StoreRoleRequest: {
+            name: string;
+            description?: string | null;
+            permissions: {
+                name: string;
+                /** @enum {string} */
+                scope: "all" | "own";
+            }[];
         };
         /** StoreSeasonRequest */
         StoreSeasonRequest: {
@@ -735,6 +889,17 @@ export interface components {
             email?: string | null;
             /** @enum {string} */
             status?: "active" | "inactive";
+        };
+        /** UpdateRoleRequest */
+        UpdateRoleRequest: {
+            name?: string;
+            description?: string | null;
+            /** @description Reemplaza la lista completa. */
+            permissions?: {
+                name: string;
+                /** @enum {string} */
+                scope: "all" | "own";
+            }[];
         };
         /** UpdateSeasonRequest */
         UpdateSeasonRequest: {
@@ -1393,6 +1558,196 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "role.permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `PermissionModuleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PermissionModuleResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "roles.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["ClubRoleResource"] & Record<string, never>)[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+        };
+    };
+    "roles.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description `ClubRoleResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "roles.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The role slug */
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "roles.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The role slug */
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "roles.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The role slug */
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "role.duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The role slug */
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `ClubRoleResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "seasons.index": {
@@ -2225,6 +2580,34 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "tenantRole.permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `PermissionModuleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PermissionModuleResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "tenantRole.index": {
         parameters: {
             query?: never;
@@ -2246,6 +2629,151 @@ export interface operations {
                     "application/json": {
                         data: components["schemas"]["ClubRoleResource"][];
                     };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "tenantRole.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreRoleRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "tenantRole.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"];
+                    } | Record<string, never>;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "tenantRole.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "tenantRole.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"];
+                    } | Record<string, never>;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "tenantRole.duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
             401: components["responses"]["AuthenticationException"];

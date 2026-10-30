@@ -361,6 +361,73 @@ export async function getTenantMemberships(
   })
 }
 
+/** Módulo de la grilla de permisos, con sus recursos y acciones. */
+export type PermissionModule = Schemas['PermissionModuleResource']
+/** Permiso de un rol con su alcance: `all` (todo el club) u `own` (sus categorías). */
+export type RolePermission = { name: string; scope: 'all' | 'own' }
+export type RoleInput = { name: string; description?: string | null; permissions: RolePermission[] }
+
+/**
+ * `GET /admin/tenants/{tenant}/permissions`
+ * Catálogo de permisos agrupado por módulo, para armar la grilla de checks.
+ */
+export async function getTenantPermissions(tenantId: number): Promise<ApiResult<{ data: PermissionModule[] }>> {
+  return apiFetch<{ data: PermissionModule[] }>(`/admin/tenants/${tenantId}/permissions`, {
+    method: 'GET',
+    auth: 'platform',
+  })
+}
+
+/**
+ * `POST /admin/tenants/{tenant}/roles`
+ * Crea un rol custom. 422 si el nombre se repite o un permiso no es válido.
+ */
+export async function createTenantRole(tenantId: number, data: RoleInput): Promise<ApiResult<{ data: ClubRole }>> {
+  return apiFetch<{ data: ClubRole }>(`/admin/tenants/${tenantId}/roles`, {
+    method: 'POST',
+    auth: 'platform',
+    body: data,
+  })
+}
+
+/**
+ * `PATCH /admin/tenants/{tenant}/roles/{role}`
+ * Edita un rol custom (los permisos reemplazan la lista). 403 `role_is_system` si es estándar.
+ */
+export async function updateTenantRole(
+  tenantId: number,
+  slug: string,
+  data: Partial<RoleInput>,
+): Promise<ApiResult<{ data: ClubRole }>> {
+  return apiFetch<{ data: ClubRole }>(`/admin/tenants/${tenantId}/roles/${encodeURIComponent(slug)}`, {
+    method: 'PATCH',
+    auth: 'platform',
+    body: data,
+  })
+}
+
+/**
+ * `DELETE /admin/tenants/{tenant}/roles/{role}`
+ * 403 `role_is_system` si es estándar; 409 `role_in_use` si alguien lo tiene.
+ */
+export async function deleteTenantRole(tenantId: number, slug: string): Promise<ApiResult<null>> {
+  return apiFetch<null>(`/admin/tenants/${tenantId}/roles/${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+    auth: 'platform',
+  })
+}
+
+/**
+ * `POST /admin/tenants/{tenant}/roles/{role}/duplicate`
+ * Copia un rol (estándar o custom) como rol custom nuevo ("Copia de …").
+ */
+export async function duplicateTenantRole(tenantId: number, slug: string): Promise<ApiResult<{ data: ClubRole }>> {
+  return apiFetch<{ data: ClubRole }>(
+    `/admin/tenants/${tenantId}/roles/${encodeURIComponent(slug)}/duplicate`,
+    { method: 'POST', auth: 'platform' },
+  )
+}
+
 /**
  * `POST /admin/tenants/{tenant}/memberships`
  * Asocia un usuario existente al club con uno o más roles del club (slugs). 422 si ya es miembro,
