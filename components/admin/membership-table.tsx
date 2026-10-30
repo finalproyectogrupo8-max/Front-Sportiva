@@ -1,15 +1,121 @@
 'use client'
 
-import { useTransition } from 'react'
-import { CheckCircle2, Loader2, PauseCircle, PlayCircle, Users, XCircle } from 'lucide-react'
+import { useActionState, useEffect, useState, useTransition } from 'react'
+import { CheckCircle2, Loader2, PauseCircle, PlayCircle, ShieldCheck, Users, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
-import { setMembershipActiveAction } from '@/app/(app)/admin/clubes/[id]/actions'
-import { membershipRoleLabel } from '@/lib/membership-roles'
-import type { AdminMembership } from '@/lib/api/admin'
+import {
+  setMembershipActiveAction,
+  updateMembershipRolesAction,
+  type UpdateRolesState,
+} from '@/app/(app)/admin/clubes/[id]/actions'
+import { RoleChecklist } from '@/components/admin/role-checklist'
+import type { AdminMembership, ClubRole } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
+
+function RoleBadges({ membership }: { membership: AdminMembership }) {
+  const roles = membership.roles ?? []
+  if (roles.length === 0) return <span className="text-xs text-muted-foreground">Sin roles</span>
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {roles.map((role) => (
+        <Badge key={role.slug} variant="outline" className="text-[11px] font-normal">
+          {role.name}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function EditRolesForm({
+  tenantId,
+  membership,
+  roles,
+  onSaved,
+}: {
+  tenantId: number
+  membership: AdminMembership
+  roles: ClubRole[]
+  onSaved: () => void
+}) {
+  const [state, action, pending] = useActionState<UpdateRolesState, FormData>(updateMembershipRolesAction, {})
+
+  useEffect(() => {
+    if (!state.ok) return
+    toast.success(`Roles de ${membership.user?.name ?? 'el usuario'} actualizados.`)
+    onSaved()
+  }, [state.ok, state.timestamp]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <form action={action} className="flex flex-col gap-4">
+      <input type="hidden" name="tenant_id" value={tenantId} />
+      <input type="hidden" name="membership_id" value={membership.id} />
+      <RoleChecklist
+        roles={roles}
+        defaultSelected={(membership.roles ?? []).map((role) => role.slug)}
+        disabled={pending}
+        error={state.error}
+        idPrefix={`membership-${membership.id}`}
+      />
+      <DialogFooter>
+        <Button type="submit" disabled={pending} className="cursor-pointer gap-2">
+          {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+          Guardar roles
+        </Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
+function EditRolesButton({
+  tenantId,
+  membership,
+  roles,
+}: {
+  tenantId: number
+  membership: AdminMembership
+  roles: ClubRole[]
+}) {
+  const [open, setOpen] = useState(false)
+  const name = membership.user?.name ?? 'el usuario'
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="h-7 cursor-pointer gap-1 px-2 text-xs"
+      >
+        <ShieldCheck className="size-3" aria-hidden="true" />
+        Roles
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Roles de {name}</DialogTitle>
+            <DialogDescription>Definen qué puede ver y hacer en este club.</DialogDescription>
+          </DialogHeader>
+          {open && (
+            <EditRolesForm tenantId={tenantId} membership={membership} roles={roles} onSaved={() => setOpen(false)} />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
 
 
 function MembershipActions({ tenantId, membership }: { tenantId: number; membership: AdminMembership }) {
@@ -61,9 +167,12 @@ function MembershipActions({ tenantId, membership }: { tenantId: number; members
 export function MembershipTable({
   tenantId,
   memberships,
+  roles,
 }: {
   tenantId: number
   memberships: AdminMembership[]
+  /** Roles del club, para editar los de cada miembro. */
+  roles: ClubRole[]
 }) {
   if (memberships.length === 0) {
     return (
@@ -92,7 +201,7 @@ export function MembershipTable({
                 Usuario
               </th>
               <th scope="col" className="hidden px-4 py-3 md:table-cell">
-                Rol
+                Roles
               </th>
               <th scope="col" className="px-4 py-3">
                 Estado
@@ -116,8 +225,8 @@ export function MembershipTable({
                     <span className="truncate text-xs text-muted-foreground">{membership.user?.email}</span>
                   </div>
                 </td>
-                <td className="hidden px-4 py-3 text-xs text-muted-foreground md:table-cell">
-                  {membershipRoleLabel(membership.role)}
+                <td className="hidden px-4 py-3 md:table-cell">
+                  <RoleBadges membership={membership} />
                 </td>
                 <td className="px-4 py-3">
                   {membership.is_active ? (
@@ -139,7 +248,12 @@ export function MembershipTable({
                   {formatShortDate(membership.created_at)}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <MembershipActions tenantId={tenantId} membership={membership} />
+                  <div className="flex justify-end gap-1.5">
+                    {roles.length > 0 && (
+                      <EditRolesButton tenantId={tenantId} membership={membership} roles={roles} />
+                    )}
+                    <MembershipActions tenantId={tenantId} membership={membership} />
+                  </div>
                 </td>
               </tr>
             ))}

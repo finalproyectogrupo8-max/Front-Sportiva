@@ -5,11 +5,11 @@ import {
   createTenantMembership,
   getAdminTenants,
   getAdminUsers,
+  getTenantRoles,
   getUserMemberships,
   updateTenantMembership,
-  type MembershipRole,
+  type ClubRole,
 } from '@/lib/api/admin'
-import { MEMBERSHIP_ROLES } from '@/lib/membership-roles'
 import { fieldError } from '@/lib/api/validation-messages'
 import { requirePlatformAdmin } from '@/lib/session'
 
@@ -79,24 +79,53 @@ export async function listClubsForUserAction(userId: number): Promise<ClubsForUs
   }
 }
 
-/** Asocia un usuario a un club con el rol indicado (por defecto, el único que hay: admin). */
+export type ClubRolesResult = { ok: true; roles: ClubRole[] } | { ok: false; error: string }
+
+/** Roles del club para elegir al dar acceso (estándar primero). */
+export async function listTenantRolesAction(tenantId: number): Promise<ClubRolesResult> {
+  await requirePlatformAdmin()
+
+  try {
+    const result = await getTenantRoles(tenantId)
+    if (!result.ok) return { ok: false, error: result.message || 'No se pudieron cargar los roles del club.' }
+    return { ok: true, roles: result.data.data }
+  } catch {
+    return { ok: false, error: 'No pudimos conectar con el servidor.' }
+  }
+}
+
+/** Roles elegidos en un formulario (checkboxes `roles`), sin repetidos ni vacíos. */
+function rolesFrom(formData: FormData): string[] {
+  return [...new Set(formData.getAll('roles').map(String).filter(Boolean))]
+}
+
+/** Primer error de validación de `roles` o de alguno de sus elementos (`roles.0`...). */
+function rolesError(errors: Record<string, string[]> | undefined): string | undefined {
+  if (!errors) return undefined
+  const key = Object.keys(errors).find((name) => name === 'roles' || name.startsWith('roles.'))
+  return key ? fieldError(errors, key) : undefined
+}
+
+/** Asocia un usuario a un club con los roles del club indicados. */
 export async function associateUserAction(
   tenantId: number,
   userId: number,
-  role: MembershipRole = MEMBERSHIP_ROLES[0].value,
+  roles: string[],
 ): Promise<{ ok: boolean; error?: string }> {
   await requirePlatformAdmin()
 
+  if (roles.length === 0) return { ok: false, error: 'Elegí al menos un rol.' }
+
   let result
   try {
-    result = await createTenantMembership(tenantId, { user_id: userId, role })
+    result = await createTenantMembership(tenantId, { user_id: userId, roles })
   } catch {
     return { ok: false, error: 'No pudimos conectar con el servidor.' }
   }
 
   if (!result.ok) {
     if (result.kind === 'validation') {
-      return { ok: false, error: fieldError(result.errors, 'user_id') ?? fieldError(result.errors, 'role') }
+      return { ok: false, error: fieldError(result.errors, 'user_id') ?? rolesError(result.errors) }
     }
     return { ok: false, error: result.message || 'No se pudo asociar el usuario.' }
   }
@@ -109,7 +138,7 @@ export type AddMembershipState = {
   ok?: boolean
   message?: string
   error?: string
-  fieldErrors?: { user_id?: string; role?: string }
+  fieldErrors?: { user_id?: string; roles?: string }
   /** Club al que se asoció el usuario (para linkear a su detalle). */
   tenantId?: number
   timestamp?: number
@@ -123,17 +152,17 @@ export async function addMembershipAction(
 
   const tenantId = Number(formData.get('tenant_id'))
   const userId = Number(formData.get('user_id'))
-  const role = String(formData.get('role') ?? '') as MembershipRole
+  const roles = rolesFrom(formData)
 
   const fieldErrors: AddMembershipState['fieldErrors'] = {}
   if (!Number.isInteger(userId) || userId <= 0) fieldErrors.user_id = 'Elegí un usuario.'
-  if (!MEMBERSHIP_ROLES.some((option) => option.value === role)) fieldErrors.role = 'Elegí un rol.'
+  if (roles.length === 0) fieldErrors.roles = 'Elegí al menos un rol.'
   if (!Number.isInteger(tenantId) || tenantId <= 0) return { ok: false, error: 'Club inválido.' }
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
 
   let result
   try {
-    result = await createTenantMembership(tenantId, { user_id: userId, role })
+    result = await createTenantMembership(tenantId, { user_id: userId, roles })
   } catch {
     return { ok: false, error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.' }
   }
@@ -142,7 +171,7 @@ export async function addMembershipAction(
     if (result.kind === 'validation') {
       return {
         ok: false,
-        fieldErrors: { user_id: fieldError(result.errors, 'user_id'), role: fieldError(result.errors, 'role') },
+        fieldErrors: { user_id: fieldError(result.errors, 'user_id'), roles: rolesError(result.errors) },
       }
     }
     if (result.kind === 'forbidden') {
@@ -182,4 +211,42 @@ export async function setMembershipActiveAction(
 
   revalidatePath(`/admin/clubes/${tenantId}`)
   return { ok: true }
+}
+
+export type UpdateRolesState = {
+  ok?: boolean
+  error?: string
+  timestamp?: number
+}
+
+/** Reemplaza los roles de un miembro del club (checkboxes `roles`). */
+export async function updateMembershipRolesAction(
+  _prev: UpdateRolesState,
+  formData: FormData,
+): Promise<UpdateRolesState> {
+  await requirePlatformAdmin()
+
+  const tenantId = Number(formData.get('tenant_id'))
+  const membershipId = Number(formData.get('membership_id'))
+  const roles = rolesFrom(formData)
+
+  if (!Number.isInteger(tenantId) || tenantId <= 0 || !Number.isInteger(membershipId) || membershipId <= 0) {
+    return { ok: false, error: 'Membresía inválida.' }
+  }
+  if (roles.length === 0) return { ok: false, error: 'Elegí al menos un rol.' }
+
+  let result
+  try {
+    result = await updateTenantMembership(tenantId, membershipId, { roles })
+  } catch {
+    return { ok: false, error: 'No pudimos conectar con el servidor.' }
+  }
+
+  if (!result.ok) {
+    if (result.kind === 'validation') return { ok: false, error: rolesError(result.errors) ?? result.message }
+    return { ok: false, error: result.message || 'No se pudieron guardar los roles.' }
+  }
+
+  revalidatePath(`/admin/clubes/${tenantId}`)
+  return { ok: true, timestamp: Date.now() }
 }

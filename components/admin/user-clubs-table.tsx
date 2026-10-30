@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button'
 import {
   associateUserAction,
   listClubsForUserAction,
+  listTenantRolesAction,
   type ClubOption,
   type ClubsForUser,
   type UserClub,
 } from '@/app/(app)/admin/clubes/[id]/actions'
-import { MEMBERSHIP_ROLES } from '@/lib/membership-roles'
+import { RoleChecklist } from '@/components/admin/role-checklist'
+import type { ClubRole } from '@/lib/api/admin'
 
 type Props = {
   user: { id: number; name: string }
@@ -101,9 +103,7 @@ export function UserClubsTable({ user, onAssociated }: Props) {
         </table>
       </div>
       {data.available.length > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          Se asocia como <span className="text-foreground">{MEMBERSHIP_ROLES[0].label}</span>.
-        </p>
+        <p className="text-xs text-muted-foreground">Al asociarlo elegís sus roles en ese club.</p>
       ) : (
         <p className="text-xs text-muted-foreground">Ya está asociado a todos los clubes activos.</p>
       )}
@@ -172,43 +172,86 @@ function AvailableRow({
 }) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  /** null: todavía no se eligió asociar. Con roles: muestra la lista para elegir. */
+  const [roles, setRoles] = useState<ClubRole[] | null>(null)
 
-  const handleAssociate = () => {
+  const handleOpen = () => {
     setError(null)
     startTransition(async () => {
-      const res = await associateUserAction(club.id, userId)
-      if (res.ok) onDone()
-      else setError(res.error || `No se pudo asociar a ${userName}.`)
+      const res = await listTenantRolesAction(club.id)
+      if (res.ok) setRoles(res.roles)
+      else setError(res.error)
+    })
+  }
+
+  const handleAssociate = (formData: FormData) => {
+    setError(null)
+    const selected = formData.getAll('roles').map(String)
+    startTransition(async () => {
+      const res = await associateUserAction(club.id, userId, selected)
+      if (res.ok) {
+        setRoles(null)
+        onDone()
+      } else {
+        setError(res.error || `No se pudo asociar a ${userName}.`)
+      }
     })
   }
 
   return (
-    <tr>
-      <ClubCell club={club} extra={error && <span className="text-xs text-destructive">{error}</span>} />
-      <td className="px-3 py-2 text-right">
-        {done ? (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            <CheckCircle2 className="size-3.5" aria-hidden="true" />
-            Asociado
-          </span>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAssociate}
-            disabled={pending}
-            className="h-7 cursor-pointer gap-1 border-primary/25 bg-primary/10 px-2 text-xs font-medium text-primary hover:bg-primary/15 hover:text-primary"
-          >
-            {pending ? (
-              <Loader2 className="size-3 animate-spin" aria-hidden="true" />
-            ) : (
-              <Building2 className="size-3" aria-hidden="true" />
-            )}
-            Asociar
-          </Button>
-        )}
-      </td>
-    </tr>
+    <>
+      <tr>
+        <ClubCell club={club} extra={error && <span className="text-xs text-destructive">{error}</span>} />
+        <td className="px-3 py-2 text-right">
+          {done ? (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" aria-hidden="true" />
+              Asociado
+            </span>
+          ) : roles === null ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleOpen}
+              disabled={pending}
+              className="h-7 cursor-pointer gap-1 border-primary/25 bg-primary/10 px-2 text-xs font-medium text-primary hover:bg-primary/15 hover:text-primary"
+            >
+              {pending ? (
+                <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+              ) : (
+                <Building2 className="size-3" aria-hidden="true" />
+              )}
+              Asociar
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setRoles(null)}
+              disabled={pending}
+              className="h-7 cursor-pointer px-2 text-xs"
+            >
+              Cancelar
+            </Button>
+          )}
+        </td>
+      </tr>
+      {roles !== null && !done && (
+        <tr>
+          <td colSpan={2} className="bg-muted/20 px-3 pb-3">
+            <form action={handleAssociate} className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-foreground">Roles en {club.name}</span>
+              <RoleChecklist roles={roles} disabled={pending} idPrefix={`associate-${club.id}`} />
+              <Button type="submit" size="sm" disabled={pending || roles.length === 0} className="cursor-pointer gap-1 self-end">
+                {pending && <Loader2 className="size-3 animate-spin" aria-hidden="true" />}
+                Asociar con estos roles
+              </Button>
+            </form>
+          </td>
+        </tr>
+      )}
+    </>
   )
 }

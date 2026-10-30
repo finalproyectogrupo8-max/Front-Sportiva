@@ -322,7 +322,19 @@ export const updateTicket = updateAdminTicket
    ========================================================================== */
 
 export type AdminMembership = Schemas['TenantMembershipResource']
-export type MembershipRole = Schemas['MembershipRole']
+/** Rol del club (estándar o custom). Se asigna por `slug`. */
+export type ClubRole = Schemas['ClubRoleResource']
+
+/**
+ * `GET /admin/tenants/{tenant}/roles`
+ * Roles del club para asignar a sus miembros: primero los estándar. Vacío si el club no está activo.
+ */
+export async function getTenantRoles(tenantId: number): Promise<ApiResult<{ data: ClubRole[] }>> {
+  return apiFetch<{ data: ClubRole[] }>(`/admin/tenants/${tenantId}/roles`, {
+    method: 'GET',
+    auth: 'platform',
+  })
+}
 
 export type PaginatedAdminMemberships = Omit<PaginatedAdminUsers, 'data'> & {
   data: AdminMembership[]
@@ -351,11 +363,12 @@ export async function getTenantMemberships(
 
 /**
  * `POST /admin/tenants/{tenant}/memberships`
- * Asocia un usuario existente al club. 422 si ya es miembro.
+ * Asocia un usuario existente al club con uno o más roles del club (slugs). 422 si ya es miembro,
+ * si un rol no existe o si el club no está activo.
  */
 export async function createTenantMembership(
   tenantId: number,
-  data: { user_id: number; role: MembershipRole },
+  data: { user_id: number; roles: string[] },
 ): Promise<ApiResult<{ data: AdminMembership }>> {
   return apiFetch<{ data: AdminMembership }>(`/admin/tenants/${tenantId}/memberships`, {
     method: 'POST',
@@ -366,12 +379,13 @@ export async function createTenantMembership(
 
 /**
  * `PATCH /admin/tenants/{tenant}/memberships/{membership}`
- * Cambia el rol o activa/desactiva la membresía. Desactivar revoca los tokens del usuario en ese club.
+ * Reemplaza los roles del miembro o activa/desactiva la membresía. Desactivar revoca los tokens del
+ * usuario en ese club.
  */
 export async function updateTenantMembership(
   tenantId: number,
   membershipId: number,
-  data: { role?: MembershipRole; is_active?: boolean },
+  data: { roles?: string[]; is_active?: boolean },
 ): Promise<ApiResult<{ data: AdminMembership }>> {
   return apiFetch<{ data: AdminMembership }>(
     `/admin/tenants/${tenantId}/memberships/${membershipId}`,

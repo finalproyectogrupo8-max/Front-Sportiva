@@ -20,7 +20,8 @@ import {
   type AddMembershipState,
   type UserOption,
 } from '@/app/(app)/admin/clubes/[id]/actions'
-import { MEMBERSHIP_ROLES } from '@/lib/membership-roles'
+import { RoleChecklist } from '@/components/admin/role-checklist'
+import type { ClubRole } from '@/lib/api/admin'
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -142,10 +143,13 @@ function UserPicker({
 export function AddMemberSheet({
   tenantId,
   tenantSlug,
+  roles,
   disabled,
 }: {
   tenantId: number
   tenantSlug: string
+  /** Roles del club que se pueden asignar. */
+  roles: ClubRole[]
   /** Solo se pueden agregar miembros a un club activo. */
   disabled?: boolean
 }) {
@@ -183,6 +187,7 @@ export function AddMemberSheet({
               key={session}
               tenantId={tenantId}
               tenantSlug={tenantSlug}
+              roles={roles}
               onAdded={() => setOpen(false)}
             />
           )}
@@ -195,10 +200,12 @@ export function AddMemberSheet({
 function MembershipFormFields({
   tenantId,
   tenantSlug,
+  roles,
   onAdded,
 }: {
   tenantId: number
   tenantSlug: string
+  roles: ClubRole[]
   onAdded: () => void
 }) {
   const [state, action, pending] = useActionState<AddMembershipState, FormData>(addMembershipAction, {})
@@ -233,22 +240,8 @@ function MembershipFormFields({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="membership-role">Rol</Label>
-          <select
-            id="membership-role"
-            name="role"
-            defaultValue={MEMBERSHIP_ROLES[0].value}
-            disabled={pending}
-            aria-invalid={state.fieldErrors?.role ? true : undefined}
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-          >
-            {MEMBERSHIP_ROLES.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
-          {state.fieldErrors?.role && <p className="text-xs text-destructive">{state.fieldErrors.role}</p>}
+          <span className="text-sm leading-none font-medium select-none">Roles</span>
+          <RoleChecklist roles={roles} disabled={pending} error={state.fieldErrors?.roles} idPrefix="add-member" />
         </div>
 
         {state.error && (
