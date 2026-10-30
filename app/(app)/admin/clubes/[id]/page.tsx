@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { AlertTriangle, ArrowLeft, Database, Info, UserCheck, UserX, Users } from 'lucide-react'
 import { requirePlatformAdmin } from '@/lib/session'
-import { getAdminTenant, getTenantMemberships } from '@/lib/api/admin'
+import { getAdminTenant, getTenantMemberships, getTenantRoles } from '@/lib/api/admin'
 import { TenantStatusBadge } from '@/components/admin/club-table'
 import { AddMemberSheet } from '@/components/admin/membership-form'
 import { MembershipTable } from '@/components/admin/membership-table'
@@ -28,12 +28,15 @@ export default async function AdminClubDetailPage({
   let tenantResult
   let membershipsResult
   let activeResult
+  let rolesResult
   try {
-    ;[tenantResult, membershipsResult, activeResult] = await Promise.all([
+    ;[tenantResult, membershipsResult, activeResult, rolesResult] = await Promise.all([
       getAdminTenant(tenantId),
       getTenantMemberships(tenantId, { page, per_page: 20 }),
       // Solo para contar los activos: con per_page=1 alcanza el `meta.total`.
       getTenantMemberships(tenantId, { is_active: true, per_page: 1 }),
+      // Vacío si el club todavía no está activo.
+      getTenantRoles(tenantId),
     ])
   } catch {
     return <ConnectionError />
@@ -49,6 +52,7 @@ export default async function AdminClubDetailPage({
   const isActive = tenant.status === 'active'
   const totalMembers = membershipsResult.ok ? membershipsResult.data.meta.total : null
   const activeMembers = activeResult.ok ? activeResult.data.meta.total : null
+  const roles = rolesResult.ok ? rolesResult.data.data : []
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
@@ -99,7 +103,7 @@ export default async function AdminClubDetailPage({
               Miembros
             </h2>
           </div>
-          <AddMemberSheet tenantId={tenant.id} tenantSlug={tenant.slug} disabled={!isActive} />
+          <AddMemberSheet tenantId={tenant.id} tenantSlug={tenant.slug} roles={roles} disabled={!isActive} />
         </div>
 
         {!isActive && (
@@ -111,7 +115,7 @@ export default async function AdminClubDetailPage({
 
         {membershipsResult.ok ? (
           <>
-            <MembershipTable tenantId={tenant.id} memberships={membershipsResult.data.data} />
+            <MembershipTable tenantId={tenant.id} memberships={membershipsResult.data.data} roles={roles} />
             <Pagination meta={membershipsResult.data.meta} label={{ one: 'miembro', many: 'miembros' }} />
           </>
         ) : (

@@ -13,8 +13,12 @@ export type Session = {
   user: Schemas['UserResource']
   tenants: Schemas['TenantSummaryResource'][]
   tenant?: Schemas['TenantSummaryResource']
-  profile?: null
+  /** Perfil del usuario en el club activo, con sus roles. null si no tiene perfil en el club. */
+  profile?: Schemas['ClubProfileResource'] | null
+  /** Permisos en el club activo (`<recurso>.<acción>`). La API los vuelve a validar en cada request. */
   permissions?: string[]
+  /** Alcance de cada permiso: `all` (todo el club) u `own` (sus categorías). */
+  permissionScopes?: Record<string, string>
 }
 
 export type ClubSession = Schemas['MeResource']
@@ -48,6 +52,7 @@ export const requireSession = cache(async (): Promise<Session> => {
         tenant: meResult.data.tenant,
         profile: meResult.data.profile,
         permissions: meResult.data.permissions,
+        permissionScopes: meResult.data.permission_scopes,
         tenants: tenantsResult.ok ? tenantsResult.data.tenants : [meResult.data.tenant],
       }
     }

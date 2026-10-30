@@ -167,6 +167,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/newsletter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["newsletter.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/seasons": {
         parameters: {
             query?: never;
@@ -365,6 +381,26 @@ export interface paths {
         patch: operations["tenantMembership.update"];
         trace?: never;
     };
+    "/admin/tenants/{tenant}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Roles del club, para asignarlos a sus miembros. Primero los estándar, después los custom.
+         *     Un club que todavía no está activo no tiene base: devuelve una lista vacía
+         */
+        get: operations["tenantRole.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -440,6 +476,25 @@ export interface components {
             created_at: string;
             updated_at: string;
         };
+        /** ClubProfileResource */
+        ClubProfileResource: {
+            id: number;
+            display_name: string;
+            status: string;
+            roles: {
+                slug: string;
+                name: string;
+            }[];
+        };
+        /** ClubRoleResource */
+        ClubRoleResource: {
+            slug: string;
+            name: string;
+            description: string | null;
+            is_system: boolean;
+            /** @description Cuántos usuarios del club tienen el rol. */
+            users_count?: number;
+        };
         /** CoachResource */
         CoachResource: {
             id: string;
@@ -471,19 +526,18 @@ export interface components {
         MeResource: {
             user: components["schemas"]["UserResource"];
             tenant: components["schemas"]["TenantSummaryResource"];
-            profile: null;
+            profile: components["schemas"]["ClubProfileResource"] | null;
             permissions: string[];
+            /** @description Alcance de cada permiso: all (todo el club) u own (sus categorías). */
+            permission_scopes: {
+                [key: string]: string;
+            };
         };
         /** MeTenantsResource */
         MeTenantsResource: {
             user: components["schemas"]["UserResource"];
             tenants: components["schemas"]["TenantSummaryResource"][];
         };
-        /**
-         * MembershipRole
-         * @enum {string}
-         */
-        MembershipRole: "admin";
         /** SeasonResource */
         SeasonResource: {
             id: string;
@@ -503,8 +557,11 @@ export interface components {
             token: string;
             expires_at: string;
             tenant: components["schemas"]["TenantSummaryResource"] | null;
-            profile: null;
+            profile: components["schemas"]["ClubProfileResource"] | null;
             permissions: string[];
+            permission_scopes: {
+                [key: string]: string;
+            };
         };
         /** SportResource */
         SportResource: {
@@ -567,7 +624,11 @@ export interface components {
         /** StoreTenantMembershipRequest */
         StoreTenantMembershipRequest: {
             user_id: number;
-            role: components["schemas"]["MembershipRole"];
+            /**
+             * @description Slugs de roles del club (GET /api/admin/tenants/{tenant}/roles). Que existan se valida
+             *     contra la base del club, en ClubMembers.
+             */
+            roles: string[];
             is_active?: string;
         };
         /** StoreTenantRequest */
@@ -619,7 +680,11 @@ export interface components {
             id: number;
             user_id: number;
             tenant_id: number;
-            role: string;
+            /** @description Roles del miembro en el club (base del club). Solo en los endpoints de un club. */
+            roles?: {
+                slug: string;
+                name: string;
+            }[];
             is_active: boolean;
             user?: components["schemas"]["App.Http.Resources.Admin.UserResource"];
             tenant?: components["schemas"]["TenantResource"];
@@ -702,7 +767,8 @@ export interface components {
         };
         /** UpdateTenantMembershipRequest */
         UpdateTenantMembershipRequest: {
-            role?: components["schemas"]["MembershipRole"];
+            /** @description Reemplaza la lista completa de roles del miembro en el club. */
+            roles?: string[];
             is_active?: boolean;
             user_id?: string;
             tenant_id?: string;
@@ -860,6 +926,11 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @constant */
+                        message: "Tu usuario está deshabilitado en este club.";
+                        /** @constant */
+                        code: "club_user_disabled";
+                    } | {
                         /** @constant */
                         message: "El club no está activo.";
                         /** @constant */
@@ -1292,6 +1363,36 @@ export interface operations {
                     "application/json": string;
                 };
             };
+        };
+    };
+    "newsletter.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Suscripción realizada con éxito";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
         };
     };
     "seasons.index": {
@@ -2122,6 +2223,34 @@ export interface operations {
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "tenantRole.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The tenant ID */
+                tenant: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `ClubRoleResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubRoleResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "users.index": {
