@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight, CalendarClock, MapPin } from 'lucide-react'
 import { TODAY, daysFromToday, formatDay, points } from '@/lib/data'
-import { MODULES, type ModuleId } from '@/lib/modules'
+import type { ModuleId } from '@/lib/modules'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
 import { Initials, Pill } from './shared'
@@ -18,7 +18,9 @@ function relative(days: number) {
 }
 
 export function HomeDashboard() {
-  const { tenant, data } = useClub()
+  const { tenant, data, modules, canSee } = useClub()
+  const seesMatches = canSee('partidos')
+  const seesCoaches = canSee('profes')
   const alerts = useAlerts()
   const base = `/c/${tenant.slug}`
 
@@ -86,11 +88,11 @@ export function HomeDashboard() {
               </h1>
               <p className="max-w-md text-sm leading-relaxed text-ink-foreground/70">
                 {alerts.length > 0
-                  ? `Hay ${alerts.length} temas que requieren atención y ${upcoming.filter((m) => daysFromToday(m.fecha) <= 7).length} partidos esta semana.`
+                  ? `Hay ${alerts.length} temas que requieren atención${seesMatches ? ` y ${upcoming.filter((m) => daysFromToday(m.fecha) <= 7).length} partidos esta semana` : ''}.`
                   : 'Todo en orden. Sin alertas operativas pendientes.'}
               </p>
             </div>
-            {last?.resultado && (
+            {seesMatches && last?.resultado && (
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="text-ink-foreground/60">Último resultado</span>
                 <span className="rounded-md bg-ink-foreground/10 px-2 py-1 font-display text-lg font-semibold tabular-nums">
@@ -106,7 +108,7 @@ export function HomeDashboard() {
             )}
           </div>
 
-          {next && (
+          {seesMatches && next && (
             <Link
               href={`${base}/partidos`}
               className="group flex flex-col gap-5 rounded-2xl border border-ink-foreground/10 bg-ink-foreground/5 p-5 transition hover:bg-ink-foreground/10 animate-rise [animation-delay:80ms]"
@@ -157,7 +159,12 @@ export function HomeDashboard() {
             Módulos del club
           </h2>
           <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {MODULES.map((m, i) => {
+            {modules.length === 0 && (
+              <li className="col-span-full rounded-xl border bg-card px-4 py-6 text-sm text-muted-foreground">
+                Tu rol todavía no tiene módulos habilitados. Pedile a un administrador del club que te asigne un rol.
+              </li>
+            )}
+            {modules.map((m, i) => {
               const metric = metrics[m.id]
               return (
                 <li key={m.id} className="min-w-0 animate-rise" style={{ animationDelay: `${120 + i * 40}ms` }}>
@@ -195,30 +202,34 @@ export function HomeDashboard() {
             })}
           </ul>
 
-          <h2 className="mt-4 text-sm font-medium text-muted-foreground">Agenda de la semana</h2>
-          <ul className="flex flex-col divide-y rounded-xl border bg-card">
-            {upcoming.slice(0, 5).map((m) => (
-              <li key={m.id} className="flex items-center gap-4 px-4 py-3">
-                <div className="flex w-12 flex-col items-center">
-                  <span className="text-[10px] font-medium uppercase text-muted-foreground">
-                    {formatDay(m.fecha, { weekday: 'short' })}
-                  </span>
-                  <span className="font-display text-2xl font-bold leading-none tabular-nums">
-                    {formatDay(m.fecha, { day: 'numeric' })}
-                  </span>
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-medium">
-                    {m.condicion === 'Local' ? `${tenant.short} vs ${m.rival}` : `${m.rival} vs ${tenant.short}`}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {m.deporte} {m.categoria} · {m.hora} · {m.lugar}
-                  </span>
-                </div>
-                <KitSwatch camiseta={m.camiseta} short={m.short} />
-              </li>
-            ))}
-          </ul>
+          {seesMatches && (
+            <>
+              <h2 className="mt-4 text-sm font-medium text-muted-foreground">Agenda de la semana</h2>
+              <ul className="flex flex-col divide-y rounded-xl border bg-card">
+                {upcoming.slice(0, 5).map((m) => (
+                  <li key={m.id} className="flex items-center gap-4 px-4 py-3">
+                    <div className="flex w-12 flex-col items-center">
+                      <span className="text-[10px] font-medium uppercase text-muted-foreground">
+                        {formatDay(m.fecha, { weekday: 'short' })}
+                      </span>
+                      <span className="font-display text-2xl font-bold leading-none tabular-nums">
+                        {formatDay(m.fecha, { day: 'numeric' })}
+                      </span>
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-medium">
+                        {m.condicion === 'Local' ? `${tenant.short} vs ${m.rival}` : `${m.rival} vs ${tenant.short}`}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {m.deporte} {m.categoria} · {m.hora} · {m.lugar}
+                      </span>
+                    </div>
+                    <KitSwatch camiseta={m.camiseta} short={m.short} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </section>
 
         <aside className="flex min-w-0 flex-col gap-6">
@@ -248,32 +259,34 @@ export function HomeDashboard() {
             </ul>
           </section>
 
-          <section aria-labelledby="profes-hoy" className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 id="profes-hoy" className="text-sm font-medium text-muted-foreground">
-                Profes hoy
-              </h2>
-              <Link href={`${base}/profes`} className="text-xs font-medium text-primary hover:underline">
-                Ver control
-              </Link>
-            </div>
-            <ul className="flex flex-col divide-y rounded-xl border bg-card">
-              {coachesToday.map((c) => (
-                <li key={c.id} className="flex items-center gap-3 px-3 py-2.5">
-                  <Initials name={c.nombre} className="size-8 text-xs" />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-medium">{c.nombre}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {c.deporte} · {c.categorias.join(', ')}
+          {seesCoaches && (
+            <section aria-labelledby="profes-hoy" className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <h2 id="profes-hoy" className="text-sm font-medium text-muted-foreground">
+                  Profes hoy
+                </h2>
+                <Link href={`${base}/profes`} className="text-xs font-medium text-primary hover:underline">
+                  Ver control
+                </Link>
+              </div>
+              <ul className="flex flex-col divide-y rounded-xl border bg-card">
+                {coachesToday.map((c) => (
+                  <li key={c.id} className="flex items-center gap-3 px-3 py-2.5">
+                    <Initials name={c.nombre} className="size-8 text-xs" />
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-sm font-medium">{c.nombre}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {c.deporte} · {c.categorias.join(', ')}
+                      </span>
                     </span>
-                  </span>
-                  <Pill tone={c.presente ? 'ok' : c.presente === false ? 'bad' : 'neutral'}>
-                    {c.presente ? 'Presente' : c.presente === false ? 'Ausente' : 'Sin carga'}
-                  </Pill>
-                </li>
-              ))}
-            </ul>
-          </section>
+                    <Pill tone={c.presente ? 'ok' : c.presente === false ? 'bad' : 'neutral'}>
+                      {c.presente ? 'Presente' : c.presente === false ? 'Ausente' : 'Sin carga'}
+                    </Pill>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </aside>
       </div>
     </div>

@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/command'
 import { Command } from '@/components/ui/command'
 import { ClubCrest } from '@/components/brand/logo'
-import { MODULES } from '@/lib/modules'
+import { QUICK_CREATE } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { useClub } from './club-provider'
 
 export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const router = useRouter()
-  const { tenant, data } = useClub()
+  const { tenant, data, modules, can, canSee } = useClub()
+  const actions = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const base = `/c/${tenant.slug}`
 
   const go = (href: string) => {
@@ -38,7 +39,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
               <House aria-hidden="true" />
               Hoy en el club
             </CommandItem>
-            {MODULES.map((m) => (
+            {modules.map((m) => (
               <CommandItem key={m.id} value={`${m.name} ${m.description}`} onSelect={() => go(`${base}/${m.id}`)}>
                 <m.icon aria-hidden="true" />
                 {m.name}
@@ -46,37 +47,39 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
               </CommandItem>
             ))}
           </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Acciones">
-            {[
-              ['indumentaria', 'Nuevo pedido de indumentaria'],
-              ['materiales', 'Solicitar reposición de materiales'],
-              ['partidos', 'Cargar partido'],
-              ['jugadores', 'Nueva ficha de jugador'],
-              ['canchas', 'Reportar problema en cancha'],
-            ].map(([mod, label]) => (
-              <CommandItem key={mod} onSelect={() => go(`${base}/${mod}?nuevo=1`)}>
-                <Plus aria-hidden="true" />
-                {label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Jugadores">
-            {data.players.map((p) => (
-              <CommandItem
-                key={p.id}
-                value={`${p.nombre} ${p.apellido} ${p.alias} ${p.puesto} ${p.deporte} ${p.categoria}`}
-                onSelect={() => go(`${base}/jugadores?id=${p.id}`)}
-              >
-                <UserRound aria-hidden="true" />
-                {p.nombre} {p.apellido}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {p.deporte} · {p.categoria} · #{p.numero}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {actions.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Acciones">
+                {actions.map((q) => (
+                  <CommandItem key={q.module} onSelect={() => go(`${base}/${q.module}?nuevo=1`)}>
+                    <Plus aria-hidden="true" />
+                    {q.action}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+          {canSee('jugadores') && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Jugadores">
+                {data.players.map((p) => (
+                  <CommandItem
+                    key={p.id}
+                    value={`${p.nombre} ${p.apellido} ${p.alias} ${p.puesto} ${p.deporte} ${p.categoria}`}
+                    onSelect={() => go(`${base}/jugadores?id=${p.id}`)}
+                  >
+                    <UserRound aria-hidden="true" />
+                    {p.nombre} {p.apellido}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {p.deporte} · {p.categoria} · #{p.numero}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
           <CommandSeparator />
           <CommandGroup heading="Cambiar de club">
             {TENANTS.filter((t) => t.slug !== tenant.slug).map((t) => (

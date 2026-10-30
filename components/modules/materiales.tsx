@@ -26,7 +26,9 @@ const URG_TONE: Record<Urgencia, Tone> = { Alta: 'bad', Media: 'warn', Baja: 'ne
 const EST_TONE: Record<MaterialRequest['estado'], Tone> = { Pendiente: 'warn', Aprobada: 'info', Recibida: 'ok' }
 
 export function MaterialesModule() {
-  const { data, update } = useClub()
+  const { data, update, can } = useClub()
+  const canCreate = can('material_orders.create')
+  const canAdvance = (estado: string) => can(estado === 'Pendiente' ? 'material_orders.approve' : 'material_orders.deliver')
   const [tipo, setTipo] = useState<Tipo>('Todos')
   const [open, setOpen] = useCreateDialog()
   const [preset, setPreset] = useState<string>('')
@@ -59,10 +61,12 @@ export function MaterialesModule() {
         title="Materiales"
         description="Stock de utilería por depósito y circuito de reposición: solicitud, aprobación e ingreso."
         actions={
-          <Button onClick={() => requestFor('')} className="gap-1.5">
-            <PackagePlus className="size-4" aria-hidden="true" />
-            Solicitar reposición
-          </Button>
+          canCreate && (
+            <Button onClick={() => requestFor('')} className="gap-1.5">
+              <PackagePlus className="size-4" aria-hidden="true" />
+              Solicitar reposición
+            </Button>
+          )
         }
       >
         <Segmented
@@ -109,7 +113,7 @@ export function MaterialesModule() {
                       <span className="text-xs text-muted-foreground">mín. {m.minimo}</span>
                     </div>
                     <Meter value={m.stock} max={m.minimo * 2} tone={tone} />
-                    {tone !== 'ok' && (
+                    {tone !== 'ok' && canCreate && (
                       <Button variant="outline" size="sm" onClick={() => requestFor(m.id)} className="w-fit">
                         Pedir {Math.max(m.minimo * 2 - m.stock, 1)} unidades
                       </Button>
@@ -138,7 +142,7 @@ export function MaterialesModule() {
                   </p>
                   <div className="flex items-center justify-between">
                     <Pill tone={URG_TONE[r.urgencia]}>Urgencia {r.urgencia.toLowerCase()}</Pill>
-                    {r.estado !== 'Recibida' && (
+                    {r.estado !== 'Recibida' && canAdvance(r.estado) && (
                       <Button size="sm" variant="ghost" className="h-7 gap-1 text-primary" onClick={() => advance(r)}>
                         {r.estado === 'Pendiente' ? (
                           <>
@@ -159,7 +163,7 @@ export function MaterialesModule() {
         </div>
       </PageBody>
 
-      <RequestDialog key={`${open}-${preset}`} open={open} onOpenChange={setOpen} preset={preset} />
+      {canCreate && <RequestDialog key={`${open}-${preset}`} open={open} onOpenChange={setOpen} preset={preset} />}
     </>
   )
 }

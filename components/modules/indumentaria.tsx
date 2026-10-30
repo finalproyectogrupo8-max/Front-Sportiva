@@ -49,7 +49,10 @@ function JerseyBack({ numero, alias, small = false }: { numero: number | string;
 }
 
 export function IndumentariaModule() {
-  const { tenant, data, update, playerName } = useClub()
+  const { tenant, data, update, playerName, can } = useClub()
+  const canCreate = can('apparel_orders.create')
+  /** Aprobar un pedido solicitado es de quien aprueba; producirlo y entregarlo, del utilero (`deliver`). */
+  const canAdvance = (estado: string) => can(estado === 'Solicitado' ? 'apparel_orders.approve' : 'apparel_orders.deliver')
   const [sport, setSport] = useState<'Todos' | Sport>('Todos')
   const [open, setOpen] = useCreateDialog()
 
@@ -71,10 +74,12 @@ export function IndumentariaModule() {
         title="Indumentaria"
         description="Pedidos de camisetas, shorts y abrigos por jugador, con talle, número y alias estampado."
         actions={
-          <Button onClick={() => setOpen(true)} className="gap-1.5">
-            <Plus className="size-4" aria-hidden="true" />
-            Nuevo pedido
-          </Button>
+          canCreate && (
+            <Button onClick={() => setOpen(true)} className="gap-1.5">
+              <Plus className="size-4" aria-hidden="true" />
+              Nuevo pedido
+            </Button>
+          )
         }
       >
         <Segmented
@@ -117,7 +122,7 @@ export function IndumentariaModule() {
                           <span className="truncate text-xs text-muted-foreground">
                             {p?.deporte} {p?.categoria} · {formatDay(o.fecha, { day: 'numeric', month: 'short' })}
                           </span>
-                          {estado !== 'Entregado' && (
+                          {estado !== 'Entregado' && canAdvance(estado) && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -140,7 +145,7 @@ export function IndumentariaModule() {
         </div>
       </PageBody>
 
-      <NewOrderDialog open={open} onOpenChange={setOpen} />
+      {canCreate && <NewOrderDialog open={open} onOpenChange={setOpen} />}
     </>
   )
 }

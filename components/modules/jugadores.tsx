@@ -23,7 +23,8 @@ export const PASE_TONE: Record<Pase, Tone> = {
 }
 
 export function JugadoresModule() {
-  const { tenant, data } = useClub()
+  const { tenant, data, can } = useClub()
+  const canCreate = can('players.create')
   const [sport, setSport] = useState<'Todos' | Sport>('Todos')
   const [cat, setCat] = useState<'Todas' | Categoria>('Todas')
   const [q, setQ] = useState('')
@@ -48,10 +49,12 @@ export function JugadoresModule() {
         title="Jugadores"
         description="Ficha de cada jugador: edad, categoría, estado del pase, puesto y datos de indumentaria."
         actions={
-          <Button onClick={() => setOpen(true)} className="gap-1.5">
-            <Plus className="size-4" aria-hidden="true" />
-            Nueva ficha
-          </Button>
+          canCreate && (
+            <Button onClick={() => setOpen(true)} className="gap-1.5">
+              <Plus className="size-4" aria-hidden="true" />
+              Nueva ficha
+            </Button>
+          )
         }
       >
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
@@ -160,13 +163,13 @@ export function JugadoresModule() {
         </SheetContent>
       </Sheet>
 
-      <NewPlayerDialog open={open} onOpenChange={setOpen} />
+      {canCreate && <NewPlayerDialog open={open} onOpenChange={setOpen} />}
     </>
   )
 }
 
 function PlayerSheet({ p }: { p: Player }) {
-  const { tenant, data, update } = useClub()
+  const { tenant, data, update, can } = useClub()
   const coach = data.coaches.find((c) => c.id === p.coachId)
   const orders = data.orders.filter((o) => o.playerId === p.id)
   const notes = data.coaches.flatMap((c) => c.notas.filter((n) => n.playerId === p.id).map((n) => ({ ...n, coach: c.nombre })))
@@ -206,13 +209,20 @@ function PlayerSheet({ p }: { p: Player }) {
           ))}
         </dl>
 
-        <FormSelect
-          id="pase"
-          label="Estado del pase"
-          value={p.pase}
-          onChange={setPase}
-          options={(['Habilitado', 'En trámite', 'A préstamo', 'Libre'] as Pase[]).map((x) => ({ value: x, label: x }))}
-        />
+        {can('players.update') ? (
+          <FormSelect
+            id="pase"
+            label="Estado del pase"
+            value={p.pase}
+            onChange={setPase}
+            options={(['Habilitado', 'En trámite', 'A préstamo', 'Libre'] as Pase[]).map((x) => ({ value: x, label: x }))}
+          />
+        ) : (
+          <p className="text-sm">
+            <span className="text-muted-foreground">Estado del pase: </span>
+            <span className="font-medium">{p.pase}</span>
+          </p>
+        )}
 
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold">Rendimiento</h3>
