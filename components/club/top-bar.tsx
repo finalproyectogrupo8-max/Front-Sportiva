@@ -54,7 +54,8 @@ export function TopBar({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
+      // El autocompletar del navegador dispara keydown sin `key`.
+      if (e.key?.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setPaletteOpen((o) => !o)
       }
