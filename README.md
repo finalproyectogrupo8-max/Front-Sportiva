@@ -6,7 +6,9 @@ Este repositorio es **solo el frontend**. Va a consumir una **API REST en Larave
 
 Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** y **shadcn/ui**.
 
-> **Estado:** el login ya va contra la API de Laravel (`lib/auth.ts`). Los datos de los clubes todavía son mock (`lib/data.ts`, `lib/tenants.ts`) y se reemplazan módulo por módulo.
+> **Estado:** configuración del club, jugadores, profes, habilitación, partidos, convocatoria y asistencia ya van contra la API de Laravel. Indumentaria, materiales, canchas, análisis y proyecto todavía muestran datos de ejemplo (`lib/data.ts`).
+
+**Cómo se usa:** [docs/guia-de-uso.md](docs/guia-de-uso.md) · **Decisiones y pendientes:** [docs/decisiones-producto.md](docs/decisiones-producto.md)
 
 ---
 
