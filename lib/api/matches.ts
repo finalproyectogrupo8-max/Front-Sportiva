@@ -104,3 +104,27 @@ export function recordAttendance(
 ): Promise<ApiResult<List<AttendanceRow>>> {
   return apiFetch(`/${kind}/${id}/attendance`, { method: 'PUT', body: { records } })
 }
+
+// Convocatoria (FRO-35): el profe elige entre los habilitados, publica y comparte por WhatsApp.
+
+export type CallupSheet = Schemas['CallupSheetResource']
+export type CallupRow = Schemas['CallupRowResource']
+export type SquadOption = Schemas['SquadOptionResource']
+export type CallupResponse = 'pending' | 'going' | 'not_going'
+
+export function getCallup(matchId: number): Promise<ApiResult<One<CallupSheet>>> {
+  return apiFetch(`/matches/${matchId}/callup`)
+}
+
+/** Reemplaza la lista de convocados. Sin número, la API usa el del plantel. */
+export function updateCallup(
+  matchId: number,
+  players: { player_id: number; shirt_number: number | null }[],
+): Promise<ApiResult<One<CallupSheet>>> {
+  return apiFetch(`/matches/${matchId}/callup`, { method: 'PUT', body: { players } })
+}
+
+/** Publica (o vuelve a publicar después de un cambio): genera la página pública y los mensajes. */
+export function publishCallup(matchId: number): Promise<ApiResult<One<CallupSheet>>> {
+  return apiFetch(`/matches/${matchId}/callup/publish`, { method: 'POST' })
+}

@@ -3,12 +3,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ClipboardCheck, Clock, ExternalLink, MapPin, Megaphone, Shirt, Trophy } from 'lucide-react'
 import { MapPreview } from '@/components/club/address-picker'
+import { CallupPanel } from '@/components/club/matches/callup-panel'
 import { MatchActions, ResultForm } from '@/components/club/matches/match-detail'
 import { NoAccess } from '@/components/club/no-access'
 import { Pill, type Tone } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
 import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
-import { getMatch } from '@/lib/api/matches'
+import { getCallup, getMatch } from '@/lib/api/matches'
 import { dayKey, formatLongDay, formatTime } from '@/lib/club-time'
 import { requireSession } from '@/lib/session'
 import { cn } from '@/lib/utils'
@@ -31,11 +32,12 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
 
   const matchId = Number(id)
   if (!matchId) notFound()
-  const [result, categories, competitions, venues] = await Promise.all([
+  const [result, categories, competitions, venues, callup] = await Promise.all([
     getMatch(matchId),
     listCategories(),
     can('competitions.view') ? listCompetitions() : Promise.resolve(null),
     can('venues.view') ? listVenues() : Promise.resolve(null),
+    can('callups.view') ? getCallup(matchId).catch(() => null) : Promise.resolve(null),
   ])
   if (!result.ok) notFound()
 
@@ -117,15 +119,19 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
           </section>
 
           {/* Convocatoria (FRO-35) */}
-          <section className="flex items-start gap-3 rounded-xl border border-dashed bg-card/50 p-5" aria-labelledby="match-callup">
-            <Megaphone className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <div className="flex flex-col gap-1">
-              <h2 id="match-callup" className="text-sm font-semibold">Convocatoria</h2>
-              <p className="text-sm text-muted-foreground">
-                Próximamente: elegir a los convocados entre los habilitados y mandarles la citación por WhatsApp con un link para confirmar.
-              </p>
-            </div>
-          </section>
+          {callup?.ok ? (
+            <CallupPanel sheet={callup.data.data} can={{ update: can('callups.update'), publish: can('callups.publish') }} />
+          ) : (
+            can('callups.view') && (
+              <section className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-5" aria-labelledby="match-callup">
+                <Megaphone className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
+                <div className="flex flex-col gap-1">
+                  <h2 id="match-callup" className="text-sm font-semibold">Convocatoria</h2>
+                  <p className="text-sm text-muted-foreground">No se pudo cargar la convocatoria. Probá recargar la página.</p>
+                </div>
+              </section>
+            )
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
