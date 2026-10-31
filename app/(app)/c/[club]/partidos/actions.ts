@@ -6,7 +6,9 @@ import {
   createTraining,
   deleteMatch,
   deleteTraining,
+  publishCallup,
   recordAttendance,
+  updateCallup,
   updateMatch,
   updateTraining,
   type AttendanceStatus,
@@ -151,4 +153,26 @@ export async function recordAttendanceAction(
   if (valid.length === 0) return { ok: false, error: 'Marcá al menos a un jugador.' }
   const present = valid.filter((r) => r.status === 'present' || r.status === 'late').length
   return runApiAction(() => recordAttendance(kind, id, valid), `Asistencia guardada: ${present} de ${valid.length} presentes.`, ['*'])
+}
+
+/** Guarda la lista de convocados; con `publish`, además la publica para compartirla. */
+export async function saveCallupAction(
+  matchId: number,
+  players: { player_id: number; shirt_number: number | null }[],
+  publish: boolean,
+): Promise<ActionResult> {
+  const valid = players.filter((p) => Number.isInteger(p.player_id) && (p.shirt_number === null || (Number.isInteger(p.shirt_number) && p.shirt_number >= 0)))
+  if (publish && valid.length === 0) return { ok: false, error: 'Convocá al menos un jugador antes de publicar.' }
+
+  const saved = await runCall(() => updateCallup(matchId, valid))
+  if (!saved.ok) return 'kind' in saved ? failure(saved, ['*']) : saved
+  if (!publish) {
+    await revalidateClub()
+    return { ok: true, message: `Convocatoria guardada: ${valid.length} convocados.` }
+  }
+  return publishCallupAction(matchId)
+}
+
+export async function publishCallupAction(matchId: number): Promise<ActionResult> {
+  return runApiAction(() => publishCallup(matchId), 'Convocatoria publicada. Compartila en el grupo.', ['*'])
 }
