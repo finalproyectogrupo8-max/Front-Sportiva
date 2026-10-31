@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ChevronRight, UserRound } from 'lucide-react'
-import { EmptyConfig } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 import { Pill } from '@/components/club/shared'
 import type { Player } from '@/lib/api/players'
 import { PLAYER_STATUS, photoUrl } from '@/lib/player-labels'

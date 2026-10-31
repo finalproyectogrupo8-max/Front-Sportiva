@@ -8,17 +8,8 @@ import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
 import type { Season } from '@/lib/api/club'
 import { formatDay } from '@/lib/format-date'
-import {
-  ConfigSheet,
-  ConfigTable,
-  ConfirmDialog,
-  EmptyConfig,
-  Field,
-  FormError,
-  RowActions,
-  SubmitButton,
-  useConfigAction,
-} from '@/components/club/forms'
+import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 
 export const SEASON_STATUS: Record<string, { label: string; tone: Tone }> = {
   active: { label: 'En curso', tone: 'ok' },

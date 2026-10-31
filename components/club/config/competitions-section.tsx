@@ -28,15 +28,8 @@ import { SheetFooter } from '@/components/ui/sheet'
 import type { Category, Competition, CompetitionRequirement, RequirementInput, Season, Sport } from '@/lib/api/club'
 import { formatDay } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
-import {
-  ConfigSheet,
-  ConfirmDialog,
-  EmptyConfig,
-  Field,
-  FormError,
-  SubmitButton,
-  useConfigAction,
-} from '@/components/club/forms'
+import { ConfigSheet, ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 
 const ALL = 'todos'
 
