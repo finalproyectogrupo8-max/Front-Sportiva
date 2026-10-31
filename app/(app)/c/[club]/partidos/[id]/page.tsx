@@ -122,7 +122,11 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
         <div className="flex min-w-0 flex-col gap-6">
           {/* Convocatoria (FRO-35) */}
           {callup?.ok ? (
-            <CallupPanel sheet={callup.data.data} can={{ update: can('callups.update'), publish: can('callups.publish') }} />
+            <CallupPanel
+              sheet={callup.data.data}
+              pollQuestion={`¿Vas al partido ${match.is_home ? 'vs' : 'en cancha de'} ${match.opponent}? ${capitalize(formatLongDay(match.match_date))} · ${match.meet_at ? `presentación ${formatTime(match.meet_at)} h` : `${formatTime(match.match_date)} h`}`}
+              can={{ update: can('callups.update'), publish: can('callups.publish') }}
+            />
           ) : (
             can('callups.view') && (
               <section className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-5" aria-labelledby="match-callup">
@@ -181,4 +185,8 @@ function mapsQuery(url: string | null): string | null {
   } catch {
     return null
   }
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
