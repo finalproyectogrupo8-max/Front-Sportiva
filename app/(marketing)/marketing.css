@@ -19,6 +19,18 @@ html.marketing {
 @layer base {
   html.marketing {
     scroll-behavior: smooth;
+    scroll-padding-top: 110px;
+  }
+
+  html.marketing section[id],
+  html.marketing footer[id],
+  html.marketing #inicio,
+  html.marketing #funciones,
+  html.marketing #quienes-somos,
+  html.marketing #nosotros,
+  html.marketing #acceso,
+  html.marketing #contacto {
+    scroll-margin-top: 110px;
   }
 
   html.marketing body {
@@ -78,22 +90,25 @@ html.marketing ::selection {
 }
 
 .site-header {
-  position: absolute;
-  z-index: 50;
-  top: 24px;
+  position: fixed;
+  z-index: 100;
+  top: 16px;
   left: 50%;
-  width: min(1360px, calc(100% - 40px));
-  height: 76px;
+  width: min(1360px, calc(100% - 32px));
+  height: 72px;
   padding: 0 32px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   transform: translateX(-50%);
   border-radius: 9999px;
-  background: #1A1A1A;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(26, 26, 26, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   animation: headerEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .brand {
@@ -274,23 +289,30 @@ html.marketing ::selection {
   position: relative;
   min-height: max(780px, 100svh);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
-  padding: 175px max(40px, calc((100vw - 1380px) / 2)) 80px;
-  background-image:
-    linear-gradient(180deg, rgba(10,10,9,.43), rgba(10,10,9,.18) 50%, rgba(10,10,9,.88)),
-    linear-gradient(90deg, rgba(10,10,9,.88) 0%, rgba(10,10,9,.62) 48%, rgba(10,10,9,.25) 100%),
-    var(--hero-image);
-  background-size: cover;
-  background-position: center;
+  padding: 175px max(48px, calc((100vw - 1280px) / 2)) 80px;
+  overflow: hidden;
 }
 
-.hero::after {
-  content: '';
+.hero-background-wrap {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,.3) 105%);
+  z-index: 0;
   pointer-events: none;
+}
+
+.hero-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10,10,9,.45) 0%, rgba(10,10,9,.2) 50%, rgba(10,10,9,.92) 100%),
+    linear-gradient(90deg, rgba(10,10,9,.9) 0%, rgba(10,10,9,.65) 50%, rgba(10,10,9,.25) 100%);
 }
 
 .hero-grain {
@@ -304,9 +326,12 @@ html.marketing ::selection {
 .hero-content {
   position: relative;
   z-index: 2;
-  width: min(940px, 100%);
+  width: min(980px, 100%);
   padding-top: 0;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .eyebrow {
@@ -345,8 +370,8 @@ html.marketing ::selection {
 
 .hero h1 {
   margin: 25px 0 24px;
-  font-size: clamp(66px, 8vw, 126px);
-  line-height: .86;
+  font-size: clamp(52px, 6.5vw, 98px);
+  line-height: .88;
   letter-spacing: -1px;
   text-shadow: 0 4px 40px rgba(0,0,0,.35);
   text-align: left;
@@ -362,17 +387,19 @@ html.marketing ::selection {
 
 .hero h1 em {
   display: block;
-  margin-left: clamp(24px, 5.2vw, 68px);
+  margin-left: 0;
   -webkit-text-stroke: 1px rgba(255,255,255,.8);
   color: transparent;
 }
 
+.hero-lead,
 .hero-content > p {
-  width: min(640px, 100%);
+  width: min(680px, 100%);
   margin: 0;
-  color: rgba(255,255,255,.78);
-  font-size: 16px;
-  line-height: 1.75;
+  margin-left: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(18px, 1.4vw, 21px);
+  line-height: 1.7;
   text-align: left;
 }
 
@@ -407,11 +434,12 @@ html.marketing ::selection {
 .hero-cta-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   margin-top: 36px;
-  width: 100%;
-  gap: 16px;
+  margin-left: 0;
+  width: max-content;
+  gap: 20px;
 }
 
 .hero-cta-group .primary-cta {
@@ -421,7 +449,7 @@ html.marketing ::selection {
 .trust-line {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 14px;
   margin-top: 0;
 }
@@ -603,8 +631,8 @@ html.marketing ::selection {
 }
 
 .teaser-copy p {
-  color: rgba(255,255,255,.55);
-  font-size: 12px;
+  color: rgba(255,255,255,.75);
+  font-size: 16px;
   line-height: 1.65;
 }
 
@@ -1012,40 +1040,63 @@ html.marketing ::selection {
 }
 
 .why-section {
-  min-height: 630px;
-  display: grid;
-  grid-template-columns: 1fr 2.1fr 1fr;
-  align-items: center;
-  gap: 60px;
+  position: relative;
+  min-height: 580px;
   padding: 100px max(32px, calc((100vw - 1380px) / 2));
   background: var(--cream);
   color: var(--ink);
+  overflow: hidden;
+}
+
+.why-background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.why-grid-container {
+  position: relative;
+  z-index: 2;
+  width: min(1360px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  align-items: center;
+  gap: 60px;
+}
+
+.why-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .why-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  align-self: start;
-  margin-top: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .why-label span {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--orange);
   color: white;
   font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
 }
 
 .why-label p {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.3;
   text-transform: uppercase;
+  color: var(--orange-dark);
 }
 
 .why-copy {
@@ -1056,7 +1107,7 @@ html.marketing ::selection {
   position: absolute;
   top: -57px;
   left: -18px;
-  color: rgba(211,111,69,.28);
+  color: rgba(211,111,69,.22);
   font-family: Georgia, serif;
   font-size: 140px;
   line-height: 1;
@@ -1064,24 +1115,48 @@ html.marketing ::selection {
 
 .why-copy h2 {
   position: relative;
-  font-size: clamp(52px, 5.7vw, 84px);
-  line-height: .93;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
+  font-size: clamp(40px, 4.8vw, 72px);
+  line-height: .98;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 
 .why-copy h2 em {
   color: var(--orange);
+  font-style: normal;
 }
 
 .why-copy > p {
-  max-width: 540px;
-  margin-top: 28px;
-  padding-left: 70px;
-  color: #65605a;
-  font-size: 14px;
-  line-height: 1.8;
+  max-width: 620px;
+  margin-top: 20px;
+  padding-left: 0;
+  color: #55504a;
+  font-size: clamp(18px, 1.4vw, 21px);
+  line-height: 1.75;
 }
 
 .why-copy > p strong {
+  color: var(--ink);
+}
+
+.why-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.why-features-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(16, 16, 15, 0.1);
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink);
 }
 
@@ -1152,9 +1227,10 @@ html.marketing ::selection {
 
 .access-section > p {
   position: relative;
-  max-width: 520px;
-  color: rgba(16,16,15,.68);
-  font-size: 13px;
+  max-width: 580px;
+  color: rgba(16, 16, 15, 0.78);
+  font-size: 18px;
+  line-height: 1.6;
 }
 
 .primary-cta--dark {
@@ -1277,7 +1353,11 @@ html.marketing footer {
 
 .contact-form-wrap {
   padding: 35px;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(22, 21, 19, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 20px;
 }
 
 .contact-form-wrap h3 {
@@ -1411,7 +1491,7 @@ html.marketing footer {
   }
 
   .menu-button {
-    z-index: 60;
+    z-index: 130;
     width: 44px;
     height: 44px;
     display: flex;
@@ -1441,21 +1521,25 @@ html.marketing footer {
 
   .nav-links {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 84px;
+    left: 16px;
+    right: 16px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-    padding: 100px 32px 40px;
-    background: #1A1A1A;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    align-items: stretch;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(22, 21, 19, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-100%);
+    transform: translateY(-16px);
     transition: opacity .3s cubic-bezier(0.16, 1, 0.3, 1), transform .3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 45;
+    z-index: 120;
   }
 
   .nav-links.is-open {
@@ -1465,8 +1549,16 @@ html.marketing footer {
   }
 
   .nav-links a {
-    font-size: 22px;
+    font-size: 17px;
     font-weight: 700;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .hero {
@@ -1494,10 +1586,22 @@ html.marketing footer {
     padding-top: 0;
   }
 
+  .hero-lead,
   .hero-content > p {
-    max-width: 560px;
-    padding: 0 8px;
-    font-size: 13px;
+    max-width: 100%;
+    margin-left: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .hero-cta-group {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .hero h1 em {
+    margin-left: 0;
   }
 
   .scroll-cue {
@@ -1560,7 +1664,7 @@ html.marketing footer {
   }
 
   .hero h1 em {
-    margin-left: 12px;
+    margin-left: 0;
   }
 
   .hero-content > p {
@@ -1678,20 +1782,22 @@ html.marketing footer {
 }
 
 .inner-header {
-  position: absolute;
-  z-index: 50;
-  top: 24px;
+  position: fixed;
+  z-index: 100;
+  top: 16px;
   left: 50%;
-  width: min(1360px, calc(100% - 40px));
-  height: 76px;
+  width: min(1360px, calc(100% - 32px));
+  height: 72px;
   padding: 0 32px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   transform: translateX(-50%);
   border-radius: 9999px;
-  background: #1A1A1A;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(26, 26, 26, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   animation: headerEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1910,51 +2016,75 @@ html.marketing footer {
 
 .route-items {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid rgba(16,16,15,.18);
-  border-left: 1px solid rgba(16,16,15,.18);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
 
 .route-items article {
   position: relative;
-  min-height: 265px;
-  padding: 30px;
-  border-right: 1px solid rgba(16,16,15,.18);
-  border-bottom: 1px solid rgba(16,16,15,.18);
+  min-height: 240px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 32px;
+  border: 1px solid rgba(16, 16, 15, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.route-items article:hover {
+  transform: translateY(-3px);
+  border-color: rgba(211, 111, 69, 0.4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
 .route-items article > span {
   color: var(--orange-dark);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
+  letter-spacing: 1px;
 }
 
 .route-items h3 {
-  margin: 48px 0 14px;
+  margin: 24px 0 12px;
   font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
-  font-size: 30px;
-  font-weight: 400;
+  font-size: 28px;
+  font-weight: 700;
   text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.1;
 }
 
 .route-items p {
-  max-width: 330px;
-  color: #6c665f;
-  font-size: 11px;
-  line-height: 1.7;
+  max-width: 500px;
+  color: #55504a;
+  font-size: 16px;
+  line-height: 1.65;
 }
 
 .route-items article > i {
   position: absolute;
-  top: 23px;
-  right: 23px;
-  width: 35px;
-  height: 35px;
+  top: 28px;
+  right: 28px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(16,16,15,.18);
+  border: 1px solid rgba(16, 16, 15, 0.14);
   border-radius: 50%;
   color: var(--orange-dark);
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.25s ease;
+}
+
+.route-items article:hover > i {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+  transform: scale(1.05);
 }
 
 .route-items article > i svg {
@@ -2120,7 +2250,7 @@ html.marketing footer {
 
 .route-form {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .route-form label {
@@ -2130,45 +2260,61 @@ html.marketing footer {
 }
 
 .route-form label span {
-  color: rgba(255,255,255,.45);
-  font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .route-form input,
 .route-form textarea {
   width: 100%;
-  padding: 14px 15px;
+  padding: 14px 18px;
   outline: none;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
   color: white;
-  font-size: 11px;
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .route-form textarea {
-  min-height: 110px;
+  min-height: 120px;
   resize: vertical;
 }
 
 .route-form input:focus,
 .route-form textarea:focus {
   border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(211, 111, 69, 0.25);
 }
 
 .route-form button,
 .login-card button {
-  height: 50px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   border: 0;
+  border-radius: 9999px;
   background: var(--orange);
   color: white;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.route-form button:hover:not(:disabled),
+.login-card button:hover:not(:disabled) {
+  background: var(--orange-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(211, 111, 69, 0.4);
 }
 
 .route-form button svg,
@@ -2272,8 +2418,10 @@ html.marketing footer {
 
 @media (max-width: 900px) {
   .inner-header {
-    width: calc(100% - 40px);
-    height: 82px;
+    width: calc(100% - 32px);
+    height: 64px;
+    top: 12px;
+    padding: 0 18px;
     grid-template-columns: 1fr auto;
   }
 
@@ -2282,22 +2430,35 @@ html.marketing footer {
   }
 
   .mobile-route-nav {
-    position: absolute;
-    top: 82px;
-    left: -20px;
-    right: -20px;
+    position: fixed;
+    top: 84px;
+    left: 16px;
+    right: 16px;
     display: flex;
     flex-direction: column;
-    gap: 22px;
-    padding: 30px 20px 40px;
-    border-bottom: 1px solid var(--line);
-    background: rgba(16,16,15,.98);
+    align-items: stretch;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(22, 21, 19, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    z-index: 120;
   }
 
   .mobile-route-nav a {
-    font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
-    font-size: 28px;
-    text-transform: uppercase;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  .mobile-route-nav a:hover {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .route-hero,

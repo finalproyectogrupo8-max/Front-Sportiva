@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode, useActionState, useRef, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { submitDemoRequest, type DemoRequestState } from '@/lib/actions/tickets'
 import Brand from './Brand'
@@ -133,8 +134,20 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
       </header>
 
       <main>
-        <section className="hero" id="inicio" style={{ '--hero-image': `url(${heroImage})` } as React.CSSProperties}>
-          <div className="hero-grain" />
+        <section className="hero" id="inicio">
+          <div className="hero-background-wrap">
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="hero-image"
+            />
+            <div className="hero-overlay" />
+            <div className="hero-grain" />
+          </div>
+
           <div className="hero-content">
             <div className="eyebrow">
               <i />
@@ -147,7 +160,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
               <em>en un solo tablero.</em>
             </h1>
 
-            <p>
+            <p className="hero-lead">
               Partidos, fichas médicas, profes, utilería e instalaciones organizados en tiempo real.
               Sin planillas perdidas ni cadenas de mensajes desordenadas.
             </p>
@@ -172,6 +185,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
               </div>
             </div>
           </div>
+
           <a className="scroll-cue" href="#funciones" aria-label="Ver funciones">
             <span>Descubrí Sportiva</span>
             <i />
@@ -233,17 +247,38 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           </div>
         </section>
 
-        <section className="why-section" id="nosotros">
-          <div className="why-label"><span>02</span><p>Por qué<br />Sportiva</p></div>
-          <div className="why-copy">
-            <span className="quote-mark">“</span>
-            <h2>Sabemos lo que cuesta<br />coordinar un club <em>a pulmón.</em></h2>
-            <p>Sportiva automatiza lo aburrido para que tu equipo se enfoque en lo que realmente importa: <strong>crecer, competir y ganar.</strong></p>
+        <section className="why-section" id="quienes-somos">
+          <span id="nosotros" className="sr-only" />
+          <div className="why-background">
+            <Image
+              src="/images/stadium-mesh.svg"
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover opacity-20 pointer-events-none"
+            />
           </div>
-          <div className="score-block" aria-hidden="true">
-            <div><small>Administración</small><b>10</b></div>
-            <span>—</span>
-            <div><small>Caos operativo</small><b>00</b></div>
+          <div className="why-grid-container">
+            <div className="why-left-col">
+              <div className="why-label"><span>02</span><p>Por qué<br />Sportiva</p></div>
+              <div className="why-copy">
+                <span className="quote-mark">“</span>
+                <h2>Sabemos lo que cuesta<br />coordinar un club <em>a pulmón.</em></h2>
+                <p>Sportiva automatiza lo aburrido para que tu equipo se enfoque en lo que realmente importa: <strong>crecer, competir y ganar.</strong></p>
+              </div>
+            </div>
+            <div className="why-right-col" aria-hidden="true">
+              <div className="score-block">
+                <div><small>Administración eficiente</small><b>10</b></div>
+                <span>—</span>
+                <div><small>Caos operativo</small><b>00</b></div>
+              </div>
+              <div className="why-features-badge">
+                <span>✓ 0 planillas duplicadas</span>
+                <span>✓ 100% trazabilidad de materiales</span>
+                <span>✓ Fichas médicas al instante</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -258,8 +293,18 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
         </section>
       </main>
 
-      <footer id="contacto">
-        <div className="footer-main">
+      <footer id="contacto" className="relative overflow-hidden bg-[#0d0d0c]">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/images/contact-stadium.jpg"
+            alt="Estadio Sportiva"
+            fill
+            sizes="100vw"
+            className="object-cover object-center opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0c]/90 via-[#0d0d0c]/60 to-[#0d0d0c]/75" />
+        </div>
+        <div className="footer-main relative z-10">
           <div className="footer-brand">
             <Brand />
             <p>La plataforma operativa que convierte el esfuerzo de todos los días en un club mejor organizado.</p>
@@ -313,7 +358,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
             )}
           </div>
         </div>
-        <div className="footer-bottom">
+        <div className="footer-bottom relative z-10">
           <span>© {new Date().getFullYear()} Sportiva</span>
           <span>Hecho para los que hacen club.</span>
           <div><a href="#">Privacidad</a><a href="#">Términos</a></div>
