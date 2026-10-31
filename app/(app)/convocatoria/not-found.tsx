@@ -4,7 +4,7 @@ import { PublicShell } from '@/components/callup/public-callup'
 export default function InvalidCallupLink() {
   return (
     <PublicShell>
-      <div className="flex flex-col items-center gap-3 px-6 pt-24 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-xl border bg-card px-6 py-12 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-muted">
           <LinkIcon className="size-6 text-muted-foreground" aria-hidden="true" />
         </span>

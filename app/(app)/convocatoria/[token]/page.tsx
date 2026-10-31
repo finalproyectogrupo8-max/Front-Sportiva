@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { GroupResponses } from '@/components/callup/group-responses'
 import { CallupDetails, CallupHeader, CallupNotice, PublicShell } from '@/components/callup/public-callup'
 import { loadPublicCallup } from '../load'
 import { callupMetadata } from '../meta'
@@ -11,22 +12,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return callupMetadata(await loadPublicCallup(token))
 }
 
-/** Convocatoria pública (FRO-36): la que se comparte en el grupo de WhatsApp. Sin login. */
+/**
+ * Convocatoria del grupo (FRO-36): el link que el profe comparte en WhatsApp. Cada convocado
+ * toca su nombre y responde. Sin login.
+ */
 export default async function PublicCallupPage({ params }: Props) {
   const { token } = await params
   const page = await loadPublicCallup(token)
   if (!page) notFound()
+  const closed = page.match.status === 'played' || page.match.status === 'cancelled'
 
   return (
-    <PublicShell>
+    <PublicShell club={page.club}>
       <CallupHeader page={page} />
-      <div className="flex flex-col gap-4 px-4">
-        <CallupNotice match={page.match} />
-        <p className="rounded-2xl border border-dashed bg-card/50 p-4 text-center text-sm text-muted-foreground">
-          Para confirmar si vas, usá el link personal que te mandó el profe.
-        </p>
-        <CallupDetails page={page} calendarHref={`/convocatoria/${encodeURIComponent(token)}/calendario`} />
-      </div>
+      <CallupNotice match={page.match} />
+      <GroupResponses token={token} initial={page.players} closed={closed} />
+      <CallupDetails page={page} token={token} />
     </PublicShell>
   )
 }

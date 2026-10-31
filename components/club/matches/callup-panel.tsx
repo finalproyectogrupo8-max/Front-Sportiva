@@ -354,7 +354,7 @@ function CallupTracker({ sheet, pollQuestion, canPublish }: { sheet: CallupSheet
         </Button>
       </div>
       {filter === 'pending' && sheet.pending > 0 && (
-        <p className="text-xs text-muted-foreground">Mandale a cada familia su link por WhatsApp con el botón verde. Si no tiene teléfono, copiá el link y mandáselo.</p>
+        <p className="text-xs text-muted-foreground">Para recordarle a alguien por privado, usá el botón verde: le llega un mensaje con su link para confirmar. Si no tiene teléfono, copiá el link.</p>
       )}
 
       {rows.length === 0 ? (
@@ -390,8 +390,8 @@ function CallupItem({ row }: { row: CallupRow }) {
             href={row.whatsapp_url}
             target="_blank"
             rel="noopener noreferrer"
-            title="Enviar por WhatsApp"
-            aria-label={`Enviar a la familia de ${row.player_name} por WhatsApp`}
+            title="Recordar por WhatsApp privado"
+            aria-label={`Recordarle a la familia de ${row.player_name} por WhatsApp`}
             className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'size-9 text-[#1ebe5b]')}
           >
             <MessageCircle className="size-4" aria-hidden="true" />
