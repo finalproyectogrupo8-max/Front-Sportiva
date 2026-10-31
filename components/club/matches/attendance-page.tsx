@@ -26,19 +26,19 @@ export async function AttendancePage({ club, kind, id }: { club: string; kind: '
   const back = isMatch ? `/c/${club}/partidos/${id}` : `/c/${club}/partidos?entrenamiento=${id}`
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-10">
       <Link href={back} className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" aria-hidden="true" />
         {isMatch ? 'Volver al partido' : 'Volver al calendario'}
       </Link>
-      <header className="flex flex-col gap-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-primary">Asistencia · {data.category_name}</p>
-        <h1 className="font-display text-3xl font-bold uppercase leading-none">{title}</h1>
-        <p className="text-sm text-muted-foreground first-letter:uppercase">
+      <header className="flex flex-col gap-1 rounded-2xl bg-ink p-6 text-ink-foreground">
+        <p className="text-xs font-medium uppercase tracking-widest text-ink-foreground/70">Asistencia · {data.category_name}</p>
+        <h1 className="font-display text-4xl font-bold uppercase leading-none">{title}</h1>
+        <p className="text-sm text-ink-foreground/80 first-letter:uppercase">
           {formatLongDay(startsAt)} · {formatTime(startsAt)} h
         </p>
       </header>
-      <AttendanceTaker kind={kind} eventId={id} rows={roster.data.data} canRecord={permissions.has('attendance.record')} />
+      <AttendanceTaker kind={kind} eventId={id} rows={roster.data.data} canRecord={permissions.has('attendance.record')} columns={2} />
     </div>
   )
 }
