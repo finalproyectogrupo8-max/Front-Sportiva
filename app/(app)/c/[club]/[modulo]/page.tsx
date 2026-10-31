@@ -6,16 +6,14 @@ import { CanchasModule } from '@/components/modules/canchas'
 import { CompetenciaModule } from '@/components/modules/competencia'
 import { IndumentariaModule } from '@/components/modules/indumentaria'
 import { MaterialesModule } from '@/components/modules/materiales'
-import { PartidosModule } from '@/components/modules/partidos'
 import { NoAccess } from '@/components/club/no-access'
 import { canSeeModule, getModule, type ModuleId } from '@/lib/modules'
 import { requireSession } from '@/lib/session'
 
-// Jugadores y Profes tienen su propia ruta con datos de la API (FRO-17).
+// Jugadores, Profes (FRO-17), Partidos (FRO-18) y Habilitación (FRO-34) tienen su propia ruta con datos de la API.
 const VIEWS: Partial<Record<ModuleId, () => React.JSX.Element>> = {
   indumentaria: IndumentariaModule,
   materiales: MaterialesModule,
-  partidos: PartidosModule,
   analisis: AnalisisModule,
   competencia: CompetenciaModule,
   canchas: CanchasModule,
