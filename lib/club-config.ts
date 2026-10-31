@@ -16,3 +16,6 @@ export const CONFIG_PERMISSIONS = ['club.update', 'sports.view', 'seasons.view']
 export function canSeeConfig(permissions: readonly string[]): boolean {
   return CONFIG_PERMISSIONS.some((p) => permissions.includes(p))
 }
+
+/** Paso de la configuración inicial del club (lo calcula `getSetupSteps`). */
+export type SetupStep = { tab: ConfigTab; label: string; description: string; done: boolean }

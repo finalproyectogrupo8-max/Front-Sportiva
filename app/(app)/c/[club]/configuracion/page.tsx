@@ -10,6 +10,7 @@ import { ModuleHeader, PageBody } from '@/components/club/shared'
 import type { ApiResult } from '@/lib/api/client'
 import { getClub, listCategories, listSeasons, listSports, type Category, type Club, type Season, type Sport } from '@/lib/api/club'
 import { CONFIG_TABS, canSeeConfig, type ConfigTab } from '@/lib/club-config'
+import { getSetupSteps } from '@/lib/club-setup'
 import { requireSession } from '@/lib/session'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +32,7 @@ export default async function ConfigPage({ params, searchParams }: Props) {
     return <NoAccess moduleName="Configuración" homeHref={`/c/${club}`} />
   }
 
+  const pending = new Set((await getSetupSteps())?.filter((s) => !s.done).map((s) => s.tab))
   const tabs = CONFIG_TABS.filter((t) => !t.permission || can(t.permission))
   const tab: ConfigTab = tabs.find((t) => t.id === query.tab)?.id ?? tabs[0].id
   const crud = (resource: string) => ({
@@ -60,6 +62,12 @@ export default async function ConfigPage({ params, searchParams }: Props) {
               )}
             >
               {t.label}
+              {pending.has(t.id) && (
+                <>
+                  <span className="ml-1.5 inline-block size-1.5 -translate-y-0.5 rounded-full bg-primary" aria-hidden="true" />
+                  <span className="sr-only"> (pendiente)</span>
+                </>
+              )}
             </Link>
           ))}
         </nav>
