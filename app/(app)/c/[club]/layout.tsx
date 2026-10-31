@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { AppFooter } from '@/components/app-footer'
 import { ClubProvider } from '@/components/club/club-provider'
 import { TopBar } from '@/components/club/top-bar'
 import { requireSession } from '@/lib/session'
@@ -54,6 +55,7 @@ export default async function ClubLayout({
           userTenants={session.tenants}
         />
         <main className="flex-1">{children}</main>
+        <AppFooter />
       </div>
     </ClubProvider>
   )
