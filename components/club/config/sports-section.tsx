@@ -21,7 +21,7 @@ import {
   RowActions,
   SubmitButton,
   useConfigAction,
-} from './shared'
+} from '@/components/club/forms'
 
 export type SportRow = Sport & { categories: number }
 

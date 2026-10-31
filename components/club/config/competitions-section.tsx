@@ -36,7 +36,7 @@ import {
   FormError,
   SubmitButton,
   useConfigAction,
-} from './shared'
+} from '@/components/club/forms'
 
 const ALL = 'todos'
 

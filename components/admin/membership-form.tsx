@@ -175,7 +175,7 @@ export function AddMemberSheet({
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:sm:max-w-md">
+        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
           <SheetHeader className="pr-12">
             <SheetTitle>Agregar miembro</SheetTitle>
             <SheetDescription>

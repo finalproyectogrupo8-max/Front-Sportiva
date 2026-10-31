@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { ConfigResult } from '@/app/(app)/c/[club]/configuracion/actions'
+import type { ActionResult as ConfigResult } from '@/lib/action-result'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -74,7 +74,7 @@ export function useConfigAction() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string>()
 
-  const execute = (action: () => Promise<ConfigResult>, onDone?: () => void) => {
+  const execute = (action: () => Promise<ConfigResult>, onDone?: (result: Extract<ConfigResult, { ok: true }>) => void) => {
     setError(undefined)
     setFieldErrors({})
     startTransition(async () => {
@@ -86,7 +86,7 @@ export function useConfigAction() {
       }
       if (result.ok) {
         toast.success(result.message)
-        onDone?.()
+        onDone?.(result)
         return
       }
       setFieldErrors(result.fieldErrors ?? {})
@@ -222,7 +222,7 @@ export function ConfigSheet({
       <SheetContent
         side="right"
         className={cn(
-          'w-full gap-0 overflow-y-auto',
+          'w-full gap-0 overflow-y-auto data-[side=right]:w-full',
           wide ? 'data-[side=right]:sm:max-w-2xl' : 'data-[side=right]:sm:max-w-md',
         )}
       >
