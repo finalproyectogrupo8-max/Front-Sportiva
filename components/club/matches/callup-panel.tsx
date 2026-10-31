@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertTriangle, Copy, Loader2, MessageCircle, Pencil, RefreshCw, Send, Users } from 'lucide-react'
+import { AlertTriangle, ChevronDown, Copy, Loader2, MessageCircle, Paperclip, Pencil, RefreshCw, Send, Users, Vote } from 'lucide-react'
 import { toast } from 'sonner'
 import { publishCallupAction, saveCallupAction } from '@/app/(app)/c/[club]/partidos/actions'
 import { Pill, type Tone } from '@/components/club/shared'
@@ -24,7 +24,16 @@ type Filter = 'all' | CallupResponse
  * Convocatoria del partido (FRO-35). Antes de publicar: elegir entre los habilitados y ajustar
  * números. Publicada: compartir en el grupo o a cada familia por WhatsApp y seguir las respuestas.
  */
-export function CallupPanel({ sheet, can }: { sheet: CallupSheet; can: { update: boolean; publish: boolean } }) {
+export function CallupPanel({
+  sheet,
+  pollQuestion,
+  can,
+}: {
+  sheet: CallupSheet
+  /** Pregunta para la encuesta de WhatsApp, armada con los datos del partido. */
+  pollQuestion: string
+  can: { update: boolean; publish: boolean }
+}) {
   const published = sheet.published_at !== null
   const [editing, setEditing] = useState(!published && can.update)
 
@@ -46,7 +55,7 @@ export function CallupPanel({ sheet, can }: { sheet: CallupSheet; can: { update:
       {editing ? (
         <CallupEditor sheet={sheet} canPublish={can.publish} onDone={() => setEditing(false)} onCancel={published ? () => setEditing(false) : undefined} />
       ) : published ? (
-        <CallupTracker sheet={sheet} canPublish={can.publish} />
+        <CallupTracker sheet={sheet} pollQuestion={pollQuestion} canPublish={can.publish} />
       ) : (
         <p className="text-sm text-muted-foreground">
           {sheet.callups.length > 0
@@ -243,7 +252,7 @@ function CallupEditor({
 }
 
 /** Convocatoria publicada: compartir y ver quién confirmó. */
-function CallupTracker({ sheet, canPublish }: { sheet: CallupSheet; canPublish: boolean }) {
+function CallupTracker({ sheet, pollQuestion, canPublish }: { sheet: CallupSheet; pollQuestion: string; canPublish: boolean }) {
   const router = useRouter()
   const [filter, setFilter] = useState<Filter>('all')
   const [refreshing, startRefresh] = useTransition()
@@ -293,6 +302,32 @@ function CallupTracker({ sheet, canPublish }: { sheet: CallupSheet; canPublish: 
           </Button>
         )}
       </div>
+
+      {/* WhatsApp no deja crear encuestas desde afuera: se arma a mano con la pregunta copiada. */}
+      <details className="group rounded-lg border bg-muted/30 text-sm">
+        <summary className="flex cursor-pointer list-none items-center gap-2 p-3 font-medium [&::-webkit-details-marker]:hidden">
+          <Vote className="size-4 text-muted-foreground" aria-hidden="true" />
+          ¿Prefieren votar en una encuesta de WhatsApp?
+          <ChevronDown className="ml-auto size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+        </summary>
+        <div className="flex flex-col gap-3 border-t p-3">
+          <ol className="flex list-decimal flex-col gap-1 pl-5 text-muted-foreground">
+            <li>Mandá el mensaje al grupo con el botón verde.</li>
+            <li>En el grupo tocá el clip <Paperclip className="inline size-3.5 align-[-2px]" aria-label="clip" /> y elegí <strong className="font-medium text-foreground">Encuesta</strong>.</li>
+            <li>Pegá la pregunta y poné las opciones <strong className="font-medium text-foreground">Voy</strong> y <strong className="font-medium text-foreground">No puedo</strong>.</li>
+          </ol>
+          <div className="flex flex-col gap-2 rounded-md border bg-card p-3 sm:flex-row sm:items-center">
+            <span className="min-w-0 flex-1 font-medium">{pollQuestion}</span>
+            <Button variant="outline" size="sm" className="shrink-0 gap-1.5 self-start sm:self-auto" onClick={() => copy(pollQuestion, 'Pregunta copiada. Pegala en la encuesta.')}>
+              <Copy className="size-3.5" aria-hidden="true" />
+              Copiar pregunta
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Las respuestas de la encuesta quedan solo en WhatsApp. Con el link de la convocatoria, en cambio, se ven acá y precargan la asistencia.
+          </p>
+        </div>
+      </details>
 
       {/* Respuestas */}
       <div className="grid grid-cols-3 gap-2" role="group" aria-label="Filtrar por respuesta">
