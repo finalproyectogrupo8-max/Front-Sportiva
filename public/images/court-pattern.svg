@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" fill="none" width="100%" height="100%">
+  <defs>
+    <radialGradient id="courtGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#C87650" stop-opacity="0.18" />
+      <stop offset="60%" stop-color="#C87650" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#C87650" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4BAA3" stop-opacity="0.3" />
+      <stop offset="50%" stop-color="#C87650" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#D4BAA3" stop-opacity="0.25" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient court glow -->
+  <rect width="1440" height="900" fill="url(#courtGlow)" />
+
+  <!-- Outer court boundary -->
+  <rect x="80" y="60" width="1280" height="780" rx="8" stroke="url(#lineGrad)" stroke-width="2.5" stroke-opacity="0.6" stroke-dasharray="16 8" />
+  <rect x="96" y="76" width="1248" height="748" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.35" />
+
+  <!-- Half court line -->
+  <line x1="720" y1="76" x2="720" y2="824" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" />
+
+  <!-- Center court circle -->
+  <circle cx="720" cy="450" r="140" stroke="#C87650" stroke-width="2.5" stroke-opacity="0.6" />
+  <circle cx="720" cy="450" r="40" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.5" />
+  <circle cx="720" cy="450" r="4" fill="#C87650" />
+
+  <!-- Left key / lane -->
+  <rect x="96" y="310" width="300" height="280" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" fill="none" />
+  <path d="M396 310 A 140 140 0 0 1 396 590" stroke="#C87650" stroke-width="2" stroke-opacity="0.5" fill="none" />
+  <path d="M396 310 A 140 140 0 0 0 396 590" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="8 6" fill="none" />
+
+  <!-- Left 3-point line -->
+  <path d="M96 150 L 220 150 A 350 350 0 0 1 220 750 L 96 750" stroke="#C87650" stroke-width="2" stroke-opacity="0.55" fill="none" />
+
+  <!-- Right key / lane -->
+  <rect x="1044" y="310" width="300" height="280" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" fill="none" />
+  <path d="M1044 310 A 140 140 0 0 0 1044 590" stroke="#C87650" stroke-width="2" stroke-opacity="0.5" fill="none" />
+  <path d="M1044 310 A 140 140 0 0 1 1044 590" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="8 6" fill="none" />
+
+  <!-- Right 3-point line -->
+  <path d="M1344 150 L 1220 150 A 350 350 0 0 0 1220 750 L 1344 750" stroke="#C87650" stroke-width="2" stroke-opacity="0.55" fill="none" />
+
+  <!-- Corner markers & Hash marks -->
+  <line x1="80" y1="200" x2="110" y2="200" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" />
+  <line x1="80" y1="700" x2="110" y2="700" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" />
+  <line x1="1330" y1="200" x2="1360" y2="200" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" />
+  <line x1="1330" y1="700" x2="1360" y2="700" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" />
+
+  <line x1="720" y1="60" x2="720" y2="76" stroke="#C87650" stroke-width="3" stroke-opacity="0.7" />
+  <line x1="720" y1="824" x2="720" y2="840" stroke="#C87650" stroke-width="3" stroke-opacity="0.7" />
+</svg>
+

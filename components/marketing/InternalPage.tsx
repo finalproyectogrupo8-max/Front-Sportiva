@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { PageShell } from './SiteChrome'
@@ -41,7 +42,18 @@ export default function InternalPage({
 }: InternalPageProps) {
   return (
     <PageShell>
-      <section className="route-hero">
+      <section className="route-hero relative">
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <Image
+            src="/images/club-gym.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#10100f] via-[#10100f]/85 to-[#10100f]/60" />
+        </div>
         <div className="route-grid" aria-hidden="true" />
         <motion.div
           className="route-hero-copy"
