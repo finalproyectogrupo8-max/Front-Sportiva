@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ClipboardCheck, Clock, ExternalLink, MapPin, Megaphone, Shirt, Trophy } from 'lucide-react'
+import { MapPreview } from '@/components/club/address-picker'
 import { MatchActions, ResultForm } from '@/components/club/matches/match-detail'
 import { NoAccess } from '@/components/club/no-access'
 import { Pill, type Tone } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
-import { listCategories, listCompetitions } from '@/lib/api/club'
+import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
 import { getMatch } from '@/lib/api/matches'
 import { dayKey, formatLongDay, formatTime } from '@/lib/club-time'
 import { requireSession } from '@/lib/session'
@@ -30,10 +31,11 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
 
   const matchId = Number(id)
   if (!matchId) notFound()
-  const [result, categories, competitions] = await Promise.all([
+  const [result, categories, competitions, venues] = await Promise.all([
     getMatch(matchId),
     listCategories(),
     can('competitions.view') ? listCompetitions() : Promise.resolve(null),
+    can('venues.view') ? listVenues() : Promise.resolve(null),
   ])
   if (!result.ok) notFound()
 
@@ -42,6 +44,8 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
   const competition = competitionList.find((c) => c.id === match.competition_id)
   const status = STATUS[match.status] ?? STATUS.scheduled
   const back = `/c/${club}/partidos?desde=${dayKey(match.match_date)}`
+  // El mapa sale del link de Google Maps (coordenadas o dirección) o, si no hay, del lugar escrito.
+  const mapQuery = mapsQuery(match.maps_url) || match.venue
   const played = match.status === 'played' && match.our_score != null && match.opponent_score != null
   const won = played && match.our_score! > match.opponent_score!
   const lost = played && match.our_score! < match.opponent_score!
@@ -108,6 +112,7 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
                 </Info>
               )}
             </ul>
+            {mapQuery && <MapPreview place={{ address: mapQuery, latitude: null, longitude: null }} />}
             {match.notes && <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm"><strong className="font-medium">Notas internas:</strong> {match.notes}</p>}
           </section>
 
@@ -132,6 +137,8 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
           )}
           {can('matches.update') && <ResultForm key={`${match.status}-${match.our_score}-${match.opponent_score}`} match={match} />}
           <MatchActions
+            club={club}
+            venues={venues?.ok ? venues.data.data.filter((v) => v.is_active || v.id === match.venue_id) : []}
             match={match}
             backHref={back}
             categories={categories.ok ? categories.data.data.filter((c) => c.is_active || c.id === match.category_id).map((c) => ({ id: c.id, label: c.name })) : []}
@@ -154,4 +161,14 @@ function Info({ icon: Icon, label, children }: { icon: React.ComponentType<{ cla
       </div>
     </li>
   )
+}
+
+/** Lo que busca el link de Google Maps que arma la API (`?query=`). null si es otro tipo de link. */
+function mapsQuery(url: string | null): string | null {
+  if (!url) return null
+  try {
+    return new URL(url).searchParams.get('query')
+  } catch {
+    return null
+  }
 }

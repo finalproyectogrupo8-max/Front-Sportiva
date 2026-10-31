@@ -1458,6 +1458,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/venues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Filtro `is_active`. Sin paginar: un club tiene pocas sedes */
+        get: operations["venues.index"];
+        put?: never;
+        post: operations["venues.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/venues/{venue}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["venues.show"];
+        put: operations["venues.update"];
+        post?: never;
+        /** Con partidos por jugarse en la sede responde 409: primero hay que moverlos */
+        delete: operations["venues.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1779,6 +1813,8 @@ export interface components {
             match_date: string;
             /** @description Hora de presentación. */
             meet_at: string | null;
+            /** @description Sede del club donde se juega (de local), si se eligió una. */
+            venue_id: number | null;
             venue: string | null;
             maps_url: string | null;
             is_home: boolean;
@@ -2134,6 +2170,8 @@ export interface components {
              * @description Hora de presentación: antes del partido.
              */
             meet_at?: string | null;
+            /** @description Sede del club (de local): completa `venue` y `maps_url` (TIZ-39). */
+            venue_id?: number | null;
             venue?: string | null;
             /** Format: uri */
             maps_url?: string | null;
@@ -2313,6 +2351,19 @@ export interface components {
             password: string;
             is_platform_admin?: string;
             is_active?: string;
+        };
+        /**
+         * StoreVenueRequest
+         * @description Alta y edición de una sede del club (TIZ-39). En PATCH, todo es opcional.
+         */
+        StoreVenueRequest: {
+            name: string;
+            address: string;
+            /** @description Del buscador de direcciones; se mandan juntas o ninguna. */
+            latitude?: number | null;
+            longitude?: number | null;
+            is_active?: boolean;
+            notes?: string | null;
         };
         /** SupportTicketCreatedResource */
         SupportTicketCreatedResource: {
@@ -2591,6 +2642,18 @@ export interface components {
             email: string;
             /** @description Solo para que el front decida si muestra /admin: la API verifica el permiso en cada request. */
             is_platform_admin: boolean;
+        };
+        /** VenueResource */
+        VenueResource: {
+            id: number;
+            name: string;
+            address: string;
+            latitude: number | null;
+            longitude: number | null;
+            /** @description Link de Google Maps: por coordenadas si las hay, si no por dirección. */
+            maps_url: string | null;
+            is_active: boolean;
+            notes: string | null;
         };
     };
     responses: {
@@ -7900,6 +7963,155 @@ export interface operations {
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "venues.index": {
+        parameters: {
+            query?: {
+                is_active?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `VenueResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["VenueResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "venues.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreVenueRequest"];
+            };
+        };
+        responses: {
+            /** @description `VenueResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["VenueResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "venues.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The venue ID */
+                venue: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `VenueResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["VenueResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "venues.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The venue ID */
+                venue: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreVenueRequest"];
+            };
+        };
+        responses: {
+            /** @description `VenueResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["VenueResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "venues.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The venue ID */
+                venue: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El recurso está en uso y no se puede eliminar.";
+                        /** @constant */
+                        code: "resource_in_use";
+                    };
+                };
+            };
         };
     };
 }

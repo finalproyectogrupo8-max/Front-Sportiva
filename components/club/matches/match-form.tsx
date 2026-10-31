@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { saveMatchAction } from '@/app/(app)/c/[club]/partidos/actions'
+import { AddressPicker, MapPreview, type Place } from '@/components/club/address-picker'
 import { Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { FormSelect, Segmented } from '@/components/club/shared'
 import { Label } from '@/components/ui/label'
@@ -12,19 +13,34 @@ import { toLocalInput } from '@/lib/club-time'
 
 export type CategoryOption = { id: number; label: string }
 export type CompetitionOption = { id: number; label: string; category_ids: number[] }
+export type VenueOption = { id: number; name: string; address: string; latitude: number | null; longitude: number | null }
+
+const OTHER = 'otro'
+
+/** Link de Google Maps del punto elegido en el buscador (sin coordenadas, lo arma la API con la dirección). */
+function mapsUrlFor(place: Place): string {
+  return place.latitude != null && place.longitude != null
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.latitude},${place.longitude}`)}`
+    : ''
+}
 
 const NONE = 'ninguna'
 
 /** Alta y edición de un partido: lo que después ve el jugador en la convocatoria. */
 export function MatchForm({
+  club,
   match,
   categories,
   competitions,
+  venues,
   onDone,
 }: {
+  club: string
   match: Match | null
   categories: CategoryOption[]
   competitions: CompetitionOption[]
+  /** Sedes del club: las activas y la del partido si ya tenía una. */
+  venues: VenueOption[]
   onDone: (id?: number) => void
 }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
@@ -32,6 +48,13 @@ export function MatchForm({
   const [competitionId, setCompetitionId] = useState(match?.competition_id ? String(match.competition_id) : NONE)
   const [home, setHome] = useState<'1' | '0'>(match ? (match.is_home ? '1' : '0') : '1')
   const [uniform, setUniform] = useState(match?.uniform ?? 'home')
+  // De local: una sede del club u "otro lugar". De visitante: la dirección del rival.
+  const [venueId, setVenueId] = useState(
+    match?.venue_id ? String(match.venue_id) : match && match.venue ? OTHER : String(venues[0]?.id ?? OTHER),
+  )
+  const [place, setPlace] = useState<Place>({ address: match && !match.venue_id ? match.venue ?? '' : '', latitude: null, longitude: null })
+  const useVenue = home === '1' && venueId !== OTHER
+  const chosenVenue = venues.find((v) => String(v.id) === venueId)
 
   // Las competencias que juega la categoría elegida.
   const options = competitions.filter((c) => c.category_ids.includes(Number(categoryId)) || String(c.id) === competitionId)
@@ -46,6 +69,10 @@ export function MatchForm({
         data.set('competition_id', competitionId === NONE ? '' : competitionId)
         data.set('is_home', home)
         data.set('uniform', uniform === NONE ? '' : uniform)
+        data.set('venue_id', useVenue ? venueId : '')
+        data.set('venue', useVenue ? '' : place.address)
+        // Si el lugar no cambió, se conserva el link que ya tenía; si se eligió un punto, sale de ahí.
+        data.set('maps_url', useVenue ? '' : mapsUrlFor(place) || (match && !match.venue_id && place.address === match.venue ? match.maps_url ?? '' : ''))
         execute(() => saveMatchAction(match?.id ?? null, data), (result) => onDone(result.id))
       }}
     >
@@ -113,21 +140,34 @@ export function MatchForm({
           />
         </div>
 
-        <Field id="match-venue" name="venue" label="Lugar" placeholder="ej. Estadio Florencio Sola, Banfield" defaultValue={match?.venue ?? ''} maxLength={200} error={fieldErrors.venue} />
-        <Field
-          id="match-maps"
-          name="maps_url"
-          // Texto y no "url": se acepta el link pegado sin https:// (lo agrega la acción).
-          type="text"
-          inputMode="url"
-          autoComplete="off"
-          label="Link de Google Maps"
-          hint="Opcional. Es el botón «Cómo llegar» que ven los jugadores."
-          placeholder="https://maps.app.goo.gl/…"
-          defaultValue={match?.maps_url ?? ''}
-          maxLength={500}
-          error={fieldErrors.maps_url}
-        />
+        {/* Lugar: de local, una sede del club; si no, se busca la dirección (FRO-39). */}
+        {home === '1' && venues.length > 0 && (
+          <FormSelect
+            id="match-venue-site"
+            label="Sede"
+            value={venueId}
+            onChange={setVenueId}
+            options={[...venues.map((v) => ({ value: String(v.id), label: v.name })), { value: OTHER, label: 'Otro lugar…' }]}
+          />
+        )}
+        {useVenue && chosenVenue ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">{chosenVenue.address}</p>
+            <MapPreview place={chosenVenue} />
+          </div>
+        ) : (
+          <AddressPicker
+            club={club}
+            label={home === '1' ? 'Lugar' : 'Dónde se juega (cancha del rival)'}
+            placeholder={home === '1' ? 'Calle y número, ciudad' : 'ej. Peña 1501, Banfield'}
+            value={place}
+            onChange={setPlace}
+            error={fieldErrors.venue ?? fieldErrors.maps_url ?? fieldErrors.venue_id}
+          />
+        )}
+        {home === '1' && venues.length === 0 && (
+          <p className="-mt-2 text-xs text-muted-foreground">Tip: cargá las sedes del club en Configuración → Sedes y elegilas sin escribir la dirección.</p>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormSelect

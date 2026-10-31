@@ -26,6 +26,8 @@ export type MatchInput = {
   opponent: string
   match_date: string
   meet_at: string | null
+  /** Sede del club (de local): la API completa `venue` y `maps_url`. */
+  venue_id: number | null
   venue: string | null
   maps_url: string | null
   is_home: boolean

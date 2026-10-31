@@ -12,6 +12,7 @@ export type Category = Schemas['CategoryResource']
 export type SeasonStatus = Season['status']
 
 type One<T> = { data: T }
+type List<T> = { data: T[] }
 type Page<T> = { data: T[]; meta: { total: number; current_page: number; last_page: number } }
 
 export type ClubProfileInput = {
@@ -158,4 +159,33 @@ export function copyCompetition(
   input: { season_id: number; name?: string; registration_deadline?: string | null },
 ): Promise<ApiResult<One<Competition>>> {
   return apiFetch(`/competitions/${id}/copy`, { method: 'POST', body: input })
+}
+
+/* Sedes del club (FRO-39) */
+
+export type Venue = Schemas['VenueResource']
+
+export type VenueInput = {
+  name: string
+  address: string
+  latitude: number | null
+  longitude: number | null
+  is_active?: boolean
+  notes?: string | null
+}
+
+export function listVenues(query: { is_active?: boolean } = {}): Promise<ApiResult<List<Venue>>> {
+  return apiFetch('/venues', { query })
+}
+
+export function createVenue(input: VenueInput): Promise<ApiResult<One<Venue>>> {
+  return apiFetch('/venues', { method: 'POST', body: input })
+}
+
+export function updateVenue(id: number, input: Partial<VenueInput>): Promise<ApiResult<One<Venue>>> {
+  return apiFetch(`/venues/${id}`, { method: 'PATCH', body: input })
+}
+
+export function deleteVenue(id: number): Promise<ApiResult<void>> {
+  return apiFetch(`/venues/${id}`, { method: 'DELETE' })
 }

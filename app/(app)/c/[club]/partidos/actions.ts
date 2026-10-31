@@ -19,6 +19,7 @@ import { toApiDateTime } from '@/lib/club-time'
 // Partidos, entrenamientos y asistencia (FRO-18). La API valida permisos y alcance.
 
 const MATCH_FIELDS = [
+  'venue_id',
   'category_id',
   'competition_id',
   'opponent',
@@ -47,6 +48,8 @@ export async function saveMatchAction(id: number | null, formData: FormData): Pr
     opponent: text(formData, 'opponent'),
     match_date: toApiDateTime(matchDate),
     meet_at: meetAt ? toApiDateTime(meetAt) : null,
+    // Con sede del club, la API completa el lugar y el link (FRO-39).
+    venue_id: Number(text(formData, 'venue_id')) || null,
     venue: text(formData, 'venue') || null,
     maps_url: mapsUrl ? (/^https?:\/\//i.test(mapsUrl) ? mapsUrl : `https://${mapsUrl}`) : null,
     is_home: text(formData, 'is_home') !== '0',

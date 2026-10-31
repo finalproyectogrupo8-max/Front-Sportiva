@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Match } from '@/lib/api/matches'
-import { MatchForm, type CategoryOption, type CompetitionOption } from './match-form'
+import { MatchForm, type CategoryOption, type CompetitionOption, type VenueOption } from './match-form'
 
 /** Resultado y estado del partido. */
 export function ResultForm({ match }: { match: Match }) {
@@ -66,12 +66,16 @@ export function ResultForm({ match }: { match: Match }) {
 
 /** Editar y eliminar el partido. */
 export function MatchActions({
+  club,
   match,
   backHref,
   categories,
   competitions,
+  venues,
   can,
 }: {
+  club: string
+  venues: VenueOption[]
   match: Match
   backHref: string
   categories: CategoryOption[]
@@ -98,7 +102,7 @@ export function MatchActions({
         </Button>
       )}
       <ConfigSheet open={editing} onOpenChange={setEditing} title="Editar partido" wide>
-        <MatchForm match={match} categories={categories} competitions={competitions} onDone={() => setEditing(false)} />
+        <MatchForm club={club} venues={venues} match={match} categories={categories} competitions={competitions} onDone={() => setEditing(false)} />
       </ConfigSheet>
       <ConfirmDialog
         open={removing}

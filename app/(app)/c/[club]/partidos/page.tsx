@@ -6,7 +6,7 @@ import { NewEventButtons } from '@/components/club/matches/new-event-buttons'
 import { TrainingSheet } from '@/components/club/matches/training-sheet'
 import { NoAccess } from '@/components/club/no-access'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
-import { listCategories, listCompetitions } from '@/lib/api/club'
+import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
 import { calendar, getTraining } from '@/lib/api/matches'
 import { addDays, addMonths, isValidDay, startOfMonth, startOfWeek, today } from '@/lib/club-time'
 import { requireSession } from '@/lib/session'
@@ -45,13 +45,14 @@ export default async function MatchesPage({ params, searchParams }: Props) {
   const categoryId = Number(query.categoria) || undefined
   const trainingId = Number(query.entrenamiento) || null
 
-  let events, categories, competitions, training
+  let events, categories, competitions, training, venues
   try {
-    ;[events, categories, competitions, training] = await Promise.all([
+    ;[events, categories, competitions, training, venues] = await Promise.all([
       calendar({ from, to, category_id: categoryId }),
       listCategories(),
       can('competitions.view') ? listCompetitions() : Promise.resolve(null),
       trainingId ? getTraining(trainingId) : Promise.resolve(null),
+      can('venues.view') ? listVenues({ is_active: true }) : Promise.resolve(null),
     ])
   } catch {
     events = null
@@ -72,6 +73,8 @@ export default async function MatchesPage({ params, searchParams }: Props) {
         description="El fixture y los entrenamientos de cada categoría. Desde cada partido se carga el resultado y se toma asistencia."
         actions={
           <NewEventButtons
+            club={club}
+            venues={venues?.ok ? venues.data.data : []}
             categories={categoryOptions}
             competitions={competitionOptions}
             can={{ match: can('matches.create'), training: can('trainings.create') }}
