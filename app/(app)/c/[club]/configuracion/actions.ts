@@ -8,16 +8,19 @@ import {
   createCompetition,
   createSeason,
   createSport,
+  createVenue,
   deleteCategory,
   deleteCompetition,
   deleteClubLogo,
   deleteSeason,
   deleteSport,
+  deleteVenue,
   updateCategory,
   updateCompetition,
   updateClub,
   updateSeason,
   updateSport,
+  updateVenue,
   uploadClubLogo,
   type CategoryInput,
   type CompetitionInput,
@@ -216,5 +219,34 @@ export async function copyCompetitionAction(id: number, formData: FormData): Pro
     () => copyCompetition(id, { season_id: seasonId, name, registration_deadline: text(formData, 'registration_deadline') || null }),
     `Competencia copiada como "${name}". Falta elegir sus categorías.`,
     ['season_id', 'name', 'registration_deadline'],
+  )
+}
+
+/* Sedes (FRO-39) */
+
+export async function saveVenueAction(
+  id: number | null,
+  input: { name: string; address: string; latitude: number | null; longitude: number | null; is_active: boolean },
+): Promise<ConfigResult> {
+  const name = input.name.trim()
+  const address = input.address.trim()
+  const fieldErrors: Record<string, string> = {}
+  if (!name) fieldErrors.name = 'Poné el nombre de la sede.'
+  if (!address) fieldErrors.address = 'Buscá y elegí la dirección.'
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
+
+  const body = { name, address, latitude: input.latitude, longitude: input.longitude, is_active: input.is_active }
+  const fields = ['name', 'address', 'latitude', 'longitude']
+  return id
+    ? run(() => updateVenue(id, body), `Sede "${name}" actualizada.`, fields)
+    : run(() => createVenue(body), `Sede "${name}" creada.`, fields)
+}
+
+export async function deleteVenueAction(id: number): Promise<ConfigResult> {
+  return run(
+    () => deleteVenue(id),
+    'Sede eliminada.',
+    [],
+    'No se puede eliminar: hay partidos programados en esta sede. Cambiales el lugar o desactivala.',
   )
 }

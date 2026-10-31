@@ -6,6 +6,7 @@ import { CompetitionsSection } from '@/components/club/config/competitions-secti
 import { ProfileSection } from '@/components/club/config/profile-section'
 import { SeasonsSection, type SeasonRow } from '@/components/club/config/seasons-section'
 import { SportsSection, type SportRow } from '@/components/club/config/sports-section'
+import { VenuesSection } from '@/components/club/config/venues-section'
 import { NoAccess } from '@/components/club/no-access'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import type { ApiResult } from '@/lib/api/client'
@@ -15,11 +16,13 @@ import {
   listCompetitions,
   listSeasons,
   listSports,
+  listVenues,
   type Category,
   type Club,
   type Competition,
   type Season,
   type Sport,
+  type Venue,
 } from '@/lib/api/club'
 import { CONFIG_TABS, canSeeConfig, type ConfigTab } from '@/lib/club-config'
 import { getSetupSteps } from '@/lib/club-setup'
@@ -87,6 +90,7 @@ export default async function ConfigPage({ params, searchParams }: Props) {
 
       <PageBody>
         <TabContent
+          club={club}
           tab={tab}
           canEditProfile={can('club.update')}
           crud={crud}
@@ -104,6 +108,7 @@ type Failure = Exclude<ApiResult<unknown>, { ok: true }>
 /** Datos de la pestaña. `error` sin `result` es que la API no respondió. */
 type TabData =
   | { tab: 'perfil'; club: Club }
+  | { tab: 'sedes'; venues: Venue[] }
   | { tab: 'deportes'; sports: SportRow[] }
   | { tab: 'temporadas'; seasons: SeasonRow[] }
   | { tab: 'categorias'; categories: Category[]; sports: Sport[]; seasons: Season[]; sport?: number; season?: number }
@@ -123,6 +128,11 @@ async function loadTab(tab: ConfigTab, filters: { sport: string; season: string 
     if (tab === 'perfil') {
       const result = await getClub()
       return result.ok ? { tab, club: result.data.data } : { tab: 'error', result }
+    }
+
+    if (tab === 'sedes') {
+      const venues = await listVenues()
+      return venues.ok ? { tab, venues: venues.data.data } : { tab: 'error', result: venues }
     }
 
     if (tab === 'deportes') {
@@ -191,11 +201,13 @@ async function loadTab(tab: ConfigTab, filters: { sport: string; season: string 
 }
 
 async function TabContent({
+  club,
   tab,
   canEditProfile,
   crud,
   filters,
 }: {
+  club: string
   tab: ConfigTab
   canEditProfile: boolean
   crud: (resource: string) => Crud
@@ -209,6 +221,8 @@ async function TabContent({
         // Al guardar, los valores nuevos vuelven del servidor: la key remonta el formulario con ellos.
         <ProfileSection key={JSON.stringify(data.club)} club={data.club} canEdit={canEditProfile} />
       )
+    case 'sedes':
+      return <VenuesSection club={club} venues={data.venues} can={crud('venues')} />
     case 'deportes':
       return <SportsSection sports={data.sports} can={crud('sports')} />
     case 'temporadas':

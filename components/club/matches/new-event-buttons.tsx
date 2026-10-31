@@ -5,17 +5,21 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Dumbbell, Swords } from 'lucide-react'
 import { ConfigSheet } from '@/components/club/forms'
 import { Button } from '@/components/ui/button'
-import { MatchForm, type CategoryOption, type CompetitionOption } from './match-form'
+import { MatchForm, type CategoryOption, type CompetitionOption, type VenueOption } from './match-form'
 import { TrainingForm } from './training-form'
 
 /** "Nuevo partido" y "Nuevo entrenamiento". El partido nuevo abre su página. */
 export function NewEventButtons({
+  club,
   categories,
   competitions,
+  venues,
   can,
 }: {
+  club: string
   categories: CategoryOption[]
   competitions: CompetitionOption[]
+  venues: VenueOption[]
   can: { match: boolean; training: boolean }
 }) {
   const router = useRouter()
@@ -47,6 +51,8 @@ export function NewEventButtons({
         wide
       >
         <MatchForm
+          club={club}
+          venues={venues}
           match={null}
           categories={categories}
           competitions={competitions}

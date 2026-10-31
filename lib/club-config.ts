@@ -1,11 +1,12 @@
 // Sección "Configuración" del club (FRO-16): quién la ve y qué pestañas tiene.
 
-export type ConfigTab = 'perfil' | 'deportes' | 'temporadas' | 'categorias' | 'competencias'
+export type ConfigTab = 'perfil' | 'sedes' | 'deportes' | 'temporadas' | 'categorias' | 'competencias'
 
 /** `permissions`: hacen falta todos (la pestaña de categorías necesita listar deportes y temporadas). */
 export const CONFIG_TABS: readonly { id: ConfigTab; label: string; permissions?: readonly string[] }[] = [
   // El perfil lo ve cualquiera que entre a la configuración; solo `club.update` lo edita.
   { id: 'perfil', label: 'Perfil' },
+  { id: 'sedes', label: 'Sedes', permissions: ['venues.view'] },
   { id: 'deportes', label: 'Deportes', permissions: ['sports.view'] },
   { id: 'temporadas', label: 'Temporadas', permissions: ['seasons.view'] },
   { id: 'categorias', label: 'Categorías', permissions: ['categories.view', 'sports.view', 'seasons.view'] },
