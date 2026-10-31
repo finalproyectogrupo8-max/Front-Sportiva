@@ -52,8 +52,39 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
   const won = played && match.our_score! > match.opponent_score!
   const lost = played && match.our_score! < match.opponent_score!
 
+  const details = (
+    <section className="flex flex-col gap-3 rounded-xl border bg-card p-5" aria-labelledby="match-info">
+      <h2 id="match-info" className="text-sm font-semibold">Datos del partido</h2>
+      <ul className="flex flex-col gap-3 text-sm">
+        <Info icon={Clock} label="Presentación">
+          {match.meet_at ? `${formatTime(match.meet_at)} h` : <span className="text-muted-foreground">Sin definir</span>}
+        </Info>
+        <Info icon={MapPin} label="Lugar">
+          {match.venue ?? <span className="text-muted-foreground">Sin definir</span>}
+          {match.maps_url && (
+            <a href={match.maps_url} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex items-center gap-1 font-medium text-primary hover:underline">
+              Cómo llegar
+              <ExternalLink className="size-3" aria-hidden="true" />
+            </a>
+          )}
+        </Info>
+        <Info icon={Shirt} label="Camiseta">
+          {match.uniform ? (match.uniform === 'home' ? 'Titular' : 'Alternativa') : <span className="text-muted-foreground">Sin definir</span>}
+          {match.uniform_color && ` · ${match.uniform_color}`}
+        </Info>
+        {match.what_to_bring && (
+          <Info icon={Trophy} label="Qué llevar">
+            <span className="whitespace-pre-line">{match.what_to_bring}</span>
+          </Info>
+        )}
+      </ul>
+      {mapQuery && <MapPreview place={{ address: mapQuery, latitude: null, longitude: null }} className="h-40" />}
+      {match.notes && <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm"><strong className="font-medium">Notas internas:</strong> {match.notes}</p>}
+    </section>
+  )
+
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
       <Link href={back} className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" aria-hidden="true" />
         Volver al calendario
@@ -86,38 +117,9 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="flex flex-col gap-6">
-          {/* Datos para los jugadores */}
-          <section className="flex flex-col gap-3 rounded-xl border bg-card p-5" aria-labelledby="match-info">
-            <h2 id="match-info" className="text-sm font-semibold">Lo que ven los jugadores</h2>
-            <ul className="flex flex-col gap-3 text-sm">
-              <Info icon={Clock} label="Presentación">
-                {match.meet_at ? `${formatTime(match.meet_at)} h` : <span className="text-muted-foreground">Sin definir</span>}
-              </Info>
-              <Info icon={MapPin} label="Lugar">
-                {match.venue ?? <span className="text-muted-foreground">Sin definir</span>}
-                {match.maps_url && (
-                  <a href={match.maps_url} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex items-center gap-1 font-medium text-primary hover:underline">
-                    Cómo llegar
-                    <ExternalLink className="size-3" aria-hidden="true" />
-                  </a>
-                )}
-              </Info>
-              <Info icon={Shirt} label="Camiseta">
-                {match.uniform ? (match.uniform === 'home' ? 'Titular' : 'Alternativa') : <span className="text-muted-foreground">Sin definir</span>}
-                {match.uniform_color && ` · ${match.uniform_color}`}
-              </Info>
-              {match.what_to_bring && (
-                <Info icon={Trophy} label="Qué llevar">
-                  <span className="whitespace-pre-line">{match.what_to_bring}</span>
-                </Info>
-              )}
-            </ul>
-            {mapQuery && <MapPreview place={{ address: mapQuery, latitude: null, longitude: null }} />}
-            {match.notes && <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm"><strong className="font-medium">Notas internas:</strong> {match.notes}</p>}
-          </section>
-
+      {/* Principal: la convocatoria. Al costado: asistencia, datos del partido y resultado. */}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="flex min-w-0 flex-col gap-6">
           {/* Convocatoria (FRO-35) */}
           {callup?.ok ? (
             <CallupPanel sheet={callup.data.data} can={{ update: can('callups.update'), publish: can('callups.publish') }} />
@@ -132,15 +134,17 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
               </section>
             )
           )}
+          {!can('callups.view') && details}
         </div>
 
-        <div className="flex flex-col gap-6">
+        <aside className="flex flex-col gap-6">
           {(can('attendance.record') || can('attendance.view')) && (
             <Link href={`/c/${club}/partidos/${match.id}/asistencia`} className={cn(buttonVariants({ size: 'lg' }), 'h-12 gap-2 text-base')}>
               <ClipboardCheck className="size-5" aria-hidden="true" />
               {can('attendance.record') ? 'Tomar asistencia' : 'Ver asistencia'}
             </Link>
           )}
+          {can('callups.view') && details}
           {can('matches.update') && <ResultForm key={`${match.status}-${match.our_score}-${match.opponent_score}`} match={match} />}
           <MatchActions
             club={club}
@@ -151,7 +155,7 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
             competitions={competitionList.map((c) => ({ id: c.id, label: c.name, category_ids: (c.categories ?? []).map((x) => x.id) }))}
             can={{ update: can('matches.update'), delete: can('matches.delete') }}
           />
-        </div>
+        </aside>
       </div>
     </div>
   )

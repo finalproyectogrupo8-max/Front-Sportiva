@@ -29,9 +29,9 @@ export function CallupPanel({ sheet, can }: { sheet: CallupSheet; can: { update:
   const [editing, setEditing] = useState(!published && can.update)
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border bg-card p-5" aria-labelledby="match-callup">
+    <section className="flex flex-col gap-4 rounded-xl border bg-card p-5 sm:p-6" aria-labelledby="match-callup">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="match-callup" className="text-sm font-semibold">
+        <h2 id="match-callup" className="text-base font-semibold">
           Convocatoria
         </h2>
         {published ? <Pill tone="ok">Publicada</Pill> : <Pill tone="neutral">Sin publicar</Pill>}
@@ -173,12 +173,12 @@ function CallupEditor({
         )}
       </div>
 
-      <ul className="flex flex-col divide-y overflow-hidden rounded-lg border">
+      <ul className="grid gap-2 xl:grid-cols-2">
         {eligible.map((p) => {
           const on = picked.has(p.player_id)
           const error = errors[p.player_id] || (repeated.has(p.player_id) ? 'Número repetido.' : '')
           return (
-            <li key={p.player_id} className={cn('flex items-center gap-3 p-2 pl-3', on && 'bg-primary/5')}>
+            <li key={p.player_id} className={cn('flex items-center gap-3 rounded-lg border p-2 pl-3', on && 'border-primary/40 bg-primary/5')}>
               <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -209,7 +209,7 @@ function CallupEditor({
           )
         })}
         {blocked.map((p) => (
-          <li key={p.player_id} className="flex items-center gap-3 p-2 pl-3 text-muted-foreground">
+          <li key={p.player_id} className="flex items-center gap-3 rounded-lg border border-dashed p-2 pl-3 text-muted-foreground">
             <input type="checkbox" disabled className="size-5 shrink-0" aria-label={`${p.player_name}: no habilitado`} />
             <span className="flex min-w-0 flex-col">
               <span className="truncate">{p.player_name}</span>
@@ -325,7 +325,7 @@ function CallupTracker({ sheet, canPublish }: { sheet: CallupSheet; canPublish: 
       {rows.length === 0 ? (
         <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Nadie en esta lista.</p>
       ) : (
-        <ul className="flex flex-col divide-y overflow-hidden rounded-lg border">
+        <ul className="grid gap-2 xl:grid-cols-2">
           {rows.map((row) => (
             <CallupItem key={row.player_id} row={row} />
           ))}
@@ -338,7 +338,7 @@ function CallupTracker({ sheet, canPublish }: { sheet: CallupSheet; canPublish: 
 function CallupItem({ row }: { row: CallupRow }) {
   const response = RESPONSE[(row.response as CallupResponse) ?? 'pending'] ?? RESPONSE.pending
   return (
-    <li className="flex items-center gap-3 p-2 pl-3">
+    <li className="flex items-center gap-3 rounded-lg border p-2 pl-3">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full border font-display text-sm font-bold tabular-nums" aria-hidden="true">
         {row.shirt_number ?? '·'}
       </span>
