@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AlertTriangle, ArrowLeft, ShieldCheck } from 'lucide-react'
-import { EmptyConfig } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 import { CategoryCards } from '@/components/club/eligibility/category-cards'
 import { EligibilityGrid } from '@/components/club/eligibility/eligibility-grid'
 import { NoAccess } from '@/components/club/no-access'
@@ -28,6 +28,7 @@ export default async function EligibilityPage({ params, searchParams }: Props) {
   }
 
   const categoryId = Number(categoria) || null
+  const canSetUp = permissions.has('competitions.create')
   let summary, grid
   try {
     ;[summary, grid] = await Promise.all([
@@ -57,8 +58,8 @@ export default async function EligibilityPage({ params, searchParams }: Props) {
       <>
         <ModuleHeader
           eyebrow="Habilitación"
-          title={current?.category_name ?? 'Categoría'}
-          description="Cada papel que piden sus competencias. Tocá una celda para presentarlo, verlo o aprobarlo."
+          title={current?.category_name ?? 'Sin competencias'}
+          description={current ? 'Cada papel que piden sus competencias. Tocá una celda para presentarlo, verlo o aprobarlo.' : undefined}
           actions={
             <Link href={`/c/${club}/habilitacion`} className={cn(buttonVariants({ variant: 'outline' }), 'gap-1.5')}>
               <ArrowLeft className="size-4" aria-hidden="true" />
@@ -69,6 +70,20 @@ export default async function EligibilityPage({ params, searchParams }: Props) {
         <PageBody>
           {!grid.ok ? (
             <LoadError message={grid.status === 404 ? 'La categoría no existe o no es de tus categorías.' : grid.message} />
+          ) : !current ? (
+            // La categoría existe pero no juega ninguna competencia: no hay papeles que controlar.
+            <EmptyConfig
+              icon={ShieldCheck}
+              title="Esta categoría no juega ninguna competencia"
+              description="La habilitación sale de los papeles que pide cada competencia. Cargá la competencia y elegí esta categoría para ver qué le falta a cada jugador."
+              action={
+                canSetUp && (
+                  <Link href={`/c/${club}/configuracion?tab=competencias`} className={buttonVariants()}>
+                    Cargar competencias
+                  </Link>
+                )
+              }
+            />
           ) : (
             <EligibilityGrid
               key={categoryId}
@@ -86,7 +101,6 @@ export default async function EligibilityPage({ params, searchParams }: Props) {
     )
   }
 
-  const canSetUp = permissions.has('competitions.create')
   return (
     <>
       <ModuleHeader

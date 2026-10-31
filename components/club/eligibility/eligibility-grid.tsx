@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { CalendarClock, Search, ShieldCheck, ShieldX } from 'lucide-react'
-import { EmptyConfig } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 import { Input } from '@/components/ui/input'
 import type { CategoryEligibility, PlayerEligibility, RequirementStatus } from '@/lib/api/eligibility'
 import { cn } from '@/lib/utils'

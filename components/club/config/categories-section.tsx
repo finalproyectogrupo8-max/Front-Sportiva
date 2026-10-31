@@ -8,17 +8,8 @@ import { FormSelect, Pill } from '@/components/club/shared'
 import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
 import type { Category, Season, Sport } from '@/lib/api/club'
-import {
-  ConfigSheet,
-  ConfigTable,
-  ConfirmDialog,
-  EmptyConfig,
-  Field,
-  FormError,
-  RowActions,
-  SubmitButton,
-  useConfigAction,
-} from '@/components/club/forms'
+import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
+import { EmptyConfig } from '@/components/club/empty-state'
 
 const ALL = 'todos'
 

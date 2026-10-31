@@ -49,9 +49,13 @@ export type PlayerDetail = {
   contacts: PlayerContact[] | null
   /** null: el usuario no ve la habilitación. */
   eligibility: PlayerEligibility | null
+  /** Categorías que juegan alguna competencia (las que tienen grilla en el tablero). */
+  categoriesWithCompetitions: number[]
 }
 
 type Flags = {
+  /** Puede cargar competencias (link desde "no hay papeles para controlar"). */
+  competitions: boolean
   update: boolean
   delete: boolean
   managePlayers: boolean
@@ -225,60 +229,80 @@ function PlayerView({
         </Section>
 
         {/* Habilitación (FRO-34) */}
-        {eligibility && current.length > 0 && (
-          <Section
-            title="Habilitación"
-            action={
-              <Link
-                href={`/c/${club}/habilitacion?categoria=${current[0].category_id}`}
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-              >
-                Ver en el tablero
-                <ExternalLink className="size-3" aria-hidden="true" />
-              </Link>
-            }
-          >
-            <p
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium',
-                eligibility.is_eligible ? 'bg-success/12 text-success' : 'bg-destructive/10 text-destructive',
-              )}
+        {eligibility && current.length > 0 && (() => {
+          const toCheck = eligibility.requirements.filter((r) => r.status !== 'not_applicable')
+          // Categoría con competencias, para linkear su grilla. Sin ninguna, no hay papeles que controlar.
+          const boardCategory = current.find((m) => detail.categoriesWithCompetitions.includes(m.category_id))
+          return (
+            <Section
+              title="Habilitación"
+              action={
+                boardCategory && (
+                  <Link
+                    href={`/c/${club}/habilitacion?categoria=${boardCategory.category_id}`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    Ver en el tablero
+                    <ExternalLink className="size-3" aria-hidden="true" />
+                  </Link>
+                )
+              }
             >
-              {eligibility.is_eligible ? <ShieldCheck className="size-4" aria-hidden="true" /> : <ShieldX className="size-4" aria-hidden="true" />}
-              {eligibility.is_eligible
-                ? 'Habilitado para jugar'
-                : `No habilitado: le ${eligibility.missing === 1 ? 'falta 1 papel' : `faltan ${eligibility.missing} papeles`}`}
-            </p>
-            {eligibility.requirements.filter((r) => r.status !== 'not_applicable').length > 0 && (
-              <ul className="flex flex-col divide-y rounded-lg border">
-                {eligibility.requirements
-                  .filter((r) => r.status !== 'not_applicable')
-                  .map((r) => (
-                    <li key={r.requirement_id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="font-medium">{r.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {r.competition_name}
-                          {r.expires_at && ` · vence ${formatDay(r.expires_at)}`}
+              {toCheck.length === 0 ? (
+                <p className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+                  {current.length === 1 ? 'Su categoría no juega' : 'Sus categorías no juegan'} ninguna competencia cargada, así que no hay
+                  papeles para controlar.
+                  {can.competitions && (
+                    <>
+                      {' '}
+                      <Link href={`/c/${club}/configuracion?tab=competencias`} className="font-medium text-primary hover:underline">
+                        Cargar la competencia
+                      </Link>
+                    </>
+                  )}
+                </p>
+              ) : (
+                <>
+                  <p
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium',
+                      eligibility.is_eligible ? 'bg-success/12 text-success' : 'bg-destructive/10 text-destructive',
+                    )}
+                  >
+                    {eligibility.is_eligible ? <ShieldCheck className="size-4" aria-hidden="true" /> : <ShieldX className="size-4" aria-hidden="true" />}
+                    {eligibility.is_eligible
+                      ? 'Habilitado para jugar'
+                      : `No habilitado: le ${eligibility.missing === 1 ? 'falta 1 papel' : `faltan ${eligibility.missing} papeles`}`}
+                  </p>
+                  <ul className="flex flex-col divide-y rounded-lg border">
+                    {toCheck.map((r) => (
+                      <li key={r.requirement_id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="font-medium">{r.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {r.competition_name}
+                            {r.expires_at && ` · vence ${formatDay(r.expires_at)}`}
+                          </span>
                         </span>
-                      </span>
-                      {r.document_id && (
-                        <a
-                          href={`/c/${club}/documentos/${r.document_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-medium text-primary hover:underline"
-                        >
-                          Ver archivo
-                        </a>
-                      )}
-                      <StatusBadge status={r.status} expiringSoon={r.expiring_soon} />
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </Section>
-        )}
+                        {r.document_id && (
+                          <a
+                            href={`/c/${club}/documentos/${r.document_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium text-primary hover:underline"
+                          >
+                            Ver archivo
+                          </a>
+                        )}
+                        <StatusBadge status={r.status} expiringSoon={r.expiring_soon} />
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </Section>
+          )
+        })()}
 
         {/* Contactos */}
         {contacts && (
