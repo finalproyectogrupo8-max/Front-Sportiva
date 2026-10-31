@@ -337,7 +337,7 @@ html.marketing ::selection {
 .section-heading h2,
 .why-copy h2,
 .access-section h2 {
-  font-family: 'Arial Narrow', 'Roboto Condensed', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-stretch: condensed;
   font-weight: 400;
   text-transform: uppercase;
@@ -537,7 +537,7 @@ html.marketing ::selection {
 }
 
 .hero-stat strong {
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 30px;
   font-weight: 400;
 }
@@ -670,7 +670,7 @@ html.marketing ::selection {
   top: 24px;
   left: 26px;
   color: rgba(255,255,255,.35);
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 17px;
 }
 
@@ -892,7 +892,7 @@ html.marketing ::selection {
 
 .card-content h3 {
   margin-top: 7px;
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 31px;
   font-weight: 400;
   line-height: 1;
@@ -1038,7 +1038,7 @@ html.marketing ::selection {
   border-radius: 50%;
   background: var(--orange);
   color: white;
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
 }
 
 .why-label p {
@@ -1106,7 +1106,7 @@ html.marketing ::selection {
 }
 
 .score-block b {
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 48px;
   font-weight: 400;
 }
@@ -1282,7 +1282,7 @@ html.marketing footer {
 
 .contact-form-wrap h3 {
   margin: 7px 0 25px;
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 34px;
   font-weight: 400;
   text-transform: uppercase;
@@ -1784,7 +1784,7 @@ html.marketing footer {
 .contact-route h1,
 .contact-route-card h2,
 .login-card h1 {
-  font-family: 'Arial Narrow', 'Roboto Condensed', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-weight: 400;
   line-height: .87;
   text-transform: uppercase;
@@ -1931,7 +1931,7 @@ html.marketing footer {
 
 .route-items h3 {
   margin: 48px 0 14px;
-  font-family: 'Arial Narrow', Impact, sans-serif;
+  font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
   font-size: 30px;
   font-weight: 400;
   text-transform: uppercase;
@@ -2295,7 +2295,7 @@ html.marketing footer {
   }
 
   .mobile-route-nav a {
-    font-family: 'Arial Narrow', Impact, sans-serif;
+    font-family: var(--font-barlow), 'Arial Narrow', Impact, sans-serif;
     font-size: 28px;
     text-transform: uppercase;
   }

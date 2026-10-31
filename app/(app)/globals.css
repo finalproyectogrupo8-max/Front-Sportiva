@@ -5,13 +5,17 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-sans: var(--font-manrope), 'Manrope', system-ui, sans-serif;
   --font-display: var(--font-barlow), 'Barlow Condensed', sans-serif;
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-ink: var(--ink);
+  --color-brand: var(--brand);
+  --color-club: var(--club);
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
   --color-ink-foreground: var(--ink-foreground);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
@@ -47,36 +51,73 @@
 
 :root {
   color-scheme: light;
-  --background: oklch(0.972 0.004 255);
-  --foreground: oklch(0.21 0.025 262);
-  --card: oklch(0.995 0.001 255);
-  --card-foreground: oklch(0.21 0.025 262);
-  --popover: oklch(0.995 0.001 255);
-  --popover-foreground: oklch(0.21 0.025 262);
-  --primary: oklch(0.5 0.2 262);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.935 0.008 255);
-  --secondary-foreground: oklch(0.21 0.025 262);
-  --muted: oklch(0.945 0.006 255);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.945 0.006 255);
-  --accent-foreground: oklch(0.21 0.025 262);
-  --destructive: oklch(0.58 0.22 25);
-  --success: oklch(0.6 0.14 158);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.72 0.17 55);
-  --warning-foreground: oklch(0.21 0.025 262);
-  --ink: oklch(0.21 0.025 262);
-  --ink-foreground: oklch(0.97 0.004 255);
-  --border: oklch(0.905 0.008 255);
-  --input: oklch(0.89 0.01 255);
-  --ring: oklch(0.5 0.2 262);
+  /* Marca Sportiva, la misma paleta que la landing (app/(marketing)/marketing.css). */
+  --paper: #f5f0e9;
+  --cream: #eee5d8;
+  --brand: #d36f45;
+  --background: var(--paper);
+  --foreground: #10100f;
+  --card: #fffcf7;
+  --card-foreground: #10100f;
+  --popover: #fffcf7;
+  --popover-foreground: #10100f;
+  /* Naranja oscurecido para que texto blanco y links pasen AA (5,5:1 y 4,8:1 sobre papel). */
+  --primary: #ad4c2b;
+  --primary-foreground: #ffffff;
+  --secondary: var(--cream);
+  --secondary-foreground: #10100f;
+  --muted: #ede5d9;
+  --muted-foreground: #6b6359;
+  --accent: #f4e2d6;
+  --accent-foreground: #10100f;
+  --destructive: #c23b30;
+  --success: #2a774c;
+  --success-foreground: #ffffff;
+  --warning: #e2a336;
+  --warning-foreground: #10100f;
+  --ink: #10100f;
+  --ink-foreground: var(--paper);
+  --border: #e2d8c9;
+  --input: #d6cab8;
+  --ring: var(--brand);
+  /* Color del club: solo acento (escudo, chips). Lo define ClubProvider; la estructura es siempre Sportiva. */
+  --club: var(--brand);
   --chart-1: var(--primary);
-  --chart-2: oklch(0.72 0.17 55);
-  --chart-3: oklch(0.21 0.025 262);
-  --chart-4: oklch(0.6 0.14 158);
-  --chart-5: oklch(0.75 0.02 260);
+  --chart-2: var(--warning);
+  --chart-3: var(--ink);
+  --chart-4: var(--success);
+  --chart-5: #a89f92;
   --radius: 0.75rem;
+}
+
+/* Modo oscuro: el negro de la landing. El naranja original pasa AA con texto ink (5,6:1). */
+.dark {
+  color-scheme: dark;
+  --background: #10100f;
+  --foreground: var(--paper);
+  --card: #1a1917;
+  --card-foreground: var(--paper);
+  --popover: #1f1e1c;
+  --popover-foreground: var(--paper);
+  --primary: var(--brand);
+  --primary-foreground: #10100f;
+  --secondary: #262420;
+  --secondary-foreground: var(--paper);
+  --muted: #23211e;
+  --muted-foreground: #a39b8f;
+  --accent: #2c241f;
+  --accent-foreground: var(--paper);
+  --destructive: #e5675c;
+  --success: #4fae7a;
+  --success-foreground: #10100f;
+  --warning: #e2a336;
+  --warning-foreground: #10100f;
+  /* Bloques destacados (hero, avatar): un escalón sobre el fondo para que no se pierdan. */
+  --ink: #1f1e1c;
+  --ink-foreground: var(--paper);
+  --border: #2e2b27;
+  --input: #3a3631;
+  --chart-5: #6f675d;
 }
 
 @layer base {
@@ -85,6 +126,8 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    /* Manrope trae un espacio angosto (0,2 em): en tablas y textos chicos las palabras se pegan. */
+    word-spacing: 0.06em;
   }
 }
 

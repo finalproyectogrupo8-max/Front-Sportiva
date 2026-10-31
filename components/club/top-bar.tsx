@@ -21,6 +21,7 @@ import { QUICK_CREATE, getModule } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { CommandPalette } from './command-palette'
 import { Initials } from './shared'
 import { useAlerts } from './use-alerts'
@@ -58,7 +59,7 @@ export function TopBar({
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-3 sm:gap-2 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-[120rem] items-center gap-1 px-3 sm:gap-2 sm:px-6 lg:px-10">
         <Link href={base} aria-label="Inicio del club" className="rounded-lg focus-visible:ring-2 focus-visible:ring-ring">
           <LogoMark />
         </Link>
@@ -194,6 +195,8 @@ export function TopBar({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+
+          <ThemeToggle />
 
           <DropdownMenu>
             <DropdownMenuTrigger

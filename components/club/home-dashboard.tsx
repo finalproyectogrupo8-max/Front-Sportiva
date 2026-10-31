@@ -71,7 +71,7 @@ export function HomeDashboard() {
     <div className="flex flex-col">
       <section className="relative overflow-hidden bg-ink text-ink-foreground">
         <div className="court-lines absolute inset-0 text-ink-foreground" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1.15fr] lg:py-10">
+        <div className="relative mx-auto grid max-w-[120rem] gap-8 px-4 py-8 sm:px-6 lg:px-10 lg:grid-cols-[1fr_1.15fr] lg:py-10">
           <div className="flex flex-col justify-between gap-6 animate-rise">
             <div className="flex flex-col gap-2">
               <p className="text-sm text-ink-foreground/60 first-letter:uppercase">
@@ -153,7 +153,7 @@ export function HomeDashboard() {
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_20rem]">
+      <div className="mx-auto grid w-full max-w-[120rem] gap-6 px-4 py-6 sm:px-6 lg:px-10 lg:grid-cols-[1fr_20rem] 2xl:grid-cols-[1fr_24rem]">
         <section aria-labelledby="modulos" className="flex min-w-0 flex-col gap-3">
           <h2 id="modulos" className="text-sm font-medium text-muted-foreground">
             Módulos del club

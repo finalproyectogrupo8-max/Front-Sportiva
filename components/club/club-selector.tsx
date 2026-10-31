@@ -37,7 +37,7 @@ export function ClubSelector({
         </p>
       )}
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {tenants.map((t, i) => (
           <li key={t.slug} className="animate-rise" style={{ animationDelay: `${i * 70}ms` }}>
             <form action={formAction} className="h-full">
