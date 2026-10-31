@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/matches/{match}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["attendance.showMatch"];
+        put: operations["attendance.recordMatch"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trainings/{training}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["attendance.showTraining"];
+        put: operations["attendance.recordTraining"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -87,6 +119,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["club.calendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matches/{match}/callup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["callup.show"];
+        /** Reemplaza la lista. `players`: `[{player_id, shirt_number?}]` */
+        put: operations["callup.update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matches/{match}/callup/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publica (o vuelve a publicar después de un cambio). Genera la página pública y los mensajes */
+        post: operations["callup.publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/categories": {
         parameters: {
             query?: never;
@@ -114,6 +196,137 @@ export interface paths {
         put: operations["categories.update"];
         post?: never;
         delete: operations["categories.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{category}/coaches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** `?status=current` (por defecto) o `all` */
+        get: operations["categoryCoach.index"];
+        put?: never;
+        post: operations["categoryCoach.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/category-coaches/{categoryCoach}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["categoryCoach.end"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{category}/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** `?status=active` (por defecto), `ended` o `all` */
+        get: operations["categoryMembership.index"];
+        put?: never;
+        post: operations["categoryMembership.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/memberships/{membership}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["categoryMembership.update"];
+        trace?: never;
+    };
+    "/memberships/{membership}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["categoryMembership.end"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/club": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["club.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["club.update"];
+        trace?: never;
+    };
+    "/public/clubs/{slug}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Público: el escudo de un club activo */
+        get: operations["clubLogo.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/club/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["clubLogo.store"];
+        delete: operations["clubLogo.destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -151,6 +364,212 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/competitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Filtros: `season_id`, `sport_id`, `category_id` y `search`. Paginado */
+        get: operations["competitions.index"];
+        put?: never;
+        post: operations["competitions.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/competitions/{competition}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["competitions.show"];
+        put: operations["competitions.update"];
+        post?: never;
+        delete: operations["competitions.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/competitions/{competition}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Para la temporada siguiente: copia los requisitos, no las categorías (son de otra temporada) */
+        post: operations["competition.copy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["document.index"];
+        put?: never;
+        /** La foto nueva reemplaza a la anterior */
+        post: operations["document.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{document}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El archivo, para mostrarlo o bajarlo. La foto la ve quien ve al jugador (`players.view`); los
+         *     papeles piden `player_documents.view`
+         */
+        get: operations["document.download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{document}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["document.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resumen del club: una fila por categoría activa con competencias */
+        get: operations["eligibility.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{category}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** La grilla de una categoría: jugadores × requisitos */
+        get: operations["eligibility.category"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["eligibility.player"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/requirements/{requirement}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Presentar un papel. Si el requisito pide archivo, `document_id` (subido con TIZ-29) es obligatorio */
+        post: operations["eligibility.submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/requirements/{requirement}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprobar. Vence a los `validity_months` del requisito, salvo que se mande `expires_at` (la fecha
+         *     del apto). Se puede aprobar sin presentar antes si el club recibió el papel en mano
+         */
+        post: operations["eligibility.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/requirements/{requirement}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["eligibility.reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -167,6 +586,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["matches.index"];
+        put?: never;
+        post: operations["matches.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/matches/{match}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["matches.show"];
+        /** También carga el resultado: con los dos puntajes, el partido pasa a `played` salvo que se mande otro estado */
+        put: operations["matches.update"];
+        post?: never;
+        delete: operations["matches.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/newsletter": {
         parameters: {
             query?: never;
@@ -177,6 +629,122 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["newsletter.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["players.index"];
+        put?: never;
+        post: operations["players.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["players.show"];
+        put: operations["players.update"];
+        post?: never;
+        /** Baja lógica. Las asignaciones activas se cierran: el jugador deja de figurar en el plantel */
+        delete: operations["players.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{player}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["playerContact.index"];
+        put?: never;
+        post: operations["playerContact.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/player-contacts/{contact}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Si se borra el principal, el más antiguo que queda pasa a serlo */
+        delete: operations["playerContact.destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["playerContact.update"];
+        trace?: never;
+    };
+    "/public/callups/respond/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["publicCallup.showPersonal"];
+        put?: never;
+        /** "Voy" o "No puedo", con motivo opcional. Se puede cambiar la respuesta */
+        post: operations["publicCallup.respond"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/callups/{token}/calendar.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El partido como evento de calendario (.ics) para "Agregar al calendario" */
+        get: operations["publicCallup.calendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/callups/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["publicCallup.show"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -311,6 +879,7 @@ export interface paths {
         get: operations["sports.show"];
         put: operations["sports.update"];
         post?: never;
+        /** La baja desactiva el deporte (D12). Con categorías activas responde 409 (D11) */
         delete: operations["sports.destroy"];
         options?: never;
         head?: never;
@@ -520,6 +1089,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trainings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["trainings.index"];
+        put?: never;
+        post: operations["trainings.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trainings/{training}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["trainings.show"];
+        put: operations["trainings.update"];
+        post?: never;
+        delete: operations["trainings.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -583,15 +1184,86 @@ export interface components {
             created_at: string | null;
             updated_at: string | null;
         };
+        /** CalendarEventResource */
+        CalendarEventResource: {
+            /** @description `match` o `training`. */
+            type: string;
+            id: number;
+            category_id: number;
+            category_name: string;
+            title: string;
+            starts_at: string;
+            ends_at: string | null;
+            location: string | null;
+            /** @description Solo partidos: `scheduled`, `played`, `postponed` o `cancelled`. */
+            status: string | null;
+        };
+        /** CallupRowResource */
+        CallupRowResource: {
+            player_id: number;
+            player_name: string;
+            shirt_number: number | null;
+            /** @description `pending`, `going` o `not_going`. */
+            response: string;
+            response_note: string | null;
+            responded_at: string | null;
+            /** @description Link personal para confirmar (página del front). */
+            personal_url: string;
+            /** @description WhatsApp al contacto principal con el mensaje armado; null si no tiene teléfono. */
+            whatsapp_url: string | null;
+        };
+        /** CallupSheetResource */
+        CallupSheetResource: {
+            match_id: number;
+            published_at: string | null;
+            /** @description Cambió la fecha, la hora o el lugar después de publicar: hay que volver a avisar. */
+            updated_after_publish: boolean;
+            /** @description Página pública de la convocatoria; null hasta publicar. */
+            public_url: string | null;
+            /** @description Mensaje para el grupo de WhatsApp; null hasta publicar. */
+            group_message: string | null;
+            going: number;
+            not_going: number;
+            pending: number;
+            callups: components["schemas"]["CallupRowResource"][];
+            /** @description El plantel de la categoría, con quién está habilitado y quién está convocado. */
+            squad: components["schemas"]["SquadOptionResource"][];
+        };
+        /** CategoryCoachResource */
+        CategoryCoachResource: {
+            id: number;
+            category_id: number;
+            coach_id: number;
+            /** @description Nombre y apellido del profe, si se cargó. */
+            coach_name?: string;
+            /** @description `head_coach`, `assistant` o `physical_trainer`. */
+            assignment_type: string;
+            start_date: string | null;
+            end_date: string | null;
+        };
+        /** CategoryEligibilityResource */
+        CategoryEligibilityResource: {
+            category_id: number;
+            category_name: string;
+            /** @description Jugadores activos en la categoría. */
+            players: number;
+            /** @description Cuántos están habilitados. */
+            eligible: number;
+            /** @description Cierre de inscripción más próximo (todavía no pasado). */
+            registration_deadline: string | null;
+            days_to_deadline: number | null;
+            /** @description Requisitos aprobados que vencen en los próximos 30 días. */
+            expiring_soon: number;
+        };
         /** CategoryResource */
         CategoryResource: {
-            id: string;
-            sport_id: string;
-            season_id: string;
+            id: number;
+            sport_id: number;
+            season_id: number;
             name: string;
-            min_age: string;
-            max_age: string;
-            is_active: string;
+            min_age: number | null;
+            max_age: number | null;
+            is_active: boolean;
             created_at: string;
             updated_at: string;
         };
@@ -604,6 +1276,24 @@ export interface components {
                 slug: string;
                 name: string;
             }[];
+        };
+        /** ClubResource */
+        ClubResource: {
+            slug: string;
+            name: string;
+            short_name: string | null;
+            city: string | null;
+            founded_year: number | null;
+            /** @description Hexadecimal (#rrggbb). Acento del club: escudo y chips. */
+            primary_color: string | null;
+            /** @description URL del escudo en la API (`GET /api/public/clubs/{slug}/logo`), o null si no tiene. */
+            logo_url: string | null;
+            stats: {
+                /** @description Jugadores con estado activo. Se calcula, no se guarda. */
+                active_players: number;
+                /** @description Nombres de los deportes activos del club. */
+                sports: string[];
+            };
         };
         /** ClubRoleResource */
         ClubRoleResource: {
@@ -622,15 +1312,74 @@ export interface components {
         };
         /** CoachResource */
         CoachResource: {
-            id: string;
-            club_user_id: string;
+            id: number;
+            club_user_id: number | null;
             first_name: string;
             last_name: string;
-            phone: string;
-            email: string;
+            phone: string | null;
+            email: string | null;
             status: string;
             created_at: string;
             updated_at: string;
+        };
+        /** CompetitionCategoryResource */
+        CompetitionCategoryResource: {
+            id: number;
+            name: string;
+        };
+        /** CompetitionRequirementResource */
+        CompetitionRequirementResource: {
+            id: number;
+            name: string;
+            /** @description Meses de validez; null si no vence. */
+            validity_months: number | null;
+            requires_file: boolean;
+            /** @description Solo se pide a menores de 18. */
+            minors_only: boolean;
+            is_required: boolean;
+            sort: number;
+        };
+        /** CompetitionResource */
+        CompetitionResource: {
+            id: number;
+            sport_id: number;
+            season_id: number;
+            name: string;
+            organizer: string | null;
+            registration_deadline: string | null;
+            /** @description Días que faltan para el cierre de inscripción (negativo si ya pasó). */
+            days_to_deadline: number | null;
+            categories?: components["schemas"]["CompetitionCategoryResource"][];
+            requirements?: components["schemas"]["CompetitionRequirementResource"][];
+        };
+        /**
+         * CopyCompetitionRequest
+         * @description Copiar una competencia a otra temporada: trae los requisitos, no las categorías.
+         */
+        CopyCompetitionRequest: {
+            season_id: number;
+            name?: string;
+            /** Format: date-time */
+            registration_deadline?: string | null;
+        };
+        /** DocumentResource */
+        DocumentResource: {
+            id: number;
+            /** @description `photo`, `medical`, `id_document`, `federation_card`, `authorization` u `other`. */
+            kind: string;
+            original_name: string;
+            mime: string;
+            /** @description Tamaño en bytes. */
+            size: number;
+            uploaded_at: string | null;
+        };
+        /**
+         * EndAssignmentRequest
+         * @description Cerrar una asignación (jugador o profe en una categoría). Sin fecha, cierra hoy.
+         */
+        EndAssignmentRequest: {
+            /** Format: date-time */
+            end_date?: string;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -646,6 +1395,30 @@ export interface components {
             tenants: components["schemas"]["TenantSummaryResource"][];
             platform_token?: string;
             platform_expires_at?: string | null;
+        };
+        /** MatchResource */
+        MatchResource: {
+            id: number;
+            category_id: number;
+            /** @description Nombre de la categoría, si se cargó. */
+            category_name?: string;
+            competition_id: number | null;
+            opponent: string;
+            match_date: string;
+            /** @description Hora de presentación. */
+            meet_at: string | null;
+            venue: string | null;
+            maps_url: string | null;
+            is_home: boolean;
+            /** @description `home` (titular) o `away` (alternativa). */
+            uniform: string | null;
+            uniform_color: string | null;
+            what_to_bring: string | null;
+            our_score: number | null;
+            opponent_score: number | null;
+            /** @description `scheduled`, `played`, `postponed` o `cancelled`. */
+            status: string;
+            notes: string | null;
         };
         /** MeResource */
         MeResource: {
@@ -663,6 +1436,21 @@ export interface components {
             user: components["schemas"]["UserResource"];
             tenants: components["schemas"]["TenantSummaryResource"][];
         };
+        /** MembershipResource */
+        MembershipResource: {
+            id: number;
+            player_id: number;
+            category_id: number;
+            /** @description Nombre de la categoría, si se cargó. */
+            category_name?: string;
+            /** @description Nombre y apellido del jugador, si se cargó. */
+            player_name?: string;
+            start_date: string;
+            end_date: string | null;
+            shirt_number: number | null;
+            /** @description `active` mientras juega en la categoría; `ended` cuando se cerró. */
+            status: string;
+        };
         /** PermissionModuleResource */
         PermissionModuleResource: {
             key: string;
@@ -679,9 +1467,82 @@ export interface components {
                 }[];
             }[];
         };
+        /** PlayerContactResource */
+        PlayerContactResource: {
+            id: number;
+            player_id: number;
+            name: string;
+            /** @description `mother`, `father`, `guardian`, `self` (el propio jugador) u `other`. */
+            relationship: string;
+            phone: string | null;
+            email: string | null;
+            /** @description El principal recibe los avisos de la convocatoria. */
+            is_primary: boolean;
+        };
+        /** PlayerEligibilityResource */
+        PlayerEligibilityResource: {
+            player_id: number;
+            player_name: string;
+            shirt_number: number | null;
+            /** @description Tiene aprobados y vigentes todos los requisitos obligatorios que le aplican. */
+            is_eligible: boolean;
+            /** @description Requisitos obligatorios que le faltan. */
+            missing: number;
+            requirements: components["schemas"]["RequirementStatusResource"][];
+        };
+        /** PlayerResource */
+        PlayerResource: {
+            id: number;
+            first_name: string;
+            last_name: string;
+            birth_date: string | null;
+            /** @description Edad en años cumplidos, calculada con la fecha de nacimiento. */
+            age: number | null;
+            document_number: string | null;
+            registration_number: string | null;
+            preferred_position: string | null;
+            dominant_side: string | null;
+            status: string;
+            /** @description Id del documento con la foto (`GET /api/documents/{id}/download`), si se cargó y tiene. */
+            photo_document_id?: number;
+            notes: string | null;
+            /** @description Categorías en las que juega hoy, con su número. Solo si el controlador las cargó. */
+            memberships?: components["schemas"]["MembershipResource"][];
+            created_at: string | null;
+            updated_at: string | null;
+        };
+        /**
+         * RecordAttendanceRequest
+         * @description Asistencia de un evento en un solo request (la pantalla móvil la manda entera).
+         */
+        RecordAttendanceRequest: {
+            records: {
+                player_id: number;
+                /** @enum {string} */
+                status: "present" | "absent" | "excused" | "late";
+                notes?: string | null;
+            }[];
+        };
+        /** RequirementStatusResource */
+        RequirementStatusResource: {
+            requirement_id: number;
+            name: string;
+            competition_id: number;
+            competition_name: string;
+            /** @description `pending`, `submitted`, `approved`, `rejected`, `expired` o `not_applicable`. */
+            status: string;
+            is_required: boolean;
+            requires_file: boolean;
+            expires_at: string | null;
+            /** @description Aprobado y vence en los próximos 30 días. */
+            expiring_soon: boolean;
+            /** @description Documento adjunto (`GET /api/documents/{id}/download`). */
+            document_id: number | null;
+            rejection_reason: string | null;
+        };
         /** SeasonResource */
         SeasonResource: {
-            id: string;
+            id: number;
             name: string;
             start_date: string;
             end_date: string;
@@ -706,11 +1567,33 @@ export interface components {
         };
         /** SportResource */
         SportResource: {
-            id: string;
+            id: number;
             name: string;
-            is_active: string;
+            is_active: boolean;
             created_at: string;
             updated_at: string;
+        };
+        /** SquadOptionResource */
+        SquadOptionResource: {
+            player_id: number;
+            player_name: string;
+            shirt_number: number | null;
+            /** @description Habilitado para jugar: solo estos se pueden convocar. */
+            is_eligible: boolean;
+            /** @description Requisitos obligatorios que le faltan. */
+            missing: string[];
+            called_up: boolean;
+        };
+        /**
+         * StoreCategoryCoachRequest
+         * @description Asignar un profe a una categoría.
+         */
+        StoreCategoryCoachRequest: {
+            coach_id: number;
+            /** @enum {string} */
+            assignment_type: "head_coach" | "assistant" | "physical_trainer";
+            /** Format: date-time */
+            start_date?: string;
         };
         /** StoreCategoryRequest */
         StoreCategoryRequest: {
@@ -731,6 +1614,113 @@ export interface components {
             email?: string | null;
             /** @enum {string} */
             status: "active" | "inactive";
+        };
+        /**
+         * StoreCompetitionRequest
+         * @description Alta y edición de competencias con sus requisitos y categorías. En PATCH, `requirements` y
+         *     `category_ids` reemplazan la lista completa si vienen; si no vienen, no se tocan.
+         */
+        StoreCompetitionRequest: {
+            sport_id: number;
+            season_id: number;
+            name: string;
+            organizer?: string | null;
+            /** Format: date-time */
+            registration_deadline?: string | null;
+            category_ids?: number[];
+            requirements?: {
+                /** @description Con id se edita ese requisito; sin id se crea. Los que no vienen se borran. */
+                id?: number;
+                name: string;
+                validity_months?: number | null;
+                requires_file?: boolean;
+                minors_only?: boolean;
+                is_required?: boolean;
+            }[];
+        };
+        /**
+         * StoreDocumentRequest
+         * @description Subir un documento de un jugador (multipart).
+         */
+        StoreDocumentRequest: {
+            /** @enum {string} */
+            kind: "photo" | "medical" | "id_document" | "federation_card" | "authorization" | "other";
+            /**
+             * Format: binary
+             * @description PDF o foto del celular (HEIC), hasta 10 MB. La foto de la ficha, solo imagen y hasta 5 MB.
+             */
+            file: string;
+        };
+        /**
+         * StoreMatchRequest
+         * @description Alta y edición de partidos. En PATCH todo es opcional; el resultado se carga así.
+         */
+        StoreMatchRequest: {
+            category_id: number;
+            competition_id?: number | null;
+            opponent: string;
+            /** Format: date-time */
+            match_date: string;
+            /**
+             * Format: date-time
+             * @description Hora de presentación: antes del partido.
+             */
+            meet_at?: string | null;
+            venue?: string | null;
+            /** Format: uri */
+            maps_url?: string | null;
+            is_home: boolean;
+            /** @enum {string|null} */
+            uniform?: "home" | "away" | null;
+            uniform_color?: string | null;
+            what_to_bring?: string | null;
+            our_score?: number | null;
+            opponent_score?: number | null;
+            /** @enum {string} */
+            status?: "scheduled" | "played" | "postponed" | "cancelled";
+            notes?: string | null;
+        };
+        /**
+         * StoreMembershipRequest
+         * @description Sumar un jugador al plantel de una categoría.
+         */
+        StoreMembershipRequest: {
+            player_id: number;
+            /** Format: date-time */
+            start_date?: string;
+            shirt_number?: number | null;
+            /** @description Si ya juega en otra categoría del mismo deporte, cierra esa asignación (pase de categoría). */
+            close_previous?: boolean;
+        };
+        /** StorePlayerContactRequest */
+        StorePlayerContactRequest: {
+            name: string;
+            /** @enum {string} */
+            relationship: "mother" | "father" | "guardian" | "self" | "other";
+            /** @description Hace falta al menos un medio para avisarle. */
+            phone?: string | null;
+            /** Format: email */
+            email?: string | null;
+            is_primary?: boolean;
+        };
+        /** StorePlayerRequest */
+        StorePlayerRequest: {
+            first_name: string;
+            last_name: string;
+            /**
+             * Format: date-time
+             * @description Obligatoria: define los requisitos "solo menores" de la habilitación (TIZ-32).
+             */
+            birth_date: string;
+            document_number?: string | null;
+            registration_number?: string | null;
+            preferred_position?: string | null;
+            /** @enum {string|null} */
+            dominant_side?: "left" | "right" | "both" | null;
+            /** @enum {string} */
+            status?: "active" | "inactive" | "transferred";
+            /** @description Nada médico: eso va en los requisitos y documentos. */
+            notes?: string | null;
         };
         /**
          * StoreRoleRequest
@@ -787,6 +1777,10 @@ export interface components {
         };
         /** StoreTenantRequest */
         StoreTenantRequest: {
+            short_name?: string | null;
+            city?: string | null;
+            founded_year?: number | null;
+            primary_color?: string | null;
             name: string;
             /** @description club_ (5) + slug (máx. 50) = 55 caracteres, bajo el límite de 64 de MySQL */
             slug: string;
@@ -800,6 +1794,21 @@ export interface components {
                 email?: string;
                 password?: string;
             };
+        };
+        /**
+         * StoreTrainingRequest
+         * @description Alta y edición de entrenamientos. En PATCH todo es opcional.
+         */
+        StoreTrainingRequest: {
+            category_id: number;
+            coach_id?: number | null;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            location?: string | null;
+            objectives?: string | null;
+            notes?: string | null;
         };
         /** StoreUserRequest */
         StoreUserRequest: {
@@ -850,6 +1859,13 @@ export interface components {
             id: number;
             slug: string;
             name: string;
+            short_name: string | null;
+            city: string | null;
+            founded_year: number | null;
+            /** @description Hexadecimal (#rrggbb). Acento del club: escudo y chips. */
+            primary_color: string | null;
+            /** @description URL del escudo en la API (`GET /api/public/clubs/{slug}/logo`), o null si no tiene. */
+            logo_url: string | null;
             database_name: string;
             status: string;
             created_at: string | null;
@@ -864,12 +1880,32 @@ export interface components {
         TenantSummaryResource: {
             slug: string;
             name: string;
+            short_name: string | null;
+            city: string | null;
+            founded_year: number | null;
+            /** @description Hexadecimal (#rrggbb). Acento del club: escudo y chips. */
+            primary_color: string | null;
+            /** @description URL del escudo en la API (`GET /api/public/clubs/{slug}/logo`), o null si no tiene. */
+            logo_url: string | null;
         };
         /**
          * TicketStatus
          * @enum {string}
          */
         TicketStatus: "new" | "in_review" | "resolved" | "discarded";
+        /** TrainingResource */
+        TrainingResource: {
+            id: number;
+            category_id: number;
+            /** @description Nombre de la categoría, si se cargó. */
+            category_name?: string;
+            coach_id: number | null;
+            starts_at: string;
+            ends_at: string;
+            location: string | null;
+            objectives: string | null;
+            notes: string | null;
+        };
         /** UpdateCategoryRequest */
         UpdateCategoryRequest: {
             sport_id?: number;
@@ -878,6 +1914,21 @@ export interface components {
             min_age?: number | null;
             max_age?: number | null;
             is_active?: boolean;
+        };
+        /**
+         * UpdateClubRequest
+         * @description Perfil del club editado por su administrador (permiso club.update).
+         */
+        UpdateClubRequest: {
+            short_name?: string | null;
+            city?: string | null;
+            founded_year?: number | null;
+            primary_color?: string | null;
+            name?: string;
+            /** @description Los maneja la plataforma. */
+            slug?: string;
+            status?: string;
+            database_name?: string;
         };
         /** UpdateCoachRequest */
         UpdateCoachRequest: {
@@ -889,6 +1940,28 @@ export interface components {
             email?: string | null;
             /** @enum {string} */
             status?: "active" | "inactive";
+        };
+        /**
+         * UpdateMembershipRequest
+         * @description Cambiar el número de camiseta de un jugador en la categoría.
+         */
+        UpdateMembershipRequest: {
+            shirt_number: number | null;
+        };
+        /** UpdatePlayerRequest */
+        UpdatePlayerRequest: {
+            first_name?: string;
+            last_name?: string;
+            /** Format: date-time */
+            birth_date?: string;
+            document_number?: string | null;
+            registration_number?: string | null;
+            preferred_position?: string | null;
+            /** @enum {string|null} */
+            dominant_side?: "left" | "right" | "both" | null;
+            /** @enum {string} */
+            status?: "active" | "inactive" | "transferred";
+            notes?: string | null;
         };
         /** UpdateRoleRequest */
         UpdateRoleRequest: {
@@ -940,6 +2013,10 @@ export interface components {
         };
         /** UpdateTenantRequest */
         UpdateTenantRequest: {
+            short_name?: string | null;
+            city?: string | null;
+            founded_year?: number | null;
+            primary_color?: string | null;
             name?: string;
             /** @enum {string} */
             status?: "active" | "suspended";
@@ -1026,6 +2103,148 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "attendance.showMatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            player_id: number;
+                            player_name: string;
+                            shirt_number: number | null;
+                            /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
+                            status: string;
+                            notes: string | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "attendance.recordMatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordAttendanceRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            player_id: number;
+                            player_name: string;
+                            shirt_number: number | null;
+                            /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
+                            status: string;
+                            notes: string | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "attendance.showTraining": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The training ID */
+                training: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            player_id: number;
+                            player_name: string;
+                            shirt_number: number | null;
+                            /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
+                            status: string;
+                            notes: string | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "attendance.recordTraining": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The training ID */
+                training: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordAttendanceRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            player_id: number;
+                            player_name: string;
+                            shirt_number: number | null;
+                            /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
+                            status: string;
+                            notes: string | null;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "auth.login": {
         parameters: {
             query?: never;
@@ -1170,6 +2389,141 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "club.calendar": {
+        parameters: {
+            query: {
+                from: string;
+                /** @description Hasta dos meses por consulta: una vista de mes con sus bordes. */
+                to: string;
+                category_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `CalendarEventResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CalendarEventResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Error overview.
+                         * @example
+                         */
+                        message: string;
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "callup.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `CallupSheetResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CallupSheetResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "callup.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    players: {
+                        player_id: number;
+                        shirt_number?: number | null;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description `CallupSheetResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CallupSheetResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "callup.publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `CallupSheetResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CallupSheetResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "categories.index": {
@@ -1342,6 +2696,353 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "categoryCoach.index": {
+        parameters: {
+            query?: {
+                status?: "current" | "all";
+            };
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `CategoryCoachResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["CategoryCoachResource"] & Record<string, never>)[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryCoach.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreCategoryCoachRequest"];
+            };
+        };
+        responses: {
+            /** @description `CategoryCoachResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryCoachResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryCoach.end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category coach ID */
+                categoryCoach: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EndAssignmentRequest"];
+            };
+        };
+        responses: {
+            /** @description `CategoryCoachResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryCoachResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryMembership.index": {
+        parameters: {
+            query?: {
+                status?: "active" | "ended" | "all";
+            };
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `MembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["MembershipResource"] & Record<string, never>)[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryMembership.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreMembershipRequest"];
+            };
+        };
+        responses: {
+            /** @description `MembershipResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MembershipResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryMembership.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The membership ID */
+                membership: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMembershipRequest"];
+            };
+        };
+        responses: {
+            /** @description `MembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MembershipResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "categoryMembership.end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The membership ID */
+                membership: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EndAssignmentRequest"];
+            };
+        };
+        responses: {
+            /** @description `MembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MembershipResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "club.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `ClubResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "club.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateClubRequest"];
+            };
+        };
+        responses: {
+            /** @description `ClubResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "clubLogo.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Transfer-Encoding": "chunked";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "clubLogo.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Maximum file size: 1024 kilobytes.
+                     */
+                    logo: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `ClubResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ClubResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "clubLogo.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
     "coaches.index": {
         parameters: {
             query?: {
@@ -1511,6 +3212,497 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "competitions.index": {
+        parameters: {
+            query?: {
+                season_id?: number;
+                sport_id?: number;
+                category_id?: number;
+                search?: string;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `CompetitionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["CompetitionResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "competitions.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreCompetitionRequest"];
+            };
+        };
+        responses: {
+            /** @description `CompetitionResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CompetitionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "competitions.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The competition ID */
+                competition: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `CompetitionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CompetitionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "competitions.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The competition ID */
+                competition: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreCompetitionRequest"];
+            };
+        };
+        responses: {
+            /** @description `CompetitionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CompetitionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "competitions.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The competition ID */
+                competition: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "competition.copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The competition ID */
+                competition: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyCompetitionRequest"];
+            };
+        };
+        responses: {
+            /** @description `CompetitionResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CompetitionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "document.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `DocumentResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["DocumentResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "document.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["StoreDocumentRequest"];
+            };
+        };
+        responses: {
+            /** @description `DocumentResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["DocumentResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "document.download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The document ID */
+                document: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Transfer-Encoding": "chunked";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "document.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The document ID */
+                document: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "eligibility.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `CategoryEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CategoryEligibilityResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "eligibility.category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `PlayerEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerEligibilityResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "eligibility.player": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `PlayerEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerEligibilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "eligibility.submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+                /** @description The requirement ID */
+                requirement: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    document_id?: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description `PlayerEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerEligibilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "eligibility.approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+                /** @description The requirement ID */
+                requirement: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    document_id?: number | null;
+                    /** Format: date-time */
+                    expires_at?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description `PlayerEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerEligibilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "eligibility.reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+                /** @description The requirement ID */
+                requirement: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `PlayerEligibilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerEligibilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     health: {
         parameters: {
             query?: never;
@@ -1528,6 +3720,172 @@ export interface operations {
                     "application/json": string;
                 };
             };
+        };
+    };
+    "matches.index": {
+        parameters: {
+            query?: {
+                category_id?: number;
+                from?: string;
+                to?: string;
+                status?: string;
+                sort?: "date" | "-date";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `MatchResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["MatchResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "matches.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreMatchRequest"];
+            };
+        };
+        responses: {
+            /** @description `MatchResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MatchResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "matches.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `MatchResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MatchResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "matches.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreMatchRequest"];
+            };
+        };
+        responses: {
+            /** @description `MatchResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MatchResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "matches.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The match ID */
+                match: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "newsletter.store": {
@@ -1558,6 +3916,479 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "players.index": {
+        parameters: {
+            query?: {
+                /** @description Nombre, apellido, documento o ficha. */
+                search?: string;
+                /** @description Jugadores con una asignación activa en esa categoría. */
+                category_id?: number;
+                status?: "active" | "inactive" | "transferred";
+                sort?: "last_name" | "-last_name" | "first_name" | "-first_name" | "birth_date" | "-birth_date" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `PlayerResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["PlayerResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "players.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorePlayerRequest"];
+            };
+        };
+        responses: {
+            /** @description `PlayerResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "players.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `PlayerResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "players.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdatePlayerRequest"];
+            };
+        };
+        responses: {
+            /** @description `PlayerResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "players.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "playerContact.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `PlayerContactResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerContactResource"][];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "playerContact.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorePlayerContactRequest"];
+            };
+        };
+        responses: {
+            /** @description `PlayerContactResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerContactResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "playerContact.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The contact ID */
+                contact: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "playerContact.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The contact ID */
+                contact: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorePlayerContactRequest"];
+            };
+        };
+        responses: {
+            /** @description `PlayerContactResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlayerContactResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "publicCallup.showPersonal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            page: {
+                                club: {
+                                    name: string;
+                                    short_name: string | null;
+                                    primary_color: string | null;
+                                    logo_url: string | null;
+                                };
+                                match: {
+                                    category: string;
+                                    competition: string;
+                                    opponent: string;
+                                    is_home: boolean;
+                                    match_date: string;
+                                    meet_at: string | null;
+                                    venue: string | null;
+                                    maps_url: string | null;
+                                    uniform: string | null;
+                                    uniform_color: string | null;
+                                    what_to_bring: string | null;
+                                    status: string;
+                                    updated: boolean;
+                                };
+                                players: {
+                                    name: string;
+                                    shirt_number: number | null;
+                                }[];
+                            };
+                            me: {
+                                name: string;
+                                response: string;
+                                note: string | null;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+    "publicCallup.respond": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    response: "going" | "not_going";
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            page: {
+                                club: {
+                                    name: string;
+                                    short_name: string | null;
+                                    primary_color: string | null;
+                                    logo_url: string | null;
+                                };
+                                match: {
+                                    category: string;
+                                    competition: string;
+                                    opponent: string;
+                                    is_home: boolean;
+                                    match_date: string;
+                                    meet_at: string | null;
+                                    venue: string | null;
+                                    maps_url: string | null;
+                                    uniform: string | null;
+                                    uniform_color: string | null;
+                                    what_to_bring: string | null;
+                                    status: string;
+                                    updated: boolean;
+                                };
+                                players: {
+                                    name: string;
+                                    shirt_number: number | null;
+                                }[];
+                            };
+                            me: {
+                                name: string;
+                                response: string;
+                                note: string | null;
+                            };
+                        };
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "publicCallup.calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Content-Disposition"?: "attachment; filename=\"partido.ics\"";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/calendar; charset=utf-8": string;
+                };
+            };
+        };
+    };
+    "publicCallup.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            club: {
+                                name: string;
+                                short_name: string | null;
+                                primary_color: string | null;
+                                logo_url: string | null;
+                            };
+                            match: {
+                                category: string;
+                                competition: string;
+                                opponent: string;
+                                is_home: boolean;
+                                match_date: string;
+                                meet_at: string | null;
+                                venue: string | null;
+                                maps_url: string | null;
+                                uniform: string | null;
+                                uniform_color: string | null;
+                                what_to_bring: string | null;
+                                status: string;
+                                updated: boolean;
+                            };
+                            players: {
+                                name: string;
+                                shirt_number: number | null;
+                            }[];
+                        };
+                    };
+                };
+            };
         };
     };
     "role.permissions": {
@@ -2099,6 +4930,19 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El recurso está en uso y no se puede eliminar.";
+                        /** @constant */
+                        code: "resource_in_use";
+                    };
+                };
+            };
         };
     };
     "supportTicket.store": {
@@ -2778,6 +5622,172 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "trainings.index": {
+        parameters: {
+            query?: {
+                category_id?: number;
+                from?: string;
+                to?: string;
+                status?: string;
+                sort?: "date" | "-date";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `TrainingResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["TrainingResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "trainings.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreTrainingRequest"];
+            };
+        };
+        responses: {
+            /** @description `TrainingResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TrainingResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "trainings.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The training ID */
+                training: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `TrainingResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TrainingResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "trainings.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The training ID */
+                training: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreTrainingRequest"];
+            };
+        };
+        responses: {
+            /** @description `TrainingResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TrainingResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "trainings.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The training ID */
+                training: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
         };
     };

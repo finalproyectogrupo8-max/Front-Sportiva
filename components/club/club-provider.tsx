@@ -3,12 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ClubData } from '@/lib/data'
 import { getModule, visibleModules, type ModuleDef } from '@/lib/modules'
-import { normalizeTenant, type Tenant } from '@/lib/tenants'
-
-export type ApiTenant = {
-  slug: string
-  name: string
-}
+import { normalizeTenant, type ApiTenant, type Tenant } from '@/lib/tenants'
 
 type ClubContextValue = {
   tenant: Tenant

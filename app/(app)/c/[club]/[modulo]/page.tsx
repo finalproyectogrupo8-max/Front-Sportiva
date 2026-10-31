@@ -12,7 +12,6 @@ import { ProfesModule } from '@/components/modules/profes'
 import { NoAccess } from '@/components/club/no-access'
 import { canSeeModule, getModule, type ModuleId } from '@/lib/modules'
 import { requireSession } from '@/lib/session'
-import { getTenant } from '@/lib/tenants'
 
 const VIEWS: Record<ModuleId, () => React.JSX.Element> = {
   indumentaria: IndumentariaModule,
@@ -28,10 +27,11 @@ const VIEWS: Record<ModuleId, () => React.JSX.Element> = {
 type Props = { params: Promise<{ club: string; modulo: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { club, modulo } = await params
+  const { modulo } = await params
   const m = getModule(modulo)
-  const t = getTenant(club)
-  return { title: m && t ? `${m.name} · ${t.short} — Sportiva` : 'Sportiva' }
+  const tenant = (await requireSession()).tenant
+  const short = tenant?.short_name || tenant?.name
+  return { title: m && short ? `${m.name} · ${short} — Sportiva` : 'Sportiva' }
 }
 
 export default async function ModulePage({ params }: Props) {
