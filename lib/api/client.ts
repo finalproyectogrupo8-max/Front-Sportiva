@@ -153,15 +153,16 @@ export async function apiFetch<T>(path: string, request: ApiRequest = {}): Promi
 }
 
 /**
- * Pide un archivo a la API con el token del club (fotos y documentos) y devuelve la respuesta
- * tal cual, para reenviarla al navegador. null si no hay sesión o la API no responde.
+ * Pide un archivo a la API y devuelve la respuesta tal cual, para reenviarla al navegador. Por
+ * defecto con el token del club (fotos y documentos); `auth: 'none'` para los públicos (el .ics de
+ * la convocatoria). null si hace falta sesión y no hay, o si la API no responde.
  */
-export async function apiFetchFile(path: string): Promise<Response | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value
-  if (!token) return null
+export async function apiFetchFile(path: string, { auth = 'session' }: { auth?: 'session' | 'none' } = {}): Promise<Response | null> {
+  const token = auth === 'session' ? (await cookies()).get(SESSION_COOKIE)?.value : null
+  if (auth === 'session' && !token) return null
   try {
     return await fetch(buildUrl(path, undefined), {
-      headers: { Authorization: `Bearer ${token}`, Accept: '*/*' },
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), Accept: '*/*' },
       cache: 'no-store',
     })
   } catch {
