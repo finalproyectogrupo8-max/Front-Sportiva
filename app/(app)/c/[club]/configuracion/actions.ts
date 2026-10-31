@@ -3,19 +3,24 @@
 import { revalidatePath } from 'next/cache'
 import type { ApiFailure, ApiResult } from '@/lib/api/client'
 import {
+  copyCompetition,
   createCategory,
+  createCompetition,
   createSeason,
   createSport,
   deleteCategory,
+  deleteCompetition,
   deleteClubLogo,
   deleteSeason,
   deleteSport,
   updateCategory,
+  updateCompetition,
   updateClub,
   updateSeason,
   updateSport,
   uploadClubLogo,
   type CategoryInput,
+  type CompetitionInput,
   type SeasonInput,
   type SeasonStatus,
 } from '@/lib/api/club'
@@ -45,7 +50,8 @@ function optionalInt(formData: FormData, key: string): number | null {
 function failure(result: ApiFailure, fields: string[], inUse?: string): ConfigResult {
   if (result.kind === 'validation') {
     const fieldErrors: Record<string, string> = {}
-    for (const field of fields) {
+    // '*': todos los campos que devolvió la API (listas como requirements.0.name).
+    for (const field of fields.includes('*') ? Object.keys(result.errors) : fields) {
       const message = fieldError(result.errors, field)
       if (message) fieldErrors[field] = message
     }
@@ -214,5 +220,53 @@ export async function setCategoryActiveAction(id: number, isActive: boolean): Pr
     (): Promise<ApiResult<unknown>> => (isActive ? updateCategory(id, { is_active: true }) : deleteCategory(id)),
     isActive ? 'Categoría activada.' : 'Categoría desactivada.',
     ['is_active'],
+  )
+}
+
+/* Competencias (FRO-33) */
+
+export async function saveCompetitionAction(id: number | null, input: CompetitionInput): Promise<ConfigResult> {
+  const name = input.name.trim()
+  const fieldErrors: Record<string, string> = {}
+  if (!input.sport_id) fieldErrors.sport_id = 'Elegí el deporte.'
+  if (!input.season_id) fieldErrors.season_id = 'Elegí la temporada.'
+  if (!name) fieldErrors.name = 'El nombre es obligatorio.'
+  input.requirements.forEach((r, i) => {
+    if (!r.name.trim()) fieldErrors[`requirements.${i}.name`] = 'Poné el nombre del requisito.'
+    if (r.validity_months != null && (!Number.isInteger(r.validity_months) || r.validity_months < 1 || r.validity_months > 120)) {
+      fieldErrors[`requirements.${i}.validity_months`] = 'Entre 1 y 120 meses, o vacío si no vence.'
+    }
+  })
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
+
+  const body: CompetitionInput = {
+    ...input,
+    name,
+    organizer: input.organizer?.trim() || null,
+    registration_deadline: input.registration_deadline || null,
+    requirements: input.requirements.map((r) => ({ ...r, name: r.name.trim() })),
+  }
+
+  return id
+    ? run(() => updateCompetition(id, body), `Competencia "${name}" actualizada.`, ['*'])
+    : run(() => createCompetition(body), `Competencia "${name}" creada.`, ['*'])
+}
+
+export async function deleteCompetitionAction(id: number): Promise<ConfigResult> {
+  return run(() => deleteCompetition(id), 'Competencia eliminada.', [])
+}
+
+export async function copyCompetitionAction(id: number, formData: FormData): Promise<ConfigResult> {
+  const seasonId = Number(text(formData, 'season_id'))
+  const name = text(formData, 'name')
+  const fieldErrors: Record<string, string> = {}
+  if (!seasonId) fieldErrors.season_id = 'Elegí la temporada.'
+  if (!name) fieldErrors.name = 'El nombre es obligatorio.'
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
+
+  return run(
+    () => copyCompetition(id, { season_id: seasonId, name, registration_deadline: text(formData, 'registration_deadline') || null }),
+    `Competencia copiada como "${name}". Falta elegir sus categorías.`,
+    ['season_id', 'name', 'registration_deadline'],
   )
 }

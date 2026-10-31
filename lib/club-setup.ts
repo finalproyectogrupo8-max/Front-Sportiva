@@ -2,7 +2,7 @@ import 'server-only'
 
 import { cache } from 'react'
 import { listCategories, listSeasons, listSports } from '@/lib/api/club'
-import { canSeeConfig, type SetupStep } from '@/lib/club-config'
+import { canSetupClub, type SetupStep } from '@/lib/club-config'
 import { requireSession } from '@/lib/session'
 
 export type { SetupStep }
@@ -14,7 +14,7 @@ export type { SetupStep }
  */
 export const getSetupSteps = cache(async (): Promise<SetupStep[] | null> => {
   const session = await requireSession()
-  if (!canSeeConfig(session.permissions ?? [])) return null
+  if (!canSetupClub(session.permissions ?? [])) return null
 
   try {
     const [sports, seasons, categories] = await Promise.all([

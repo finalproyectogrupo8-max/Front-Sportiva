@@ -202,12 +202,15 @@ export function ConfigSheet({
   onOpenChange,
   title,
   description,
+  wide = false,
   children,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** Formularios largos (competencia con requisitos). */
+  wide?: boolean
   children: React.ReactNode
 }) {
   // Mientras se cierra, el panel conserva el título con el que se abrió ("Nuevo" no pasa a "Editar").
@@ -216,7 +219,13 @@ export function ConfigSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:sm:max-w-md">
+      <SheetContent
+        side="right"
+        className={cn(
+          'w-full gap-0 overflow-y-auto',
+          wide ? 'data-[side=right]:sm:max-w-2xl' : 'data-[side=right]:sm:max-w-md',
+        )}
+      >
         <SheetHeader>
           <SheetTitle>{shownTitle}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}

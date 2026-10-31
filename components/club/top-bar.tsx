@@ -178,7 +178,7 @@ export function TopBar({
                   <Settings className="size-4" aria-hidden="true" />
                   <span className="flex flex-col">
                     <span className="font-medium">Configuración del club</span>
-                    <span className="text-xs text-muted-foreground">Perfil, deportes, temporadas y categorías</span>
+                    <span className="text-xs text-muted-foreground">Perfil, deportes, categorías y competencias</span>
                   </span>
                 </DropdownMenuItem>
               </>
