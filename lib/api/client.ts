@@ -151,3 +151,20 @@ export async function apiFetch<T>(path: string, request: ApiRequest = {}): Promi
 
   return { ok: false, kind: 'error', status: response.status, message, code }
 }
+
+/**
+ * Pide un archivo a la API con el token del club (fotos y documentos) y devuelve la respuesta
+ * tal cual, para reenviarla al navegador. null si no hay sesión o la API no responde.
+ */
+export async function apiFetchFile(path: string): Promise<Response | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
+  if (!token) return null
+  try {
+    return await fetch(buildUrl(path, undefined), {
+      headers: { Authorization: `Bearer ${token}`, Accept: '*/*' },
+      cache: 'no-store',
+    })
+  } catch {
+    return null
+  }
+}

@@ -234,6 +234,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/players/{player}/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de categorías del jugador: vigentes y cerradas, de la más reciente a la más vieja */
+        get: operations["categoryMembership.forPlayer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/categories/{category}/memberships": {
         parameters: {
             query?: never;
@@ -241,7 +258,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** `?status=active` (por defecto), `ended` o `all` */
         get: operations["categoryMembership.index"];
         put?: never;
         post: operations["categoryMembership.store"];
@@ -586,6 +602,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/inventory/balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["inventoryBalance.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["inventoryMovement.index"];
+        put?: never;
+        post: operations["inventoryMovement.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory/transfers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["inventoryTransfer.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matches": {
         parameters: {
             query?: never;
@@ -614,6 +678,38 @@ export interface paths {
         put: operations["matches.update"];
         post?: never;
         delete: operations["matches.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["materials.index"];
+        put?: never;
+        post: operations["materials.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/materials/{material}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["materials.show"];
+        put: operations["materials.update"];
+        post?: never;
+        delete: operations["materials.destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -881,6 +977,38 @@ export interface paths {
         post?: never;
         /** La baja desactiva el deporte (D12). Con categorías activas responde 409 (D11) */
         delete: operations["sports.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage-locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["storage-locations.index"];
+        put?: never;
+        post: operations["storage-locations.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage-locations/{storageLocation}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["storage-locations.show"];
+        put: operations["storage-locations.update"];
+        post?: never;
+        delete: operations["storage-locations.destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1233,6 +1361,8 @@ export interface components {
         CategoryCoachResource: {
             id: number;
             category_id: number;
+            /** @description Nombre de la categoría, si se cargó. */
+            category_name?: string;
             coach_id: number;
             /** @description Nombre y apellido del profe, si se cargó. */
             coach_name?: string;
@@ -1319,6 +1449,8 @@ export interface components {
             phone: string | null;
             email: string | null;
             status: string;
+            /** @description Categorías que tiene a cargo hoy. Solo en el listado y la ficha. */
+            assignments?: components["schemas"]["CategoryCoachResource"][];
             created_at: string;
             updated_at: string;
         };
@@ -1381,6 +1513,44 @@ export interface components {
             /** Format: date-time */
             end_date?: string;
         };
+        /** InventoryBalanceResource */
+        InventoryBalanceResource: {
+            id: number;
+            material_id: number;
+            location_id: number;
+            quantity: number;
+            is_below_minimum: boolean;
+            updated_at: string | null;
+            material?: components["schemas"]["MaterialResource"];
+            location?: components["schemas"]["StorageLocationResource"];
+        };
+        /** InventoryMovementResource */
+        InventoryMovementResource: {
+            id: number;
+            material_id: number;
+            location_id: number;
+            movement_type: string;
+            quantity: number;
+            transfer_group_id: string | null;
+            order_id: number | null;
+            performed_by: number;
+            reason: string | null;
+            reference: string | null;
+            created_at: string;
+            material?: components["schemas"]["MaterialResource"];
+            location?: components["schemas"]["StorageLocationResource"];
+        };
+        /** InventoryTransferResource */
+        InventoryTransferResource: {
+            transfer_group_id: string;
+            material_id: string;
+            from_location_id: string;
+            to_location_id: string;
+            quantity: number;
+            reason: string | null;
+            reference: string | null;
+            movements: components["schemas"]["InventoryMovementResource"][];
+        };
         /** LoginRequest */
         LoginRequest: {
             /** Format: email */
@@ -1419,6 +1589,17 @@ export interface components {
             /** @description `scheduled`, `played`, `postponed` o `cancelled`. */
             status: string;
             notes: string | null;
+        };
+        /** MaterialResource */
+        MaterialResource: {
+            id: number;
+            name: string;
+            description: string | null;
+            unit: string;
+            minimum_stock: number;
+            is_active: boolean;
+            created_at: string | null;
+            updated_at: string | null;
         };
         /** MeResource */
         MeResource: {
@@ -1584,6 +1765,16 @@ export interface components {
             missing: string[];
             called_up: boolean;
         };
+        /** StorageLocationResource */
+        StorageLocationResource: {
+            id: number;
+            name: string;
+            location_code: string | null;
+            description: string | null;
+            is_active: boolean;
+            created_at: string | null;
+            updated_at: string | null;
+        };
         /**
          * StoreCategoryCoachRequest
          * @description Asignar un profe a una categoría.
@@ -1651,6 +1842,25 @@ export interface components {
              */
             file: string;
         };
+        /** StoreInventoryMovementRequest */
+        StoreInventoryMovementRequest: {
+            material_id: number;
+            location_id: number;
+            /** @enum {string} */
+            movement_type: "in" | "out" | "adjustment";
+            quantity: number;
+            reason?: string | null;
+            reference?: string | null;
+        };
+        /** StoreInventoryTransferRequest */
+        StoreInventoryTransferRequest: {
+            material_id: number;
+            from_location_id: number;
+            to_location_id: number;
+            quantity: number;
+            reason?: string | null;
+            reference?: string | null;
+        };
         /**
          * StoreMatchRequest
          * @description Alta y edición de partidos. En PATCH todo es opcional; el resultado se carga así.
@@ -1679,6 +1889,14 @@ export interface components {
             /** @enum {string} */
             status?: "scheduled" | "played" | "postponed" | "cancelled";
             notes?: string | null;
+        };
+        /** StoreMaterialRequest */
+        StoreMaterialRequest: {
+            name: string;
+            description?: string | null;
+            unit: string;
+            minimum_stock?: number;
+            is_active?: boolean;
         };
         /**
          * StoreMembershipRequest
@@ -1748,6 +1966,13 @@ export interface components {
         /** StoreSportRequest */
         StoreSportRequest: {
             name: string;
+            is_active?: boolean;
+        };
+        /** StoreStorageLocationRequest */
+        StoreStorageLocationRequest: {
+            name: string;
+            location_code?: string | null;
+            description?: string | null;
             is_active?: boolean;
         };
         /** StoreSupportTicketRequest */
@@ -1941,6 +2166,14 @@ export interface components {
             /** @enum {string} */
             status?: "active" | "inactive";
         };
+        /** UpdateMaterialRequest */
+        UpdateMaterialRequest: {
+            name?: string;
+            description?: string | null;
+            unit?: string;
+            minimum_stock?: number;
+            is_active?: boolean;
+        };
         /**
          * UpdateMembershipRequest
          * @description Cambiar el número de camiseta de un jugador en la categoría.
@@ -1987,6 +2220,13 @@ export interface components {
         /** UpdateSportRequest */
         UpdateSportRequest: {
             name?: string;
+            is_active?: boolean;
+        };
+        /** UpdateStorageLocationRequest */
+        UpdateStorageLocationRequest: {
+            name?: string;
+            location_code?: string | null;
+            description?: string | null;
             is_active?: boolean;
         };
         /** UpdateSupportTicketRequest */
@@ -2790,6 +3030,33 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "categoryMembership.forPlayer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The player ID */
+                player: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Array of `MembershipResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["MembershipResource"] & Record<string, never>)[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "categoryMembership.index": {
         parameters: {
             query?: {
@@ -3064,7 +3331,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["CoachResource"][];
+                        data: (components["schemas"]["CoachResource"] & Record<string, never>)[];
                         links: {
                             first: string | null;
                             last: string | null;
@@ -3146,7 +3413,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["CoachResource"];
+                        data: components["schemas"]["CoachResource"] & Record<string, never>;
                     };
                 };
             };
@@ -3722,6 +3989,172 @@ export interface operations {
             };
         };
     };
+    "inventoryBalance.index": {
+        parameters: {
+            query?: {
+                location_id?: number;
+                material_id?: number;
+                below_minimum?: boolean;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `InventoryBalanceResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["InventoryBalanceResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "inventoryMovement.index": {
+        parameters: {
+            query?: {
+                material_id?: number;
+                location_id?: number;
+                movement_type?: "in" | "out" | "adjustment" | "transfer_in" | "transfer_out";
+                transfer_group_id?: string;
+                sort?: "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `InventoryMovementResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["InventoryMovementResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "inventoryMovement.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreInventoryMovementRequest"];
+            };
+        };
+        responses: {
+            /** @description `InventoryMovementResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["InventoryMovementResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "inventoryTransfer.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreInventoryTransferRequest"];
+            };
+        };
+        responses: {
+            /** @description `InventoryTransferResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["InventoryTransferResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "matches.index": {
         parameters: {
             query?: {
@@ -3886,6 +4319,189 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "materials.index": {
+        parameters: {
+            query?: {
+                search?: string;
+                unit?: string;
+                is_active?: boolean;
+                sort?: "name" | "-name" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `MaterialResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaterialResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "materials.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreMaterialRequest"];
+            };
+        };
+        responses: {
+            /** @description `MaterialResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaterialResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "materials.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The material ID */
+                material: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `MaterialResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaterialResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "materials.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The material ID */
+                material: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateMaterialRequest"];
+            };
+        };
+        responses: {
+            /** @description `MaterialResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaterialResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "materials.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The material ID */
+                material: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El recurso está en uso y no se puede eliminar.";
+                        /** @constant */
+                        code: "resource_in_use";
+                    };
+                };
+            };
         };
     };
     "newsletter.store": {
@@ -4915,6 +5531,188 @@ export interface operations {
             path: {
                 /** @description The sport ID */
                 sport: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El recurso está en uso y no se puede eliminar.";
+                        /** @constant */
+                        code: "resource_in_use";
+                    };
+                };
+            };
+        };
+    };
+    "storage-locations.index": {
+        parameters: {
+            query?: {
+                search?: string;
+                is_active?: boolean;
+                sort?: "name" | "-name" | "location_code" | "-location_code" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `StorageLocationResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["StorageLocationResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "storage-locations.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreStorageLocationRequest"];
+            };
+        };
+        responses: {
+            /** @description `StorageLocationResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["StorageLocationResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "storage-locations.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The storage location ID */
+                storageLocation: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `StorageLocationResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["StorageLocationResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "storage-locations.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The storage location ID */
+                storageLocation: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateStorageLocationRequest"];
+            };
+        };
+        responses: {
+            /** @description `StorageLocationResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["StorageLocationResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "storage-locations.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The storage location ID */
+                storageLocation: number;
             };
             cookie?: never;
         };

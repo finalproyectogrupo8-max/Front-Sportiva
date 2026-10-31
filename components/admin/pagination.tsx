@@ -9,7 +9,7 @@ export function Pagination({
   meta,
   label = { one: 'usuario', many: 'usuarios' },
 }: {
-  meta: PaginatedAdminUsers['meta']
+  meta: Pick<PaginatedAdminUsers['meta'], 'current_page' | 'last_page' | 'from' | 'to' | 'total'>
   /** Cómo se llaman los elementos del listado (en singular y plural). */
   label?: { one: string; many: string }
 }) {

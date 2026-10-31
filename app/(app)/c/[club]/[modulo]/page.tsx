@@ -5,22 +5,19 @@ import { AnalisisModule } from '@/components/modules/analisis'
 import { CanchasModule } from '@/components/modules/canchas'
 import { CompetenciaModule } from '@/components/modules/competencia'
 import { IndumentariaModule } from '@/components/modules/indumentaria'
-import { JugadoresModule } from '@/components/modules/jugadores'
 import { MaterialesModule } from '@/components/modules/materiales'
 import { PartidosModule } from '@/components/modules/partidos'
-import { ProfesModule } from '@/components/modules/profes'
 import { NoAccess } from '@/components/club/no-access'
 import { canSeeModule, getModule, type ModuleId } from '@/lib/modules'
 import { requireSession } from '@/lib/session'
 
-const VIEWS: Record<ModuleId, () => React.JSX.Element> = {
+// Jugadores y Profes tienen su propia ruta con datos de la API (FRO-17).
+const VIEWS: Partial<Record<ModuleId, () => React.JSX.Element>> = {
   indumentaria: IndumentariaModule,
   materiales: MaterialesModule,
   partidos: PartidosModule,
-  jugadores: JugadoresModule,
   analisis: AnalisisModule,
   competencia: CompetenciaModule,
-  profes: ProfesModule,
   canchas: CanchasModule,
 }
 
@@ -46,6 +43,7 @@ export default async function ModulePage({ params }: Props) {
   }
 
   const View = VIEWS[mod.id]
+  if (!View) notFound()
   return (
     <Suspense>
       <View />

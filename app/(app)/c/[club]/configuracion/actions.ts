@@ -1,7 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import type { ApiFailure, ApiResult } from '@/lib/api/client'
+import type { ApiResult } from '@/lib/api/client'
+import { optionalInt, runApiAction, text, type ActionResult } from '@/lib/action-result'
 import {
   copyCompetition,
   createCategory,
@@ -24,67 +24,15 @@ import {
   type SeasonInput,
   type SeasonStatus,
 } from '@/lib/api/club'
-import { fieldError } from '@/lib/api/validation-messages'
-import { requireSession } from '@/lib/session'
 
 // Configuración del club (FRO-16). Cada acción devuelve el resultado al formulario: los 422 van
 // a cada campo y el 409 ("está en uso") como mensaje general. La API valida los permisos.
 
-export type ConfigResult =
-  | { ok: true; message: string }
-  | { ok: false; error?: string; fieldErrors?: Record<string, string> }
+export type ConfigResult = ActionResult
 
 const SEASON_STATUSES: SeasonStatus[] = ['planned', 'active', 'closed']
 const MAX_LOGO_BYTES = 1024 * 1024
-
-function text(formData: FormData, key: string): string {
-  return String(formData.get(key) ?? '').trim()
-}
-
-/** Número entero o null si el campo quedó vacío. NaN si no es un número (lo rechaza la API). */
-function optionalInt(formData: FormData, key: string): number | null {
-  const value = text(formData, key)
-  return value === '' ? null : Number(value)
-}
-
-function failure(result: ApiFailure, fields: string[], inUse?: string): ConfigResult {
-  if (result.kind === 'validation') {
-    const fieldErrors: Record<string, string> = {}
-    // '*': todos los campos que devolvió la API (listas como requirements.0.name).
-    for (const field of fields.includes('*') ? Object.keys(result.errors) : fields) {
-      const message = fieldError(result.errors, field)
-      if (message) fieldErrors[field] = message
-    }
-    return Object.keys(fieldErrors).length > 0
-      ? { ok: false, fieldErrors }
-      : { ok: false, error: result.message }
-  }
-  if (result.kind === 'forbidden') return { ok: false, error: 'No tenés permiso para hacer este cambio.' }
-  if (result.status === 409 && inUse) return { ok: false, error: inUse }
-  if (result.status === 404) return { ok: false, error: 'Ya no existe. Recargá la página.' }
-  return { ok: false, error: result.message || 'No se pudo guardar. Probá de nuevo.' }
-}
-
-async function run<T>(
-  call: () => Promise<ApiResult<T>>,
-  done: string,
-  fields: string[],
-  inUse?: string,
-): Promise<ConfigResult> {
-  const session = await requireSession()
-
-  let result: ApiResult<T>
-  try {
-    result = await call()
-  } catch {
-    return { ok: false, error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.' }
-  }
-  if (!result.ok) return failure(result, fields, inUse)
-
-  // El layout del club (top bar, escudo, color) y los selectores de los módulos leen estos datos.
-  if (session.tenant) revalidatePath(`/c/${session.tenant.slug}`, 'layout')
-  return { ok: true, message: done }
-}
+const run = runApiAction
 
 /* Perfil */
 

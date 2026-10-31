@@ -18,7 +18,7 @@ import {
   RowActions,
   SubmitButton,
   useConfigAction,
-} from './shared'
+} from '@/components/club/forms'
 
 export const SEASON_STATUS: Record<string, { label: string; tone: Tone }> = {
   active: { label: 'En curso', tone: 'ok' },

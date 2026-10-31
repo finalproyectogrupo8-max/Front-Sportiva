@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Club } from '@/lib/api/club'
-import { ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from './shared'
+import { ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
 
 const FALLBACK_COLOR = '#1d4ed8'
 
