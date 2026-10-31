@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Barlow_Condensed, Manrope } from 'next/font/google'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -23,8 +24,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
-  themeColor: '#f5f0e9',
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f0e9' },
+    { media: '(prefers-color-scheme: dark)', color: '#10100f' },
+  ],
 }
 
 export default function AppRootLayout({
@@ -33,10 +37,13 @@ export default function AppRootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${manrope.variable} ${barlow.variable} bg-background`}>
+    // suppressHydrationWarning: next-themes agrega la clase del tema antes de hidratar.
+    <html lang="es" className={`${manrope.variable} ${barlow.variable} bg-background`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {children}
-        <Toaster position="bottom-right" toastOptions={{ style: { fontFamily: 'var(--font-manrope), system-ui, sans-serif' } }} />
+        <ThemeProvider>
+          {children}
+          <Toaster position="bottom-right" toastOptions={{ style: { fontFamily: 'var(--font-manrope), system-ui, sans-serif' } }} />
+        </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

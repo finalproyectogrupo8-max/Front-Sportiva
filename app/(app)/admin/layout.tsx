@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { LogOut, Shield } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,7 +29,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-[120rem] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="flex items-center gap-2.5">
               <Logo />
@@ -52,6 +53,8 @@ export default async function AdminLayout({
                 <span className="text-[10px] text-muted-foreground">{session.user.email}</span>
               </div>
             </div>
+
+            <ThemeToggle />
 
             <form action={logout}>
               <Button

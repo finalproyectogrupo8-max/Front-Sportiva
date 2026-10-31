@@ -59,7 +59,7 @@ export default async function AdminClubDetailPage({
   const modules = permissionsResult.ok ? permissionsResult.data.data : []
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
+    <div className="mx-auto flex max-w-[120rem] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-10">
       <div className="flex flex-col gap-3">
         <Link
           href="/admin/clubes"
@@ -167,7 +167,7 @@ function Stat({
 
 function ConnectionError({ message }: { message?: string }) {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[120rem] px-4 py-8 sm:px-6 lg:px-10">
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center text-destructive">
         <AlertTriangle className="size-8" aria-hidden="true" />
         <h2 className="text-base font-semibold">No se pudo cargar el club</h2>

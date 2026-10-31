@@ -1,6 +1,6 @@
 export default function AdminUsuariosLoading() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
+    <div className="mx-auto flex max-w-[120rem] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-10">
       {/* Header Skeleton */}
       <div className="flex flex-col gap-2">
         <div className="h-4 w-32 rounded bg-muted animate-pulse" />

@@ -19,7 +19,7 @@ export function ModuleHeader({
 }) {
   return (
     <div className="border-b bg-card">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pb-4 pt-6 sm:px-6">
+      <div className="mx-auto flex max-w-[120rem] flex-col gap-5 px-4 pb-4 pt-6 sm:px-6 lg:px-10">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div className="flex flex-col gap-1">
             {eyebrow && <p className="text-xs font-medium uppercase tracking-widest text-primary">{eyebrow}</p>}
@@ -35,7 +35,7 @@ export function ModuleHeader({
 }
 
 export function PageBody({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6', className)}>{children}</div>
+  return <div className={cn('mx-auto flex max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10', className)}>{children}</div>
 }
 
 export function Segmented<T extends string>({

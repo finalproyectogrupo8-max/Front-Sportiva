@@ -31,7 +31,7 @@ export function Logo({
           aria-hidden="true"
           className={cn(
             'text-[26px] leading-none font-extrabold tracking-[-0.055em]',
-            light ? 'text-white' : 'text-ink',
+            light ? 'text-white' : 'text-foreground',
           )}
         >
           sport

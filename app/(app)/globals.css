@@ -90,6 +90,36 @@
   --radius: 0.75rem;
 }
 
+/* Modo oscuro: el negro de la landing. El naranja original pasa AA con texto ink (5,6:1). */
+.dark {
+  color-scheme: dark;
+  --background: #10100f;
+  --foreground: var(--paper);
+  --card: #1a1917;
+  --card-foreground: var(--paper);
+  --popover: #1f1e1c;
+  --popover-foreground: var(--paper);
+  --primary: var(--brand);
+  --primary-foreground: #10100f;
+  --secondary: #262420;
+  --secondary-foreground: var(--paper);
+  --muted: #23211e;
+  --muted-foreground: #a39b8f;
+  --accent: #2c241f;
+  --accent-foreground: var(--paper);
+  --destructive: #e5675c;
+  --success: #4fae7a;
+  --success-foreground: #10100f;
+  --warning: #e2a336;
+  --warning-foreground: #10100f;
+  /* Bloques destacados (hero, avatar): un escalón sobre el fondo para que no se pierdan. */
+  --ink: #1f1e1c;
+  --ink-foreground: var(--paper);
+  --border: #2e2b27;
+  --input: #3a3631;
+  --chart-5: #6f675d;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

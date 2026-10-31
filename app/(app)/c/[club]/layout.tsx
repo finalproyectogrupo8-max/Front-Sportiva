@@ -41,7 +41,7 @@ export default async function ClubLayout({
         {/* Decisión de arquitectura (FRO-8 - Opción A):
             Para la demo, mantenemos los datos mockeados en las vistas internas de los módulos (getClubData),
             pero agregamos un banner visible en la parte superior del layout indicando que son datos de ejemplo. */}
-        <div className="border-b border-amber-200 bg-amber-100 px-4 py-1.5 text-center text-xs font-medium text-amber-900">
+        <div className="border-b border-amber-200 bg-amber-100 px-4 py-1.5 text-center text-xs font-medium text-amber-900 dark:border-amber-900/50 dark:bg-amber-950 dark:text-amber-200">
           Modo Demo · Datos de ejemplo en módulos operativos
         </div>
 
