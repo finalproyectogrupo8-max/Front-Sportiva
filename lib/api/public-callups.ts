@@ -23,10 +23,12 @@ export type PublicCallupPage = {
     /** Cambió la fecha, la hora o el lugar después de publicar. */
     updated: boolean
   }
-  players: { name: string; shirt_number: number | null }[]
+  /** Convocados: nombre e inicial, con su respuesta (el motivo no se expone). */
+  players: PublicPlayer[]
 }
 
 export type CallupAnswer = 'going' | 'not_going'
+export type PublicPlayer = { id: number; name: string; shirt_number: number | null; response: 'pending' | CallupAnswer }
 export type PublicMe = { name: string; response: 'pending' | CallupAnswer; note: string | null }
 export type PersonalCallup = { page: PublicCallupPage; me: PublicMe }
 
@@ -42,4 +44,14 @@ export function getPersonalCallup(token: string): Promise<ApiResult<{ data: Pers
 
 export function respondCallup(token: string, response: CallupAnswer, note: string | null): Promise<ApiResult<{ data: PersonalCallup }>> {
   return apiFetch(`/public/callups/respond/${encodeURIComponent(token)}`, { ...NO_SESSION, method: 'POST', body: { response, note } })
+}
+
+/** Respuesta desde el link del grupo: cada uno toca su nombre. Devuelve la página actualizada. */
+export function respondFromGroup(
+  token: string,
+  callupId: number,
+  response: CallupAnswer,
+  note: string | null,
+): Promise<ApiResult<{ data: PublicCallupPage }>> {
+  return apiFetch(`/public/callups/${encodeURIComponent(token)}/players/${callupId}`, { ...NO_SESSION, method: 'POST', body: { response, note } })
 }

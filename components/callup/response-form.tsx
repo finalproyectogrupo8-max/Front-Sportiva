@@ -30,7 +30,7 @@ export function ResponseForm({ token, initial, closed }: { token: string; initia
   const answered = me.response !== 'pending' && !changing
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm" aria-labelledby="response-title">
+    <section className="flex flex-col gap-4 rounded-xl border bg-card p-5" aria-labelledby="response-title">
       {answered ? (
         <div className="flex flex-col items-center gap-3 py-2 text-center" role="status">
           <span

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return callupMetadata((await loadPersonalCallup(token))?.page ?? null)
 }
 
-/** Link personal de cada convocado (FRO-36): confirmar con "Voy" o "No puedo". Sin login. */
+/** Link personal (FRO-36): para recordarle a uno por privado. Confirma con "Voy" o "No puedo". Sin login. */
 export default async function RespondCallupPage({ params }: Props) {
   const { token } = await params
   const data = await loadPersonalCallup(token)
@@ -21,13 +21,11 @@ export default async function RespondCallupPage({ params }: Props) {
   const closed = page.match.status === 'played' || page.match.status === 'cancelled'
 
   return (
-    <PublicShell>
+    <PublicShell club={page.club}>
       <CallupHeader page={page} />
-      <div className="flex flex-col gap-4 px-4">
-        <CallupNotice match={page.match} />
-        <ResponseForm token={token} initial={me} closed={closed} />
-        <CallupDetails page={page} calendarHref={`/convocatoria/${encodeURIComponent(token)}/calendario`} />
-      </div>
+      <CallupNotice match={page.match} />
+      <ResponseForm token={token} initial={me} closed={closed} />
+      <CallupDetails page={page} token={token} />
     </PublicShell>
   )
 }
