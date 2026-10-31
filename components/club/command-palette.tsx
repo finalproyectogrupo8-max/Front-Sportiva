@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { House, Plus, UserRound } from 'lucide-react'
+import { House, Plus, Settings, UserRound } from 'lucide-react'
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/command'
 import { Command } from '@/components/ui/command'
 import { ClubCrest } from '@/components/brand/logo'
+import { CONFIG_PERMISSIONS } from '@/lib/club-config'
 import { QUICK_CREATE } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { useClub } from './club-provider'
@@ -46,6 +47,12 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                 <span className="ml-auto truncate text-xs text-muted-foreground">{m.description}</span>
               </CommandItem>
             ))}
+            {CONFIG_PERMISSIONS.some(can) && (
+              <CommandItem value="Configuración del club perfil deportes temporadas categorías" onSelect={() => go(`${base}/configuracion`)}>
+                <Settings aria-hidden="true" />
+                Configuración del club
+              </CommandItem>
+            )}
           </CommandGroup>
           {actions.length > 0 && (
             <>

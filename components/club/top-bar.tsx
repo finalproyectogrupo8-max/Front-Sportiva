@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search } from 'lucide-react'
+import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logout, selectTenant } from '@/lib/auth'
 import type { Schemas } from '@/lib/api/client'
+import { CONFIG_PERMISSIONS } from '@/lib/club-config'
 import { QUICK_CREATE, getModule } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
@@ -39,7 +40,10 @@ export function TopBar({
   const { tenant, modules, can, canSee } = useClub()
   const pathname = usePathname()
   const base = `/c/${tenant.slug}`
-  const current = getModule(pathname.split('/')[3] ?? '')
+  const section = pathname.split('/')[3] ?? ''
+  const current = getModule(section)
+  const inConfig = section === 'configuracion'
+  const showConfig = CONFIG_PERMISSIONS.some(can)
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
   const alerts = useAlerts()
@@ -55,7 +59,7 @@ export function TopBar({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const CurrentIcon = current?.icon ?? House
+  const CurrentIcon = current?.icon ?? (inConfig ? Settings : House)
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-md">
@@ -73,7 +77,7 @@ export function TopBar({
             render={<Button variant="ghost" className="h-9 gap-2 px-2" />}
             aria-label="Cambiar de club"
           >
-            <ClubCrest short={tenant.short} color={tenant.color} className="size-6 rounded-md text-[10px]" />
+            <ClubCrest short={tenant.short} color={tenant.color} logoUrl={tenant.logoUrl} className="size-6 rounded-md text-[10px]" />
             <span className="hidden max-w-40 truncate font-medium md:inline">{tenant.name}</span>
             <span className="font-medium md:hidden">{tenant.short}</span>
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
@@ -129,9 +133,12 @@ export function TopBar({
         </span>
 
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-2" />} aria-label="Cambiar de módulo">
+          <DropdownMenuTrigger
+            render={<Button variant="ghost" className="h-9 gap-1.5 px-1.5 sm:gap-2 sm:px-2" />}
+            aria-label={`Cambiar de módulo (ahora: ${current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
+          >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
-            <span className="font-medium">{current?.name ?? 'Hoy'}</span>
+            <span className="hidden font-medium sm:inline">{current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
@@ -156,6 +163,21 @@ export function TopBar({
                 </DropdownMenuItem>
               ))}
             </div>
+            {showConfig && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  render={<Link href={`${base}/configuracion`} />}
+                  className={cn('gap-3 py-2', inConfig && 'bg-muted')}
+                >
+                  <Settings className="size-4" aria-hidden="true" />
+                  <span className="flex flex-col">
+                    <span className="font-medium">Configuración del club</span>
+                    <span className="text-xs text-muted-foreground">Perfil, deportes, temporadas y categorías</span>
+                  </span>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

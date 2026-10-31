@@ -49,12 +49,28 @@ export function Logo({
 export function ClubCrest({
   short,
   color,
+  logoUrl,
   className,
 }: {
   short: string
   color: string
+  /** Escudo subido por el club. Sin escudo se muestra la sigla sobre el color del club. */
+  logoUrl?: string | null
   className?: string
 }) {
+  if (logoUrl) {
+    return (
+      // El escudo viene de la API (otro origen): next/image pediría configurar el dominio.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={logoUrl}
+        alt=""
+        aria-hidden="true"
+        className={cn('inline-block size-9 shrink-0 rounded-lg bg-card object-contain', className)}
+      />
+    )
+  }
+
   return (
     <span
       className={cn(

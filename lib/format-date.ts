@@ -32,3 +32,13 @@ export function formatDateTime(dateString: string | null | undefined): string {
   const date = new Date(dateString)
   return Number.isNaN(date.getTime()) ? dateString : DATE_TIME.format(date)
 }
+
+// Fecha sin hora de la API ("2027-03-01"). `new Date` la toma como medianoche UTC: en Argentina
+// sería el día anterior, así que se formatea en UTC.
+const DAY = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
+
+export function formatDay(dateString: string | null | undefined): string {
+  if (!dateString) return '—'
+  const date = new Date(`${dateString.slice(0, 10)}T00:00:00Z`)
+  return Number.isNaN(date.getTime()) ? dateString : DAY.format(date)
+}
