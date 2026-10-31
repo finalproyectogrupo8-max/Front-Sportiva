@@ -586,6 +586,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/facilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["facilities.index"];
+        put?: never;
+        post: operations["facilities.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facility}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["facilities.show"];
+        put: operations["facilities.update"];
+        post?: never;
+        delete: operations["facilities.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/facilities/{facility}/components": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["facilities.components.index"];
+        put?: never;
+        post: operations["facilities.components.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/components/{component}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["components.show"];
+        put: operations["components.update"];
+        post?: never;
+        delete: operations["components.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -645,6 +709,38 @@ export interface paths {
         put?: never;
         post: operations["inventoryTransfer.store"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/maintenance-records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["maintenance-records.index"];
+        put?: never;
+        post: operations["maintenance-records.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/maintenance-records/{maintenanceRecord}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["maintenance-records.show"];
+        put: operations["maintenance-records.update"];
+        post?: never;
+        delete: operations["maintenance-records.destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -841,6 +937,70 @@ export interface paths {
         get: operations["publicCallup.show"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repair-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["repair-requests.index"];
+        put?: never;
+        post: operations["repair-requests.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repair-requests/{repairRequest}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["repair-requests.show"];
+        put: operations["repair-requests.update"];
+        post?: never;
+        delete: operations["repair-requests.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repair-requests/{repairRequest}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["repairRequest.assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/repair-requests/{repairRequest}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["repairRequest.resolve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1312,6 +1472,10 @@ export interface components {
             created_at: string | null;
             updated_at: string | null;
         };
+        /** AssignRepairRequestRequest */
+        AssignRepairRequestRequest: {
+            assigned_to: number;
+        };
         /** CalendarEventResource */
         CalendarEventResource: {
             /** @description `match` o `training`. */
@@ -1513,6 +1677,30 @@ export interface components {
             /** Format: date-time */
             end_date?: string;
         };
+        /** FacilityComponentResource */
+        FacilityComponentResource: {
+            id: number;
+            facility_id: number;
+            name: string;
+            condition_status: string;
+            last_inspected_at: string | null;
+            notes: string | null;
+            created_at: string | null;
+            updated_at: string | null;
+            facility?: components["schemas"]["FacilityResource"];
+        };
+        /** FacilityResource */
+        FacilityResource: {
+            id: number;
+            name: string;
+            type: string;
+            location: string | null;
+            status: string;
+            notes: string | null;
+            created_at: string | null;
+            updated_at: string | null;
+            components?: components["schemas"]["FacilityComponentResource"][];
+        };
         /** InventoryBalanceResource */
         InventoryBalanceResource: {
             id: number;
@@ -1565,6 +1753,20 @@ export interface components {
             tenants: components["schemas"]["TenantSummaryResource"][];
             platform_token?: string;
             platform_expires_at?: string | null;
+        };
+        /** MaintenanceRecordResource */
+        MaintenanceRecordResource: {
+            id: number;
+            repair_request_id: number | null;
+            facility_id: number;
+            performed_by: number | null;
+            performed_at: string;
+            description: string;
+            cost: number | null;
+            created_at: string | null;
+            updated_at: string | null;
+            facility?: components["schemas"]["FacilityResource"];
+            repair_request?: components["schemas"]["RepairRequestResource"];
         };
         /** MatchResource */
         MatchResource: {
@@ -1704,6 +1906,25 @@ export interface components {
                 notes?: string | null;
             }[];
         };
+        /** RepairRequestResource */
+        RepairRequestResource: {
+            id: number;
+            facility_id: number;
+            component_id: number | null;
+            reported_by: number;
+            assigned_to: number | null;
+            title: string;
+            description: string;
+            priority: string;
+            status: string;
+            reported_at: string;
+            resolved_at: string | null;
+            created_at: string | null;
+            updated_at: string | null;
+            facility?: components["schemas"]["FacilityResource"];
+            component?: components["schemas"]["FacilityComponentResource"];
+            maintenance_record?: components["schemas"]["MaintenanceRecordResource"];
+        };
         /** RequirementStatusResource */
         RequirementStatusResource: {
             requirement_id: number;
@@ -1720,6 +1941,14 @@ export interface components {
             /** @description Documento adjunto (`GET /api/documents/{id}/download`). */
             document_id: number | null;
             rejection_reason: string | null;
+        };
+        /** ResolveRepairRequestRequest */
+        ResolveRepairRequestRequest: {
+            description: string;
+            cost?: number | null;
+            /** Format: date-time */
+            performed_at?: string | null;
+            performed_by?: number | null;
         };
         /** SeasonResource */
         SeasonResource: {
@@ -1842,6 +2071,25 @@ export interface components {
              */
             file: string;
         };
+        /** StoreFacilityComponentRequest */
+        StoreFacilityComponentRequest: {
+            name: string;
+            /** @enum {string} */
+            condition_status?: "ok" | "review" | "out_of_service";
+            /** Format: date-time */
+            last_inspected_at?: string | null;
+            notes?: string | null;
+        };
+        /** StoreFacilityRequest */
+        StoreFacilityRequest: {
+            name: string;
+            /** @enum {string} */
+            type?: "court" | "gym" | "locker_room" | "other";
+            location?: string | null;
+            /** @enum {string} */
+            status?: "active" | "out_of_service";
+            notes?: string | null;
+        };
         /** StoreInventoryMovementRequest */
         StoreInventoryMovementRequest: {
             material_id: number;
@@ -1860,6 +2108,16 @@ export interface components {
             quantity: number;
             reason?: string | null;
             reference?: string | null;
+        };
+        /** StoreMaintenanceRecordRequest */
+        StoreMaintenanceRecordRequest: {
+            facility_id: number;
+            repair_request_id?: number | null;
+            performed_by?: number | null;
+            /** Format: date-time */
+            performed_at?: string;
+            description: string;
+            cost?: number | null;
         };
         /**
          * StoreMatchRequest
@@ -1939,6 +2197,18 @@ export interface components {
             status?: "active" | "inactive" | "transferred";
             /** @description Nada médico: eso va en los requisitos y documentos. */
             notes?: string | null;
+        };
+        /** StoreRepairRequestRequest */
+        StoreRepairRequestRequest: {
+            facility_id: number;
+            component_id?: number | null;
+            assigned_to?: number | null;
+            title: string;
+            description: string;
+            /** @enum {string} */
+            priority?: "low" | "normal" | "high" | "urgent";
+            /** @enum {string} */
+            component_condition_status?: "review" | "out_of_service";
         };
         /**
          * StoreRoleRequest
@@ -2166,6 +2436,35 @@ export interface components {
             /** @enum {string} */
             status?: "active" | "inactive";
         };
+        /** UpdateFacilityComponentRequest */
+        UpdateFacilityComponentRequest: {
+            name?: string;
+            /** @enum {string} */
+            condition_status?: "ok" | "review" | "out_of_service";
+            /** Format: date-time */
+            last_inspected_at?: string | null;
+            notes?: string | null;
+        };
+        /** UpdateFacilityRequest */
+        UpdateFacilityRequest: {
+            name?: string;
+            /** @enum {string} */
+            type?: "court" | "gym" | "locker_room" | "other";
+            location?: string | null;
+            /** @enum {string} */
+            status?: "active" | "out_of_service";
+            notes?: string | null;
+        };
+        /** UpdateMaintenanceRecordRequest */
+        UpdateMaintenanceRecordRequest: {
+            facility_id?: number;
+            repair_request_id?: number | null;
+            performed_by?: number | null;
+            /** Format: date-time */
+            performed_at?: string;
+            description?: string;
+            cost?: number | null;
+        };
         /** UpdateMaterialRequest */
         UpdateMaterialRequest: {
             name?: string;
@@ -2195,6 +2494,18 @@ export interface components {
             /** @enum {string} */
             status?: "active" | "inactive" | "transferred";
             notes?: string | null;
+        };
+        /** UpdateRepairRequestRequest */
+        UpdateRepairRequestRequest: {
+            facility_id?: number;
+            component_id?: number | null;
+            assigned_to?: number | null;
+            title?: string;
+            description?: string;
+            /** @enum {string} */
+            priority?: "low" | "normal" | "high" | "urgent";
+            /** @enum {string} */
+            status?: "open" | "assigned" | "in_progress" | "resolved" | "cancelled";
         };
         /** UpdateRoleRequest */
         UpdateRoleRequest: {
@@ -3970,6 +4281,352 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "facilities.index": {
+        parameters: {
+            query?: {
+                search?: string;
+                type?: "court" | "gym" | "locker_room" | "other";
+                status?: "active" | "out_of_service";
+                sort?: "name" | "-name" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `FacilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "facilities.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreFacilityRequest"];
+            };
+        };
+        responses: {
+            /** @description `FacilityResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "facilities.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The facility ID */
+                facility: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `FacilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "facilities.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The facility ID */
+                facility: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateFacilityRequest"];
+            };
+        };
+        responses: {
+            /** @description `FacilityResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "facilities.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The facility ID */
+                facility: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "facilities.components.index": {
+        parameters: {
+            query?: {
+                condition_status?: "ok" | "review" | "out_of_service";
+                search?: string;
+                per_page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description The facility ID */
+                facility: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `FacilityComponentResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityComponentResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "facilities.components.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The facility ID */
+                facility: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreFacilityComponentRequest"];
+            };
+        };
+        responses: {
+            /** @description `FacilityComponentResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityComponentResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "components.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The component ID */
+                component: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `FacilityComponentResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityComponentResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "components.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The component ID */
+                component: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateFacilityComponentRequest"];
+            };
+        };
+        responses: {
+            /** @description `FacilityComponentResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FacilityComponentResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "components.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The component ID */
+                component: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     health: {
         parameters: {
             query?: never;
@@ -4153,6 +4810,178 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "maintenance-records.index": {
+        parameters: {
+            query?: {
+                facility_id?: number;
+                repair_request_id?: number;
+                performed_by?: number;
+                from_date?: string;
+                to_date?: string;
+                sort?: "performed_at" | "-performed_at" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `MaintenanceRecordResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["MaintenanceRecordResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "maintenance-records.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreMaintenanceRecordRequest"];
+            };
+        };
+        responses: {
+            /** @description `MaintenanceRecordResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaintenanceRecordResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "maintenance-records.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The maintenance record ID */
+                maintenanceRecord: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `MaintenanceRecordResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaintenanceRecordResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "maintenance-records.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The maintenance record ID */
+                maintenanceRecord: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateMaintenanceRecordRequest"];
+            };
+        };
+        responses: {
+            /** @description `MaintenanceRecordResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MaintenanceRecordResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "maintenance-records.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The maintenance record ID */
+                maintenanceRecord: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "matches.index": {
@@ -5005,6 +5834,286 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    "repair-requests.index": {
+        parameters: {
+            query?: {
+                facility_id?: number;
+                component_id?: number;
+                status?: "open" | "assigned" | "in_progress" | "resolved" | "cancelled";
+                priority?: "low" | "normal" | "high" | "urgent";
+                assigned_to?: number;
+                reported_by?: number;
+                sort?: "reported_at" | "-reported_at" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `RepairRequestResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["RepairRequestResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "repair-requests.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreRepairRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description `RepairRequestResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RepairRequestResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "repair-requests.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The repair request ID */
+                repairRequest: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `RepairRequestResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RepairRequestResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "repair-requests.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The repair request ID */
+                repairRequest: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateRepairRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description `RepairRequestResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RepairRequestResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "repair-requests.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The repair request ID */
+                repairRequest: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "repairRequest.assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The repair request ID */
+                repairRequest: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRepairRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description `RepairRequestResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RepairRequestResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "La reparación está cancelada.";
+                        /** @constant */
+                        code: "repair_cancelled";
+                    } | {
+                        /** @constant */
+                        message: "La reparación ya fue resuelta.";
+                        /** @constant */
+                        code: "repair_already_resolved";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "repairRequest.resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The repair request ID */
+                repairRequest: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRepairRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description `RepairRequestResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RepairRequestResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "La reparación debe estar asignada para poder resolverse.";
+                        /** @constant */
+                        code: "repair_not_assigned";
+                    } | {
+                        /** @constant */
+                        message: "La reparación está cancelada.";
+                        /** @constant */
+                        code: "repair_cancelled";
+                    } | {
+                        /** @constant */
+                        message: "La reparación ya fue resuelta.";
+                        /** @constant */
+                        code: "repair_already_resolved";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
         };
     };
     "role.permissions": {

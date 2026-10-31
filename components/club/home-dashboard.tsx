@@ -33,7 +33,8 @@ export function HomeDashboard() {
     .sort((a, b) => b.fecha.localeCompare(a.fecha))
   const last = played[0]
 
-  const metrics: Record<ModuleId, { value: string; label: string; attention?: boolean }> = {
+  // Los módulos que ya leen de la API no tienen métrica de prueba acá (FRO-15).
+  const metrics: Partial<Record<ModuleId, { value: string; label: string; attention?: boolean }>> = {
     partidos: { value: String(upcoming.length), label: 'próximos' },
     jugadores: { value: String(data.players.length), label: 'fichas activas' },
     analisis: {
@@ -185,6 +186,7 @@ export function HomeDashboard() {
                       <span className="font-semibold">{m.name}</span>
                       <span className="text-xs leading-snug text-muted-foreground text-pretty">{m.description}</span>
                     </div>
+                    {metric && (
                     <div className="mt-auto flex items-baseline gap-1.5 border-t pt-3">
                       <span
                         className={cn(
@@ -196,6 +198,7 @@ export function HomeDashboard() {
                       </span>
                       <span className="truncate text-xs text-muted-foreground">{metric.label}</span>
                     </div>
+                    )}
                   </Link>
                 </li>
               )
