@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LogOut, Shield } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { AppFooter } from '@/components/app-footer'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -79,6 +80,7 @@ export default async function AdminLayout({
       <main className="flex-1">
         <ProvisioningWatcher>{children}</ProvisioningWatcher>
       </main>
+      <AppFooter />
     </div>
   )
 }

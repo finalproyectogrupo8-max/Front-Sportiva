@@ -51,7 +51,7 @@ export function CalendarView({
         {days.map((day) => {
           const list = byDay.get(day) ?? []
           return (
-            <li key={day} className={cn('flex flex-col gap-2 rounded-xl border bg-card p-3', day === now && 'border-primary/50 ring-1 ring-primary/20', list.length === 0 && 'max-md:hidden')}>
+            <li key={day} className={cn('flex min-w-0 flex-col gap-2 rounded-xl border bg-card p-3', day === now && 'border-primary/50 ring-1 ring-primary/20', list.length === 0 && 'max-md:hidden')}>
               <h3 className={cn('text-xs font-semibold uppercase tracking-wide', day === now ? 'text-primary' : 'text-muted-foreground')}>
                 {formatDayHeader(day)}
                 {day === now && ' · hoy'}
@@ -145,7 +145,7 @@ function EventCard({ club, event: e, compact = false }: { club: string; event: C
       href={href}
       scroll={false}
       className={cn(
-        'flex flex-col gap-1 rounded-lg border p-2 text-sm transition-colors',
+        'flex min-w-0 flex-col gap-1 rounded-lg border p-2 text-sm transition-colors',
         isMatch ? 'border-primary/30 bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted',
         off && 'opacity-60',
       )}
