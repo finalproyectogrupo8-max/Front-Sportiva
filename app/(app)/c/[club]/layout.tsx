@@ -3,6 +3,7 @@ import { ClubProvider } from '@/components/club/club-provider'
 import { TopBar } from '@/components/club/top-bar'
 import { requireSession } from '@/lib/session'
 import { getClubData } from '@/lib/data'
+import { getSetupSteps } from '@/lib/club-setup'
 import { normalizeTenant } from '@/lib/tenants'
 
 export default async function ClubLayout({
@@ -27,6 +28,7 @@ export default async function ClubLayout({
   // Se normaliza el tenant de la sesión asignando valores por defecto para que la UI no se rompa.
   const tenant = normalizeTenant(session.tenant)
   const data = getClubData(tenant)
+  const setupSteps = await getSetupSteps()
   const roles = session.profile?.roles.map((role) => role.name) ?? []
 
   return (
@@ -46,6 +48,7 @@ export default async function ClubLayout({
         </div>
 
         <TopBar
+          setupSteps={setupSteps}
           userName={session.user.name}
           userRole={roles.length > 0 ? roles.join(' · ') : 'Sin rol en el club'}
           userTenants={session.tenants}

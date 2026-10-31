@@ -17,13 +17,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logout, selectTenant } from '@/lib/auth'
 import type { Schemas } from '@/lib/api/client'
-import { CONFIG_PERMISSIONS } from '@/lib/club-config'
+import { CONFIG_PERMISSIONS, type SetupStep } from '@/lib/club-config'
 import { QUICK_CREATE, getModule } from '@/lib/modules'
 import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { CommandPalette } from './command-palette'
+import { SetupGuide } from './setup-guide'
 import { Initials } from './shared'
 import { useAlerts } from './use-alerts'
 
@@ -31,10 +32,13 @@ export function TopBar({
   userName,
   userRole,
   userTenants,
+  setupSteps,
 }: {
   userName: string
   userRole: string
   userTenants?: Schemas['TenantSummaryResource'][]
+  /** Pasos de la configuración inicial; null si el usuario no configura el club. */
+  setupSteps?: SetupStep[] | null
 }) {
   const router = useRouter()
   const { tenant, modules, can, canSee } = useClub()
@@ -80,7 +84,7 @@ export function TopBar({
             <ClubCrest short={tenant.short} color={tenant.color} logoUrl={tenant.logoUrl} className="size-6 rounded-md text-[10px]" />
             <span className="hidden max-w-40 truncate font-medium md:inline">{tenant.name}</span>
             <span className="font-medium md:hidden">{tenant.short}</span>
-            <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
+            <ChevronsUpDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-72">
             <DropdownMenuGroup>
@@ -139,7 +143,7 @@ export function TopBar({
           >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
             <span className="hidden font-medium sm:inline">{current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
-            <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
+            <ChevronsUpDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
             <DropdownMenuItem render={<Link href={base} />} className="mb-1 gap-3 py-2">
@@ -182,6 +186,8 @@ export function TopBar({
         </DropdownMenu>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {setupSteps && <SetupGuide steps={setupSteps} club={tenant.slug} />}
+
           <Button
             variant="outline"
             onClick={() => setPaletteOpen(true)}
