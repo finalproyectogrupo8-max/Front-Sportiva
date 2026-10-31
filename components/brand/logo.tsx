@@ -1,37 +1,45 @@
 import { cn } from '@/lib/utils'
 
+/** Isotipo de Sportiva: los dos trazos de la landing (naranja y arena). */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      className={cn('size-8 shrink-0', className)}
-    >
-      <rect width="32" height="32" rx="7" className="fill-ink" />
-      <path
-        d="M23.5 6L23.4 7.2L22.8 8.4L22.3 9.6L21.5 10.6L20.5 11.1L19.6 11.4L18.6 11.7L17.7 12.1L16.8 12.4L15.9 12.7L14.9 13.1L14.0 13.4L13.1 13.8L12.1 14.1L11.2 14.4L10.2 14.8L9.3 15.1L9.6 15.5L10.5 15.6L11.5 15.7L12.4 15.8L13.3 15.9L14.2 15.9L15.2 16.0L16.2 16.1L17.1 16.2L18.0 16.3L18.9 16.4L19.9 16.7L20.8 17.6L21.1 18.8L21.0 20.1L20.5 21.3L19.9 22.5L19.0 23.5L18.1 24.1L17.1 24.5L16.2 24.8L15.3 24.9L14.3 25.2L13.4 25.4L12.4 25.7L11.5 26.0L10.6 26.2L9.7 26.4L8.7 26.7L7.7 26.9L6.8 27.1L5.9 27.4L4.9 27.6L4.0 27.9L3.1 28.1L2.6 27.8L3.2 26.6L3.7 25.4L4.4 24.2L5.4 23.4L6.3 23.0L7.3 22.7L8.2 22.3L9.1 21.9L10.1 21.6L11.0 21.2L11.9 21.0L12.9 20.6L13.9 20.2L14.8 19.9L15.7 19.6L16.6 19.2L17.3 18.7L16.3 18.7L15.4 18.7L14.4 18.7L13.5 18.7L12.6 18.7L11.7 18.6L10.7 18.6L9.8 18.6L8.8 18.6L7.9 18.6L7.0 18.3L6.0 17.8L5.4 16.6L5.4 15.4L5.6 14.2L6.2 12.9L6.8 11.7L7.6 10.6L8.5 9.7L9.5 9.1L10.4 8.8L11.4 8.6L12.3 8.4L13.2 8.2L14.2 8.0L15.1 7.8L16.1 7.6L17.0 7.4L17.9 7.2L18.9 7.0L19.8 6.7L20.7 6.6L21.7 6.3L22.6 6.3Z"
-        fill="#C8643C"
-        className="fill-brand"
-      />
-    </svg>
+    <span aria-hidden="true" className={cn('relative block h-[38px] w-[34px] shrink-0', className)}>
+      <i className="absolute top-[6px] left-[2px] h-[11px] w-[31px] -rotate-[29deg] rounded-full bg-brand" />
+      <i className="absolute bottom-[5px] left-[2px] h-[11px] w-[31px] -rotate-[29deg] rounded-full bg-[#dbc4aa]" />
+    </span>
   )
 }
 
+/**
+ * Logo completo, igual al de la landing: isotipo + "sportıva" con el punto de la i en naranja.
+ * `light` lo pone en blanco para fondos oscuros.
+ */
 export function Logo({
   className,
   compact = false,
+  light = false,
 }: {
   className?: string
   compact?: boolean
+  light?: boolean
 }) {
   return (
-    <span className={cn('inline-flex items-center gap-2.5 select-none', className)}>
-      <LogoMark />
+    <span className={cn('inline-flex items-center gap-2.5 select-none', className)} aria-label="Sportiva">
+      <LogoMark className="origin-left scale-[0.82]" />
       {!compact && (
-        <span className="font-display text-2xl font-bold uppercase leading-none tracking-wider text-foreground">
-          Sportiva
+        <span
+          aria-hidden="true"
+          className={cn(
+            'text-[26px] leading-none font-extrabold tracking-[-0.055em]',
+            light ? 'text-white' : 'text-ink',
+          )}
+        >
+          sport
+          {/* "ı" sin punto: el punto lo pone el ::before en naranja, como en la landing. */}
+          <span className="relative before:absolute before:top-[0.17em] before:left-1/2 before:size-[0.2em] before:-translate-x-1/2 before:rounded-full before:bg-brand">
+            ı
+          </span>
+          va
         </span>
       )}
     </span>

@@ -26,7 +26,7 @@ export default async function LoginPage() {
 
         <div className="relative flex items-center gap-2">
           <Link href="/" className="transition hover:opacity-85">
-            <Logo className="[&_span]:text-white" />
+            <Logo light />
           </Link>
         </div>
 
@@ -54,7 +54,7 @@ export default async function LoginPage() {
         <div className="flex w-full max-w-sm flex-col gap-8">
           <div className="flex flex-col gap-3">
             <Link href="/" className="lg:hidden w-fit mb-2">
-              <Logo />
+              <Logo light />
             </Link>
             <h2 className="text-3xl font-bold uppercase tracking-tight text-white">
               Iniciar sesión

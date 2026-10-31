@@ -44,13 +44,14 @@ export function ClubProvider({
   const tenant = useMemo(() => normalizeTenant(rawTenant), [rawTenant])
   const [data, setData] = useState(initialData)
 
+  // El color del club es solo un acento (--club: escudo, chips). La estructura y los botones
+  // usan siempre la marca Sportiva. Se pone en <html> para que también lo vean los portales
+  // (menús, diálogos), que se montan fuera de este árbol.
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--primary', tenant.color)
-    root.style.setProperty('--ring', tenant.color)
+    root.style.setProperty('--club', tenant.color)
     return () => {
-      root.style.removeProperty('--primary')
-      root.style.removeProperty('--ring')
+      root.style.removeProperty('--club')
     }
   }, [tenant.color])
 
@@ -87,7 +88,7 @@ export function ClubProvider({
 
   return (
     <ClubContext.Provider value={value}>
-      <div style={{ '--primary': tenant.color, '--ring': tenant.color } as React.CSSProperties} className="contents">
+      <div style={{ '--club': tenant.color } as React.CSSProperties} className="contents">
         {children}
       </div>
     </ClubContext.Provider>
