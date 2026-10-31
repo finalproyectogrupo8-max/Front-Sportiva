@@ -5,6 +5,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft,
   Camera,
+  ExternalLink,
+  ShieldCheck,
+  ShieldX,
   Loader2,
   Mail,
   MessageCircle,
@@ -29,6 +32,9 @@ import { ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '
 import { FormSelect, Pill } from '@/components/club/shared'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import Link from 'next/link'
+import { StatusBadge } from '@/components/club/eligibility/status'
+import type { PlayerEligibility } from '@/lib/api/eligibility'
 import type { Membership, Player, PlayerContact } from '@/lib/api/players'
 import { formatDay } from '@/lib/format-date'
 import { DOMINANT_SIDE, PLAYER_STATUS, RELATIONSHIP, photoUrl } from '@/lib/player-labels'
@@ -41,6 +47,8 @@ export type PlayerDetail = {
   history: Membership[]
   /** null: el usuario no ve los contactos. */
   contacts: PlayerContact[] | null
+  /** null: el usuario no ve la habilitación. */
+  eligibility: PlayerEligibility | null
 }
 
 type Flags = {
@@ -162,7 +170,7 @@ function PlayerView({
   onMode: (mode: Mode) => void
   onDeleted: () => void
 }) {
-  const { player, history, contacts } = detail
+  const { player, history, contacts, eligibility } = detail
   const status = PLAYER_STATUS[player.status] ?? { label: player.status, tone: 'neutral' as const }
   const current = player.memberships ?? []
   const ended = history.filter((m) => m.status !== 'active')
@@ -215,6 +223,62 @@ function PlayerView({
           </dl>
           {player.notes && <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm leading-relaxed">{player.notes}</p>}
         </Section>
+
+        {/* Habilitación (FRO-34) */}
+        {eligibility && current.length > 0 && (
+          <Section
+            title="Habilitación"
+            action={
+              <Link
+                href={`/c/${club}/habilitacion?categoria=${current[0].category_id}`}
+                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+              >
+                Ver en el tablero
+                <ExternalLink className="size-3" aria-hidden="true" />
+              </Link>
+            }
+          >
+            <p
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium',
+                eligibility.is_eligible ? 'bg-success/12 text-success' : 'bg-destructive/10 text-destructive',
+              )}
+            >
+              {eligibility.is_eligible ? <ShieldCheck className="size-4" aria-hidden="true" /> : <ShieldX className="size-4" aria-hidden="true" />}
+              {eligibility.is_eligible
+                ? 'Habilitado para jugar'
+                : `No habilitado: le ${eligibility.missing === 1 ? 'falta 1 papel' : `faltan ${eligibility.missing} papeles`}`}
+            </p>
+            {eligibility.requirements.filter((r) => r.status !== 'not_applicable').length > 0 && (
+              <ul className="flex flex-col divide-y rounded-lg border">
+                {eligibility.requirements
+                  .filter((r) => r.status !== 'not_applicable')
+                  .map((r) => (
+                    <li key={r.requirement_id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="font-medium">{r.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {r.competition_name}
+                          {r.expires_at && ` · vence ${formatDay(r.expires_at)}`}
+                        </span>
+                      </span>
+                      {r.document_id && (
+                        <a
+                          href={`/c/${club}/documentos/${r.document_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Ver archivo
+                        </a>
+                      )}
+                      <StatusBadge status={r.status} expiringSoon={r.expiring_soon} />
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </Section>
+        )}
 
         {/* Contactos */}
         {contacts && (

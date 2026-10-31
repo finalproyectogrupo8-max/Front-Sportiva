@@ -2,6 +2,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   Package,
+  ShieldCheck,
   Shirt,
   Target,
   TrendingUp,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react'
 
 export type ModuleId =
+  | 'habilitacion'
   | 'indumentaria'
   | 'materiales'
   | 'partidos'
@@ -35,6 +37,7 @@ export type ModuleDef = {
 
 export const MODULES: ModuleDef[] = [
   { id: 'partidos', name: 'Partidos', description: 'Fixture, horarios, sedes y ropa de juego', icon: CalendarDays, area: 'Deportivo', permissions: ['matches.view', 'trainings.view', 'attendance.view'] },
+  { id: 'habilitacion', name: 'Habilitación', description: 'Quién puede jugar y qué papeles le faltan', icon: ShieldCheck, area: 'Deportivo', permissions: ['player_requirements.view'] },
   { id: 'jugadores', name: 'Jugadores', description: 'Fichas, categorías, pases y puestos', icon: Users, area: 'Deportivo', permissions: ['players.view'] },
   { id: 'analisis', name: 'Análisis', description: 'Eficacia, constancia y práctica', icon: TrendingUp, area: 'Deportivo', permissions: ['physical_evaluations.view'] },
   { id: 'competencia', name: 'Proyecto', description: 'Objetivos, tabla y estadísticas', icon: Target, area: 'Deportivo', permissions: ['project.view'] },

@@ -8,6 +8,7 @@ import { PlayerSheet, type PlayerDetail } from '@/components/club/players/player
 import { PlayersTable } from '@/components/club/players/players-table'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { listCategories, listSports, type Category } from '@/lib/api/club'
+import { playerEligibility } from '@/lib/api/eligibility'
 import { getPlayer, listContacts, listPlayerMemberships, listPlayers } from '@/lib/api/players'
 import { requireSession } from '@/lib/session'
 
@@ -32,17 +33,19 @@ async function categoryOptions(): Promise<(Category & { label: string })[]> {
     }))
 }
 
-async function loadDetail(id: number, canSeeContacts: boolean): Promise<PlayerDetail | null> {
-  const [player, history, contacts] = await Promise.all([
+async function loadDetail(id: number, canSeeContacts: boolean, canSeeEligibility: boolean): Promise<PlayerDetail | null> {
+  const [player, history, contacts, eligibility] = await Promise.all([
     getPlayer(id),
     listPlayerMemberships(id),
     canSeeContacts ? listContacts(id) : Promise.resolve(null),
+    canSeeEligibility ? playerEligibility(id) : Promise.resolve(null),
   ])
   if (!player.ok) return null
   return {
     player: player.data.data,
     history: history.ok ? history.data.data : [],
     contacts: contacts?.ok ? contacts.data.data : null,
+    eligibility: eligibility?.ok ? eligibility.data.data : null,
   }
 }
 
@@ -64,7 +67,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
     ;[players, categories, detail] = await Promise.all([
       listPlayers({ search: query.q?.trim() || undefined, category_id: categoryId, status: query.estado === 'todos' ? undefined : query.estado || 'active', page }),
       categoryOptions(),
-      selectedId ? loadDetail(selectedId, can('player_contacts.view')) : Promise.resolve(null),
+      selectedId ? loadDetail(selectedId, can('player_contacts.view'), can('player_requirements.view')) : Promise.resolve(null),
     ])
   } catch {
     players = null
