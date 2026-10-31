@@ -2,13 +2,25 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
 import { CategoriesSection } from '@/components/club/config/categories-section'
+import { CompetitionsSection } from '@/components/club/config/competitions-section'
 import { ProfileSection } from '@/components/club/config/profile-section'
 import { SeasonsSection, type SeasonRow } from '@/components/club/config/seasons-section'
 import { SportsSection, type SportRow } from '@/components/club/config/sports-section'
 import { NoAccess } from '@/components/club/no-access'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import type { ApiResult } from '@/lib/api/client'
-import { getClub, listCategories, listSeasons, listSports, type Category, type Club, type Season, type Sport } from '@/lib/api/club'
+import {
+  getClub,
+  listCategories,
+  listCompetitions,
+  listSeasons,
+  listSports,
+  type Category,
+  type Club,
+  type Competition,
+  type Season,
+  type Sport,
+} from '@/lib/api/club'
 import { CONFIG_TABS, canSeeConfig, type ConfigTab } from '@/lib/club-config'
 import { getSetupSteps } from '@/lib/club-setup'
 import { requireSession } from '@/lib/session'
@@ -33,7 +45,7 @@ export default async function ConfigPage({ params, searchParams }: Props) {
   }
 
   const pending = new Set((await getSetupSteps())?.filter((s) => !s.done).map((s) => s.tab))
-  const tabs = CONFIG_TABS.filter((t) => !t.permission || can(t.permission))
+  const tabs = CONFIG_TABS.filter((t) => (t.permissions ?? []).every(can))
   const tab: ConfigTab = tabs.find((t) => t.id === query.tab)?.id ?? tabs[0].id
   const crud = (resource: string) => ({
     create: can(`${resource}.create`),
@@ -46,7 +58,7 @@ export default async function ConfigPage({ params, searchParams }: Props) {
       <ModuleHeader
         eyebrow="Club"
         title="Configuración"
-        description="Perfil, deportes, temporadas y categorías: lo primero que se carga, antes de los jugadores."
+        description="Perfil, deportes, temporadas, categorías y competencias: lo primero que se carga, antes de los jugadores."
       >
         <nav aria-label="Secciones de la configuración" className="-mb-4 flex gap-1 overflow-x-auto">
           {tabs.map((t) => (
@@ -78,7 +90,8 @@ export default async function ConfigPage({ params, searchParams }: Props) {
           tab={tab}
           canEditProfile={can('club.update')}
           crud={crud}
-          filters={{ sport: query.deporte ?? 'todos', season: query.temporada ?? 'todos' }}
+          // '' = sin filtro elegido (Competencias arranca en la temporada en curso); 'todos' = todas.
+          filters={{ sport: query.deporte ?? '', season: query.temporada ?? '' }}
         />
       </PageBody>
     </>
@@ -94,6 +107,15 @@ type TabData =
   | { tab: 'deportes'; sports: SportRow[] }
   | { tab: 'temporadas'; seasons: SeasonRow[] }
   | { tab: 'categorias'; categories: Category[]; sports: Sport[]; seasons: Season[]; sport?: number; season?: number }
+  | {
+      tab: 'competencias'
+      competitions: Competition[]
+      sports: Sport[]
+      seasons: Season[]
+      categories: Category[]
+      sport?: number
+      season?: number
+    }
   | { tab: 'error'; result?: Failure }
 
 async function loadTab(tab: ConfigTab, filters: { sport: string; season: string }): Promise<TabData> {
@@ -120,6 +142,30 @@ async function loadTab(tab: ConfigTab, filters: { sport: string; season: string 
       return {
         tab,
         seasons: seasons.data.data.map((s) => ({ ...s, categories: all.filter((c) => c.season_id === s.id).length })),
+      }
+    }
+
+    if (tab === 'competencias') {
+      // El profe ve las competencias de sus categorías, pero no tiene sports.view ni seasons.view:
+      // sin esas listas, la tarjeta muestra lo que tiene y no se puede editar.
+      const [sports, seasons, categories] = await Promise.all([listSports(), listSeasons(), listCategories()])
+      const seasonList = seasons.ok ? seasons.data.data : []
+      // Por defecto, la temporada en curso.
+      const season =
+        filters.season === 'todos'
+          ? undefined
+          : Number(filters.season) || seasonList.find((s) => s.status === 'active')?.id
+      const sport = Number(filters.sport) || undefined
+      const competitions = await listCompetitions({ season_id: season, sport_id: sport })
+      if (!competitions.ok) return { tab: 'error', result: competitions }
+      return {
+        tab,
+        competitions: competitions.data.data,
+        sports: sports.ok ? sports.data.data : [],
+        seasons: seasonList,
+        categories: categories.ok ? categories.data.data : [],
+        sport,
+        season,
       }
     }
 
@@ -175,6 +221,17 @@ async function TabContent({
           seasons={data.seasons}
           filters={{ sport: data.sport ? String(data.sport) : 'todos', season: data.season ? String(data.season) : 'todos' }}
           can={crud('categories')}
+        />
+      )
+    case 'competencias':
+      return (
+        <CompetitionsSection
+          competitions={data.competitions}
+          sports={data.sports}
+          seasons={data.seasons}
+          categories={data.categories}
+          filters={{ sport: data.sport ? String(data.sport) : 'todos', season: data.season ? String(data.season) : 'todos' }}
+          can={crud('competitions')}
         />
       )
     default:

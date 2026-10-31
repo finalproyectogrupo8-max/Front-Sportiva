@@ -108,3 +108,54 @@ export function updateCategory(id: number, input: CategoryInput): Promise<ApiRes
 export function deleteCategory(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/categories/${id}`, { method: 'DELETE' })
 }
+
+/* Competencias y requisitos de habilitación (FRO-33) */
+
+export type Competition = Schemas['CompetitionResource']
+export type CompetitionRequirement = Schemas['CompetitionRequirementResource']
+
+export type RequirementInput = {
+  id?: number
+  name: string
+  validity_months: number | null
+  requires_file: boolean
+  minors_only: boolean
+  is_required: boolean
+}
+
+export type CompetitionInput = {
+  sport_id: number
+  season_id: number
+  name: string
+  organizer: string | null
+  registration_deadline: string | null
+  category_ids: number[]
+  /** La lista completa y en orden: con id edita, sin id crea, y la API borra los que no vienen. */
+  requirements: RequirementInput[]
+}
+
+export function listCompetitions(
+  query: { season_id?: number; sport_id?: number; per_page?: number } = {},
+): Promise<ApiResult<Page<Competition>>> {
+  return apiFetch('/competitions', { query: { per_page: 100, ...query } })
+}
+
+export function createCompetition(input: CompetitionInput): Promise<ApiResult<One<Competition>>> {
+  return apiFetch('/competitions', { method: 'POST', body: input })
+}
+
+export function updateCompetition(id: number, input: CompetitionInput): Promise<ApiResult<One<Competition>>> {
+  return apiFetch(`/competitions/${id}`, { method: 'PATCH', body: input })
+}
+
+export function deleteCompetition(id: number): Promise<ApiResult<void>> {
+  return apiFetch(`/competitions/${id}`, { method: 'DELETE' })
+}
+
+/** Copia la competencia a otra temporada con sus requisitos (las categorías no, son de otra temporada). */
+export function copyCompetition(
+  id: number,
+  input: { season_id: number; name?: string; registration_deadline?: string | null },
+): Promise<ApiResult<One<Competition>>> {
+  return apiFetch(`/competitions/${id}/copy`, { method: 'POST', body: input })
+}
