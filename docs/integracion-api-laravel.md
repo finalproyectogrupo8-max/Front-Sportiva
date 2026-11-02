@@ -5,7 +5,7 @@
 
 ## 1. Contexto
 
-- **Frontend:** este repo. Next.js 16 (App Router), React 19, TypeScript, Tailwind 4 y shadcn/ui. El login ya va contra la API (`lib/auth.ts`); los datos de los clubes todavía son mock (`lib/data.ts`, `lib/tenants.ts`).
+- **Frontend:** este repo. Next.js 16 (App Router), React 19, TypeScript, Tailwind 4 y shadcn/ui. Todo va contra la API: el login (`lib/auth.ts`) y cada módulo (`lib/api/<modulo>.ts`). Cómo está armado el front: [arquitectura-front.md](arquitectura-front.md).
 - **Backend:** una sola aplicación Laravel, en otro repo. Es dueña de la lógica de negocio, la persistencia y la autenticación.
 - **Datos:**
   - Una BD central `olim_platform`, con usuarios, clubes (`tenants`), membresías (`tenant_memberships`) y tokens.
@@ -319,19 +319,17 @@ Paquetes como `stancl/tenancy` ya resuelven el cambio de conexión, el alta y la
 
 Para que scramble infiera bien los tipos, la API tiene que validar con Form Requests y responder con API Resources, no devolver modelos ni arrays sueltos.
 
-## 7. Decisiones de producto pendientes
+## 7. Decisiones de producto que pedía la UI
 
-La UI muestra cinco cosas que el modelo de datos no guarda. Cada una necesita una decisión antes de conectar su pantalla a la API.
+Eran cosas que la maqueta mostraba y el modelo de datos no guardaba:
 
-| Dato en la UI | Dónde está hoy | Qué dice el modelo | Decisión |
-| --- | --- | --- | --- |
-| Tabla de posiciones | `Standing` en `lib/data.ts` | No hay tablas de torneos ni de posiciones | pendiente |
-| Objetivos de jugador | `Objective` en `lib/data.ts` | `player_goals` y `goal_progress_updates` se eliminaron a propósito | pendiente |
-| Notas del entrenador | `CoachNote` en `lib/data.ts` | No hay una tabla equivalente | pendiente |
-| Perfil del club (ciudad, fundación, color, socios) | `lib/tenants.ts` | `tenants` solo guarda nombre, slug y datos de conexión | pendiente |
-| Estados de pedido | la UI usa 4 estados | el modelo tiene 7 (`draft` … `rejected`) | pendiente |
-
-Opciones para cada una: quitar la pantalla, dejarla como "próximamente" o agregar la tabla al modelo. En los estados de pedido, la opción real es adaptar la UI a los 7 estados o agruparlos en 4 etiquetas.
+| Dato en la UI | Decisión |
+| --- | --- |
+| Tabla de posiciones | Se carga a mano por competencia y categoría (`competition_standings`, TIZ-20). El club no juega todos los partidos del torneo |
+| Objetivos | Objetivos de la temporada, del club o de una categoría (`season_objectives`, TIZ-20). Los objetivos por jugador se descartaron |
+| Notas del entrenador | **Pendiente.** No hay tabla: hoy las observaciones van en el resumen de las evaluaciones físicas y en las notas de la ficha del jugador |
+| Perfil del club (ciudad, fundación, color, escudo) | En `tenants`: sigla, ciudad, año de fundación, color y escudo, editables desde Configuración y desde el panel admin |
+| Estados de pedido | La UI usa los 7 estados del modelo, con etiquetas en español |
 
 ## 8. Próximos pasos
 
@@ -354,7 +352,7 @@ Opciones para cada una: quitar la pantalla, dejarla como "próximamente" o agreg
 - [ ] `selectTenant` y selector `/clubes` desde la API (FRO-3)
 - [x] `proxy.ts` como gate optimista
 - [x] Generar los tipos con `openapi-typescript`
-- [ ] Reemplazar los mocks de `lib/data.ts` y `lib/tenants.ts`, módulo por módulo
+- [x] Reemplazar los mocks, módulo por módulo (FRO-15)
 
 **Producto**
 

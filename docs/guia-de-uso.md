@@ -29,8 +29,6 @@ Cada persona ve solo los módulos que permiten sus roles. El profe ve solo sus c
 
 **Pie de página:** muestra la versión del sistema, el commit y la fecha de la última actualización. En desarrollo aparece la etiqueta "Desarrollo".
 
-**Banner "Modo Demo":** hay módulos que todavía muestran datos de ejemplo (ver [sección 11](#11-qué-todavía-es-de-ejemplo)).
-
 ---
 
 ## 3. Configuración del club
@@ -250,9 +248,9 @@ De los convocados se muestra solo el nombre y la inicial del apellido. Nunca apa
 
 ---
 
-## 11. Qué todavía es de ejemplo
+## 11. Todo con datos reales
 
-Estos módulos todavía muestran datos de ejemplo (el banner "Modo Demo"): **Indumentaria**, **Materiales**, **Canchas**, **Análisis** y **Proyecto**, además del inicio y la paleta de Ctrl + K. La API ya tiene inventario y canchas. Falta conectar las pantallas (ver [decisiones-producto.md](decisiones-producto.md#pendiente)).
+Todos los módulos leen y guardan en la API: no quedan datos de ejemplo. Lo que todavía no tiene datos muestra un estado vacío con la acción para empezar. El manual por rol, con los módulos nuevos (Análisis, Proyecto, Comunicados, Equipo, Materiales, Indumentaria y Canchas), está en FRO-24.
 
 ---
 

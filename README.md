@@ -1,125 +1,140 @@
-# Gestión Operativa — Club Deportivo
+# Sportiva — Gestión operativa de clubes deportivos
 
-Panel de gestión operativa para clubes deportivos: partidos, fichas de jugadores, profes, materiales y canchas, con un espacio separado para cada club.
+Panel para la operación diaria de un club: jugadores, profes, partidos con convocatoria y asistencia, habilitación ante la liga, materiales, indumentaria, canchas, comunicados, análisis y proyecto deportivo. Cada club tiene su propio espacio y sus propios datos.
 
-Este repositorio es **solo el frontend**. Va a consumir una **API REST en Laravel** que vive en su propio repositorio y es dueña de la lógica de negocio, la persistencia y la autenticación.
+Este repositorio es **solo el frontend**. Consume la **API REST en Laravel** ([API_Sportiva](https://github.com/finalproyectogrupo8-max/API_Sportiva)), que es dueña de la lógica de negocio, la persistencia, los permisos y la autenticación.
 
 Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**, **Tailwind CSS 4** y **shadcn/ui**.
 
-> **Estado:** configuración del club, jugadores, profes, habilitación, partidos, convocatoria y asistencia ya van contra la API de Laravel. Indumentaria, materiales, canchas, análisis y proyecto todavía muestran datos de ejemplo (`lib/data.ts`).
+> **Estado:** todos los módulos van contra la API. No quedan datos de ejemplo en el front.
 
-**Cómo se usa:** [docs/guia-de-uso.md](docs/guia-de-uso.md) · **Decisiones y pendientes:** [docs/decisiones-producto.md](docs/decisiones-producto.md)
+| Para… | Leé |
+| --- | --- |
+| Usar la app (por pantalla y por rol) | [docs/guia-de-uso.md](docs/guia-de-uso.md) |
+| Entender cómo está armado el front: sesión, carpetas, cómo sumar un endpoint, design system | [docs/arquitectura-front.md](docs/arquitectura-front.md) |
+| Login, tokens y contrato con Laravel | [docs/integracion-api-laravel.md](docs/integracion-api-laravel.md) |
+| Decisiones de producto y pendientes | [docs/decisiones-producto.md](docs/decisiones-producto.md) |
+| CI | [docs/ci.md](docs/ci.md) |
 
 ---
 
 ## 1. Correr la app en local
 
+El front no funciona solo: necesita la API corriendo. Son cuatro pasos y en una hora tenés todo andando.
+
 ### Requisitos previos
 
-| Herramienta | Versión                         | Cómo verificarla |
-| ----------- | ------------------------------- | ---------------- |
-| Node.js     | 20.9 o superior (probado con 24) | `node -v`        |
-| pnpm        | 12.x                            | `pnpm -v`        |
-| Git         | cualquier versión reciente      | `git --version`  |
+| Herramienta | Versión | Cómo verificarla |
+| --- | --- | --- |
+| Node.js | 20.9 o superior (probado con 24) | `node -v` |
+| pnpm | 12.x | `pnpm -v` |
+| Docker Desktop | con WSL 2 en Windows | `docker compose version` |
+| Git | cualquier versión reciente | `git --version` |
 
-Si no tenés pnpm, la forma más simple de instalarlo es con Corepack, que viene con Node:
+Si no tenés pnpm: `corepack enable` (viene con Node y usa la versión fijada en `package.json`).
+
+> Usá **solo pnpm**. `npm install` o `yarn` ignoran `pnpm-lock.yaml` y generan otro lockfile.
+
+### Paso 1: la API
+
+Cloná [API_Sportiva](https://github.com/finalproyectogrupo8-max/API_Sportiva) **al lado de este repo** (por ejemplo `~/repos/api-sportiva` y `~/repos/gestion-operativa-club-deportivo`): `pnpm api:types` la busca en `../api-sportiva`.
+
+Seguí su guía [docs/desarrollo-local.md](https://github.com/finalproyectogrupo8-max/API_Sportiva/blob/main/docs/desarrollo-local.md). En resumen, dentro del repo de la API:
 
 ```bash
-corepack enable
+cp .env.example .env
+docker compose up -d --wait                       # API en :8000, MySQL, cola y Mailpit
+docker compose exec backend php artisan migrate --seed
 ```
 
-Corepack usa después la versión de pnpm fijada en `package.json` (campo `packageManager`).
+El seed crea dos usuarios:
 
-> Usá **solo pnpm**. No corras `npm install` ni `yarn`: ignoran `pnpm-lock.yaml` y generan otro lockfile distinto.
+| Email | Contraseña | Qué es |
+| --- | --- | --- |
+| `admin@sportiva.com` | `admin123` | Admin de plataforma: entra a `/admin` |
+| `general@sportiva.com` | `general123` | Usuario común, sin clubes todavía |
 
-### Pasos
+Los mails que manda la API (recuperar contraseña, convocatorias, comunicados) no salen a internet: se ven en **Mailpit**, <http://localhost:8025>.
+
+### Paso 2: el front
 
 ```bash
-# 1. Clonar el repositorio
-git clone <REPO_URL>
+git clone https://github.com/finalproyectogrupo8-max/Front-Sportiva.git gestion-operativa-club-deportivo
 cd gestion-operativa-club-deportivo
-
-# 2. Instalar dependencias (versiones exactas del lockfile)
+cp .env.example .env.local        # API_URL=http://127.0.0.1:8000/api
 pnpm install --frozen-lockfile
-
-# 3. Levantar el servidor de desarrollo
-pnpm dev
+pnpm dev                          # http://localhost:3000
 ```
 
-Abrí <http://localhost:3000> e ingresá con:
+En el `.env` de la API, `FRONTEND_URL` tiene que apuntar a esta URL (los links de los mails la usan).
 
-- **Usuario:** `admin`
-- **Contraseña:** `admin`
+### Paso 3: crear un club y entrar
 
-### Scripts disponibles
+1. Entrá a <http://localhost:3000/login> con `admin@sportiva.com` / `admin123`. Llegás al **panel admin**.
+2. **Clubes → Nuevo club:** nombre, slug (por ejemplo `club_demo`) y su administrador inicial. La base del club se crea en segundo plano (la cola corre en Docker): esperá a que diga **Activo**.
+3. Cerrá sesión y entrá con el administrador del club que cargaste. Llegás a `/c/club_demo`.
+4. La guía "Configurar club" (arriba a la derecha) te lleva por los primeros pasos: deporte, temporada y categorías. Después, jugadores y partidos.
 
-| Comando                  | Qué hace                                                      |
-| ------------------------ | ------------------------------------------------------------- |
-| `pnpm dev`               | Servidor de desarrollo con hot reload en el puerto 3000       |
-| `pnpm build`             | Build de producción                                           |
-| `pnpm start`             | Sirve el build de producción (primero hay que correr `build`) |
-| `pnpm lint`              | Revisa el código con ESLint (`eslint.config.mjs`)             |
-| `pnpm typecheck`         | Chequeo de tipos con `tsc --noEmit` (ver la nota de abajo)    |
-| `pnpm api:types`         | Regenera `lib/api/schema.d.ts` desde el contrato OpenAPI de la API |
+### Scripts
 
-> **Importante:** `next.config.mjs` tiene `typescript.ignoreBuildErrors: true`, así que `pnpm build` **no falla por errores de tipos**. Corré `pnpm typecheck` antes de abrir un pull request. La CI también lo corre (ver [3.4](#34-ci-integración-continua)).
+| Comando | Qué hace |
+| --- | --- |
+| `pnpm dev` | Servidor de desarrollo con hot reload (puerto 3000; otro con `pnpm dev --port 3125`) |
+| `pnpm build` / `pnpm start` | Build de producción y servirlo |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | `tsc --noEmit`. **`pnpm build` no falla por tipos** (`ignoreBuildErrors`): corré esto antes del PR |
+| `pnpm api:types` | Regenera `lib/api/schema.d.ts` desde `../api-sportiva/docs/api/openapi.json` (o `API_OPENAPI=/ruta pnpm api:types`) |
 
 ### Variables de entorno
 
-Copiá `.env.example` a `.env.local` (`cp .env.example .env.local`).
+| Variable | Ejemplo | Notas |
+| --- | --- | --- |
+| `API_URL` | `http://127.0.0.1:8000/api` | URL base de la API, con `/api`. **Solo de servidor**: nunca `NEXT_PUBLIC_` |
 
-| Variable  | Ejemplo                     | Notas                                                                    |
-| --------- | --------------------------- | ------------------------------------------------------------------------ |
-| `API_URL` | `http://127.0.0.1:8000/api` | URL base de la API de Laravel, con `/api`. **Solo de servidor**: nunca usar `NEXT_PUBLIC_`. |
-
-El browser nunca llama a Laravel directamente. Todas las llamadas pasan por el servidor de Next.js, que guarda el token de Sanctum en una cookie `httpOnly`. El razonamiento está en el [ADR 0001](docs/adr/0001-frontend-api-integration.md), y el detalle del login y del contrato de la API, en [docs/integracion-api-laravel.md](docs/integracion-api-laravel.md).
-
-Los valores locales van en `.env.local`. Ese archivo está en el `.gitignore`, así que nunca se commitea. Cada variable nueva se documenta en este README, y se commitea un `.env.example` con valores de ejemplo.
-
-Tené en cuenta que cualquier variable con el prefijo `NEXT_PUBLIC_` se envía al browser. **Nunca** pongas secretos (API keys, tokens) en una variable `NEXT_PUBLIC_`.
-
-### Trabajar contra la API de Laravel
-
-Necesitás la API de Laravel corriendo en local (o una URL de desarrollo compartida). Las instrucciones de instalación están en el repositorio de la API.
-
-Todas las llamadas pasan por `lib/api/client.ts` (`apiFetch`), que solo corre en el servidor: lee el token de la cookie, manda `Authorization: Bearer` y resuelve los errores de sesión (401 → login, 403 de club → `/clubes`). Nunca lo importes desde un client component.
-
-**Tipos del contrato.** `lib/api/schema.d.ts` se genera desde `docs/api/openapi.json` del repo de la API y se commitea. Cuando la API cambie su contrato, regeneralo:
-
-```bash
-pnpm api:types                                         # espera el repo de la API en ../api-sportiva
-API_OPENAPI=/ruta/a/openapi.json pnpm api:types        # si lo tenés en otro lado
-```
-
-Usá esos tipos (`Schemas['LoginResource']`, etc.) en vez de tipar las respuestas a mano.
-
-Los cambios de frontend y backend que dependen entre sí necesitan **un PR en cada repositorio**. Vinculá los dos PRs y mergeá primero el de la API.
+Los valores locales van en `.env.local`, que no se commitea. Cada variable nueva se documenta acá y se suma a `.env.example`. Una variable `NEXT_PUBLIC_` viaja al browser: **nunca** secretos ahí.
 
 ### Problemas comunes
 
-- **El puerto 3000 ya está en uso:** corré `pnpm dev -- -p 3001`.
-- **Errores después de hacer pull:** probablemente alguien cambió dependencias. Corré `pnpm install` de nuevo.
-- **Problemas raros de caché del build:** borrá la carpeta `.next/` y reiniciá `pnpm dev`.
+| Síntoma | Qué hacer |
+| --- | --- |
+| El login dice que no se puede conectar | La API no está arriba: `docker compose ps` en el repo de la API |
+| El club queda en "Aprovisionando" | La cola no corre: `docker compose ps queue`; si está, mirá `docker compose logs queue` |
+| No llega un mail | Está en Mailpit (<http://localhost:8025>). Si tampoco, reiniciá la cola: `php artisan queue:restart` |
+| Errores de tipos después de un pull de la API | `pnpm api:types` |
+| Errores raros después de un pull | `pnpm install`; si sigue, borrá `.next/` y reiniciá `pnpm dev` |
+| Puerto 3000 ocupado | `pnpm dev --port 3001` (y actualizá `FRONTEND_URL` en la API) |
 
 ---
 
 ## 2. Estructura del proyecto
 
 ```
-app/                 Rutas (Next.js App Router)
-  page.tsx           Login
-  clubes/            Selector de club
-  c/[club]/          Panel de un club (ruta dinámica)
+app/
+  (marketing)/          Sitio público: inicio, funciones, quiénes somos, contacto
+  (app)/                La aplicación (sesión, sin estilos de marketing)
+    login/ recuperar-contrasena/ restablecer-contrasena/ sesion-expirada/
+    clubes/             Elegir club
+    perfil/             Mi perfil (cualquier usuario)
+    admin/              Panel de plataforma: clubes, usuarios, tickets
+    c/[club]/           Un club: inicio y un directorio por módulo
+                        (partidos, jugadores, habilitacion, analisis, competencia,
+                         profes, indumentaria, materiales, canchas, comunicados,
+                         equipo, configuracion), cada uno con page.tsx y actions.ts
+    convocatoria/       Página pública de la convocatoria (familias, sin login)
 components/
-  ui/                Componentes base de shadcn/ui
-  auth/ brand/ club/ modules/   Componentes de cada funcionalidad
-docs/                Documentación (ADRs, integración con la API, CI)
-hooks/               Hooks de React propios
-lib/                 Auth, datos mock, tenants, helpers
-public/              Archivos estáticos
+  ui/                   Base de shadcn/ui (no se editan a mano salvo ajustes del tema)
+  club/                 Pantallas del club, una carpeta por módulo, más shared.tsx y forms.tsx
+  admin/  marketing/  auth/  brand/  callup/  contact/  profile/
+lib/
+  api/                  client.ts (apiFetch) + un archivo por módulo; schema.d.ts generado
+  session.ts auth.ts    Leer y escribir la sesión
+  action-result.ts      Resultado de las server actions (runApiAction)
+  modules.ts            Módulos del club, sus íconos y qué permiso los habilita
+proxy.ts                Gate optimista: sin cookie, al login
+docs/                   Guía de uso, arquitectura, integración con la API, decisiones, CI, ADRs
 ```
 
-`AGENTS.md` y `CLAUDE.md` los crea automáticamente `next dev`. Son instrucciones para asistentes de código con IA y se commitean como cualquier otro archivo.
+`AGENTS.md` y `CLAUDE.md` los genera `next dev`: son instrucciones para asistentes de código y se commitean.
 
 ---
 
@@ -211,7 +226,9 @@ Antes de pedir una revisión, verificá que:
 
 - [ ] El branch está al día con `main`.
 - [ ] El check `verify` de la CI está en verde (o corriste `pnpm lint`, `pnpm typecheck` y `pnpm build` en local).
-- [ ] Probaste el cambio a mano en el browser (`pnpm dev`).
+- [ ] Probaste el cambio a mano en el browser (`pnpm dev`), en escritorio y en celular.
+- [ ] Nada de datos de ejemplo: todo sale de la API, y lo que todavía no existe muestra un estado vacío.
+- [ ] Si cambió el contrato de la API, corriste `pnpm api:types` y commiteaste `lib/api/schema.d.ts`.
 - [ ] El PR es chico y hace una sola cosa. Los cambios grandes se dividen en varios PRs.
 - [ ] La descripción explica **qué** cambió, **por qué** y **cómo probarlo**. Para cambios de UI, agregá capturas.
 - [ ] No hay secretos, archivos `.env` ni cambios ajenos al PR.
@@ -227,7 +244,7 @@ El problema que resuelve o la funcionalidad que agrega.
 
 ## Cómo probarlo
 1. Correr `pnpm dev`
-2. Ingresar como admin/admin
+2. Entrar con un usuario del seed (ver la sección 1)
 3. Ir a ... y verificar que ...
 
 ## Capturas
