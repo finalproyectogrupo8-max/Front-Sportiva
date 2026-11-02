@@ -21,6 +21,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/categories/{category}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tablero de una categoría: totales, asistencia semana a semana, distribución por estado y los
+         *     partidos jugados uno por uno, para los gráficos del módulo Análisis
+         */
+        get: operations["analytics.category"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/categories/{category}/players": {
         parameters: {
             query?: never;
@@ -3642,6 +3662,77 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "analytics.category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            category_id: number;
+                            category_name: string;
+                            players: number;
+                            attendance: {
+                                recorded: number;
+                                present: number;
+                                rate: number | null;
+                            };
+                            sessions: number;
+                            /** @description Registros de asistencia por estado: present, late, excused, absent. */
+                            by_status: string[];
+                            /** @description Una fila por semana (lunes) del período. */
+                            weekly: {
+                                week_start: string;
+                                recorded: number;
+                                present: number;
+                                rate: number | null;
+                            }[];
+                            results: {
+                                played: number;
+                                won: number;
+                                drawn: number;
+                                lost: number;
+                                goals_for: number;
+                                goals_against: number;
+                                /** @description Los últimos 5, del más viejo al más nuevo: `W`, `D` o `L`. */
+                                form: ("W" | "D" | "L")[];
+                            };
+                            /** @description Partidos jugados del período, del más viejo al más nuevo. */
+                            matches: {
+                                id: number;
+                                date: string;
+                                opponent: string;
+                                is_home: boolean;
+                                our_score: number;
+                                opponent_score: number;
+                                /** @enum {string} */
+                                result: "W" | "D" | "L";
+                            }[];
+                            evaluations: number;
+                        };
+                        meta: {
+                            from: string;
+                            to: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "analytics.players": {

@@ -26,6 +26,18 @@ export type PlayerStats = {
   evaluations: number
   last_evaluated_at: string | null
 }
+export type CategoryDetail = {
+  category_id: number
+  category_name: string
+  players: number
+  attendance: Rate
+  sessions: number
+  by_status: { present: number; late: number; excused: number; absent: number }
+  weekly: (Rate & { week_start: string })[]
+  results: CategoryStats['results']
+  matches: { id: number; date: string; opponent: string; is_home: boolean; our_score: number; opponent_score: number; result: 'W' | 'D' | 'L' }[]
+  evaluations: number
+}
 type Period = { from: string; to: string }
 type WithPeriod<T> = { data: T[]; meta: Period }
 type Page<T> = { data: T[]; meta: { total: number; current_page: number; last_page: number } }
@@ -42,6 +54,9 @@ export type EvaluationInput = {
 
 export function categoryStats(period: Period): Promise<ApiResult<WithPeriod<CategoryStats>>> {
   return apiFetch('/analytics/categories', { query: period })
+}
+export function categoryDetail(categoryId: number, period: Period): Promise<ApiResult<{ data: CategoryDetail; meta: Period }>> {
+  return apiFetch(`/analytics/categories/${categoryId}`, { query: period })
 }
 export function playerStats(categoryId: number, period: Period): Promise<ApiResult<WithPeriod<PlayerStats>>> {
   return apiFetch(`/analytics/categories/${categoryId}/players`, { query: period })
