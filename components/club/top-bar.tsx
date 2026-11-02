@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings } from 'lucide-react'
+import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings, UserRound } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -238,6 +238,10 @@ export function TopBar({
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href={`/perfil?volver=${encodeURIComponent(`/c/${tenant.slug}`)}`} />}>
+                <UserRound className="size-4" aria-hidden="true" />
+                Mi perfil
+              </DropdownMenuItem>
               <DropdownMenuItem variant="destructive" onClick={() => logout()}>
                 <LogOut className="size-4" aria-hidden="true" />
                 Cerrar sesión
