@@ -316,7 +316,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["me.update"];
         trace?: never;
     };
     "/calendar": {
@@ -576,16 +576,36 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Personas activas del club, solo id y nombre: para elegir a quién asignar una reparación
-         *     y mostrar quién reportó o pidió algo. No expone mails ni roles
+         * Sin parámetros: personas activas, solo id y nombre (para asignar reparaciones o comunicados).
+         *     Con `?team=1` y `club_users.view`: el equipo completo con email, roles, deportes y estado
          */
         get: operations["clubUser.index"];
+        put?: never;
+        /**
+         * Suma a alguien al equipo. Si no tiene usuario en Sportiva, se crea y le llega un mail para elegir
+         *     su contraseña. Si ya estaba y se le había quitado el acceso, se reactiva con los roles nuevos
+         */
+        post: operations["clubUser.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/club-users/{clubUser}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["clubUser.update"];
         trace?: never;
     };
     "/coaches": {
@@ -1063,6 +1083,57 @@ export interface paths {
         put: operations["materials.update"];
         post?: never;
         delete: operations["materials.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Cambia la contraseña con la actual. Cierra las demás sesiones: la actual sigue abierta */
+        put: operations["me.password"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cierra la sesión en todos los demás dispositivos */
+        post: operations["me.logoutAll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/clubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Clubes activos del usuario con sus roles en cada uno */
+        get: operations["me.clubs"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2834,6 +2905,19 @@ export interface components {
             branch?: "female" | "male" | "mixed" | null;
             is_active?: boolean;
         };
+        /**
+         * StoreClubUserRequest
+         * @description Sumar a alguien al equipo del club por email, con uno o más roles (TIZ-34).
+         */
+        StoreClubUserRequest: {
+            /** Format: email */
+            email: string;
+            /** @description Obligatorio si la persona todavía no tiene usuario en Sportiva. */
+            name?: string | null;
+            roles: string[];
+            /** @description Deportes del coordinador de deporte. */
+            sport_ids?: number[];
+        };
         /** StoreCoachRequest */
         StoreCoachRequest: {
             club_user_id?: number | null;
@@ -3370,6 +3454,19 @@ export interface components {
             slug?: string;
             status?: string;
             database_name?: string;
+        };
+        /**
+         * UpdateClubUserRequest
+         * @description Cambiar los roles, los deportes o el estado de alguien del equipo (TIZ-34).
+         */
+        UpdateClubUserRequest: {
+            roles?: string[];
+            sport_ids?: number[];
+            /**
+             * @description `disabled` le quita el acceso al club; `active` se lo devuelve.
+             * @enum {string}
+             */
+            status?: "active" | "disabled";
         };
         /** UpdateCoachRequest */
         UpdateCoachRequest: {
@@ -4663,6 +4760,39 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
         };
     };
+    "me.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: number;
+                            name: string;
+                            email: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "club.calendar": {
         parameters: {
             query: {
@@ -5386,6 +5516,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
+                            [key: string]: unknown;
+                        }[];
+                    } | {
+                        data: {
                             id: number;
                             display_name: string;
                         }[];
@@ -5408,6 +5542,71 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    "clubUser.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreClubUserRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            [key: string]: unknown;
+                        };
+                        meta: {
+                            invited: boolean;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "clubUser.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The club user ID */
+                clubUser: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateClubUserRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
         };
     };
     "coaches.index": {
@@ -7207,6 +7406,90 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    "me.password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    current_password: string;
+                    password: string;
+                    password_confirmation: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            closed_sessions: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "me.logoutAll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            closed_sessions: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "me.clubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: ({
+                            /** @description Nombres de los roles en el club. */
+                            roles: string[];
+                        } & {
+                            [key: string]: unknown;
+                        })[];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
         };
     };
     "newsletter.store": {
