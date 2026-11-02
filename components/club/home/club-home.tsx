@@ -21,6 +21,7 @@ import { listNotifications, listOrders, lowStock, type InventoryBalance, type No
 import { calendar, getCallup, type CalendarEvent, type CallupSheet } from '@/lib/api/matches'
 import { addDays, dayKey, formatTime, today } from '@/lib/club-time'
 import { visibleModules } from '@/lib/modules'
+import { notificationHref } from '@/lib/notification-links'
 import { cn } from '@/lib/utils'
 
 const LONG_DAY = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Argentina/Buenos_Aires' })
@@ -209,7 +210,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
             <Card title="En riesgo de abandono" icon={UserX}>
               <ul className="flex flex-col divide-y">
                 {atRisk.slice(0, 6).map((n) => (
-                  <AlertRow key={n.id} alert={n} href={alertHref(base, n)} />
+                  <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
                 ))}
               </ul>
             </Card>
@@ -221,7 +222,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
             ) : (
               <ul className="flex flex-col divide-y">
                 {otherAlerts.slice(0, 6).map((n) => (
-                  <AlertRow key={n.id} alert={n} href={alertHref(base, n)} />
+                  <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
                 ))}
               </ul>
             )}
@@ -401,6 +402,10 @@ const ALERT_ICON: Record<string, React.ComponentType<{ className?: string }>> = 
   attendance_drop: UserX,
   requirement_expiring: FileWarning,
   registration_closing: ShieldCheck,
+  order_approved: Shirt,
+  order_rejected: Shirt,
+  order_delivered: Package,
+  order_partially_delivered: Package,
 }
 
 function AlertRow({ alert, href }: { alert: Notification; href: string | null }) {
@@ -469,23 +474,6 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 function eventHref(base: string, event: CalendarEvent): string {
   return event.type === 'match' ? `${base}/partidos/${event.id}` : `${base}/partidos?entrenamiento=${event.id}`
-}
-
-/** A dónde lleva cada alerta automática de la API. */
-function alertHref(base: string, alert: Notification): string | null {
-  const data = (alert.data ?? {}) as Record<string, unknown>
-  const id = (key: string) => (typeof data[key] === 'number' ? (data[key] as number) : null)
-  switch (alert.type) {
-    case 'callup_pending':
-      return id('match_id') ? `${base}/partidos/${id('match_id')}` : null
-    case 'attendance_drop':
-    case 'requirement_expiring':
-      return id('player_id') ? `${base}/jugadores?id=${id('player_id')}` : null
-    case 'registration_closing':
-      return id('category_id') ? `${base}/habilitacion?categoria=${id('category_id')}` : `${base}/habilitacion`
-    default:
-      return null
-  }
 }
 
 function joinList(items: string[]): string {

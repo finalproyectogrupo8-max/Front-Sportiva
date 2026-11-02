@@ -11,8 +11,11 @@ export type InventoryBalance = Schemas['InventoryBalanceResource']
 type Page<T> = { data: T[]; meta: { total: number; current_page: number; last_page: number } }
 
 /** Notificaciones del usuario (alertas automáticas de la API, TIZ-27). */
-export function listNotifications(query: { unread?: boolean; per_page?: number } = {}): Promise<ApiResult<Page<Notification>>> {
-  return apiFetch('/notifications', { query: { unread: query.unread ? 1 : undefined, per_page: query.per_page ?? 20 } })
+export function listNotifications(
+  query: { unread?: boolean; per_page?: number } = {},
+  sessionErrors: 'redirect' | 'return' = 'redirect',
+): Promise<ApiResult<Page<Notification>>> {
+  return apiFetch('/notifications', { query: { unread: query.unread ? 1 : undefined, per_page: query.per_page ?? 20 }, sessionErrors })
 }
 
 export function markNotificationRead(id: number): Promise<ApiResult<{ data: Notification }>> {
