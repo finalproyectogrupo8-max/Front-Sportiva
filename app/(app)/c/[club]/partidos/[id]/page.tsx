@@ -65,6 +65,7 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
           subtitle={match.category_name ?? 'Partido'}
           rows={attendance.data.data}
           canRecord={can('attendance.record')}
+          callup={callup?.ok && callup.data.data.published_at ? callup.data.data.callups : undefined}
           pageHref={`/c/${club}/partidos/${match.id}/asistencia`}
         />
       )}

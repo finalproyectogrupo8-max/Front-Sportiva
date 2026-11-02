@@ -3335,6 +3335,8 @@ export interface operations {
                             player_id: number;
                             player_name: string;
                             shirt_number: number | null;
+                            /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
+                            photo_document_id: number;
                             /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
                             status: string;
                             notes: string | null;
@@ -3372,6 +3374,8 @@ export interface operations {
                             player_id: number;
                             player_name: string;
                             shirt_number: number | null;
+                            /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
+                            photo_document_id: number;
                             /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
                             status: string;
                             notes: string | null;
@@ -3406,6 +3410,8 @@ export interface operations {
                             player_id: number;
                             player_name: string;
                             shirt_number: number | null;
+                            /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
+                            photo_document_id: number;
                             /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
                             status: string;
                             notes: string | null;
@@ -3443,6 +3449,8 @@ export interface operations {
                             player_id: number;
                             player_name: string;
                             shirt_number: number | null;
+                            /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
+                            photo_document_id: number;
                             /** @description `present`, `absent`, `excused`, `late` o null si todavía no se tomó. */
                             status: string;
                             notes: string | null;
