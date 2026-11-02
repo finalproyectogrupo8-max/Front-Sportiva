@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import {
   createAdminTenant,
+  deleteAdminTenant,
   getAdminTenant,
   retryAdminTenant,
   updateAdminTenant,
@@ -218,4 +219,49 @@ export async function getTenantStatusesAction(
   )
 
   return statuses
+}
+
+export type EditTenantResult = { ok: true; message: string } | { ok: false; error?: string; fieldErrors?: Record<string, string> }
+
+/** Edita el nombre y el perfil del club (sigla, ciudad, fundación y color). */
+export async function updateTenantAction(
+  tenantId: number,
+  input: { name: string; short_name: string | null; city: string | null; founded_year: number | null; primary_color: string | null },
+): Promise<EditTenantResult> {
+  await requirePlatformAdmin()
+  let result
+  try {
+    result = await updateAdminTenant(tenantId, input)
+  } catch {
+    return { ok: false, error: 'No se pudo conectar con el servidor.' }
+  }
+  if (!result.ok) {
+    if (result.kind === 'validation') {
+      const fieldErrors: Record<string, string> = {}
+      for (const f of ['name', 'short_name', 'city', 'founded_year', 'primary_color']) {
+        const message = fieldError(result.errors, f)
+        if (message) fieldErrors[f] = message
+      }
+      return { ok: false, fieldErrors }
+    }
+    return { ok: false, error: result.message || 'No se pudo guardar el club.' }
+  }
+  revalidatePath('/admin/clubes')
+  revalidatePath(`/admin/clubes/${tenantId}`)
+  revalidatePath('/clubes')
+  return { ok: true, message: 'Club actualizado.' }
+}
+
+/** Baja lógica del club. La API no borra su base: queda para purgarla a mano si hace falta. */
+export async function deleteTenantAction(tenantId: number): Promise<EditTenantResult> {
+  await requirePlatformAdmin()
+  try {
+    const result = await deleteAdminTenant(tenantId)
+    if (!result.ok) return { ok: false, error: result.message || 'No se pudo dar de baja el club.' }
+  } catch {
+    return { ok: false, error: 'No se pudo conectar con el servidor.' }
+  }
+  revalidatePath('/admin/clubes')
+  revalidatePath('/clubes')
+  return { ok: true, message: 'Club dado de baja.' }
 }
