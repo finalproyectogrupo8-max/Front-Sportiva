@@ -133,13 +133,14 @@ export function TopBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <span className="hidden text-border sm:inline" aria-hidden="true">
+        <span className="hidden text-border md:inline" aria-hidden="true">
           /
         </span>
 
+        {/* En el celular, la barra inferior reemplaza a este menú (FRO-38). */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" className="h-9 gap-1.5 px-1.5 sm:gap-2 sm:px-2" />}
+            render={<Button variant="ghost" className="hidden h-9 gap-2 px-2 md:inline-flex" />}
             aria-label={`Cambiar de módulo (ahora: ${current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
           >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
