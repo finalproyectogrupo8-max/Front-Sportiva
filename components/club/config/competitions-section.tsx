@@ -80,6 +80,15 @@ export function CompetitionsSection({
   const [filtering, startFilter] = useTransition()
   const [editing, setEditing] = useState<Competition | 'new' | null>(null)
   const [copying, setCopying] = useState<Competition | null>(null)
+  // Después de duplicar se abre la copia para elegir sus categorías, cuando llega en la lista nueva.
+  const [openAfterCopy, setOpenAfterCopy] = useState<number | null>(null)
+  if (openAfterCopy !== null) {
+    const copy = competitions.find((c) => c.id === openAfterCopy)
+    if (copy) {
+      setOpenAfterCopy(null)
+      setEditing(copy)
+    }
+  }
   const [removing, setRemoving] = useState<Competition | null>(null)
 
   const sportName = new Map(sports.map((s) => [s.id, s.name]))
@@ -223,7 +232,7 @@ export function CompetitionsSection({
                     {can.create && (
                       <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setCopying(competition)}>
                         <Copy className="size-3.5" aria-hidden="true" />
-                        Copiar a otra temporada
+                        Duplicar
                       </Button>
                     )}
                     {can.delete && (
@@ -267,10 +276,19 @@ export function CompetitionsSection({
       <ConfigSheet
         open={copying !== null}
         onOpenChange={(open) => !open && setCopying(null)}
-        title="Copiar a otra temporada"
-        description="Se copian los datos y los requisitos. Las categorías no: son de la otra temporada y las elegís después."
+        title="Duplicar competencia"
+        description="Se copian los datos y los requisitos. Después elegís sus categorías: por ejemplo, la misma liga para la rama masculina."
       >
-        {copying && <CopyForm competition={copying} seasons={seasons} onDone={() => setCopying(null)} />}
+        {copying && (
+          <CopyForm
+            competition={copying}
+            seasons={seasons}
+            onDone={(id) => {
+              setCopying(null)
+              if (id) setOpenAfterCopy(id)
+            }}
+          />
+        )}
       </ConfigSheet>
 
       <ConfirmDialog
@@ -663,18 +681,10 @@ function Toggle({
   )
 }
 
-function CopyForm({ competition, seasons, onDone }: { competition: Competition; seasons: Season[]; onDone: () => void }) {
+function CopyForm({ competition, seasons, onDone }: { competition: Competition; seasons: Season[]; onDone: (id?: number) => void }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
-  const others = seasons.filter((s) => s.id !== competition.season_id)
-  const [seasonId, setSeasonId] = useState(String(others[0]?.id ?? ''))
-
-  if (others.length === 0) {
-    return (
-      <p className="mx-4 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-        No hay otra temporada cargada. Creala primero en la pestaña Temporadas.
-      </p>
-    )
-  }
+  const [seasonId, setSeasonId] = useState(String(competition.season_id))
+  const sameSeason = Number(seasonId) === competition.season_id
 
   return (
     <form
@@ -683,17 +693,17 @@ function CopyForm({ competition, seasons, onDone }: { competition: Competition; 
         e.preventDefault()
         const data = new FormData(e.currentTarget)
         data.set('season_id', seasonId)
-        execute(() => copyCompetitionAction(competition.id, data), onDone)
+        execute(() => copyCompetitionAction(competition.id, data), (result) => onDone(result.id))
       }}
     >
       <fieldset disabled={pending} className="flex flex-col gap-4 px-4 pb-4">
         <div className="flex flex-col gap-1.5">
           <FormSelect
             id="copy-season"
-            label="Temporada nueva"
+            label="Temporada"
             value={seasonId}
             onChange={setSeasonId}
-            options={others.map((s) => ({ value: String(s.id), label: s.name }))}
+            options={seasons.map((s) => ({ value: String(s.id), label: s.id === competition.season_id ? `${s.name} (la misma)` : s.name }))}
           />
           {fieldErrors.season_id && <p className="text-xs text-destructive">{fieldErrors.season_id}</p>}
         </div>
@@ -701,7 +711,8 @@ function CopyForm({ competition, seasons, onDone }: { competition: Competition; 
           id="copy-name"
           name="name"
           label="Nombre"
-          defaultValue={competition.name}
+          key={sameSeason ? 'misma' : 'otra'}
+          defaultValue={sameSeason ? `${competition.name} (copia)` : competition.name}
           maxLength={150}
           required
           error={fieldErrors.name}
@@ -720,7 +731,7 @@ function CopyForm({ competition, seasons, onDone }: { competition: Competition; 
         <FormError message={error} />
       </fieldset>
       <SheetFooter className="mt-auto border-t">
-        <SubmitButton pending={pending}>Copiar competencia</SubmitButton>
+        <SubmitButton pending={pending}>Duplicar y elegir categorías</SubmitButton>
       </SheetFooter>
     </form>
   )

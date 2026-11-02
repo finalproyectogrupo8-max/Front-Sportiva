@@ -1,5 +1,6 @@
 'use server'
 
+import { isGender } from '@/lib/branches'
 import { failure, optionalInt, revalidateClub, runApiAction, runCall, text, type ActionResult } from '@/lib/action-result'
 import {
   addToCategory,
@@ -27,6 +28,7 @@ const PLAYER_FIELDS = [
   'registration_number',
   'preferred_position',
   'dominant_side',
+  'gender',
   'status',
   'notes',
 ]
@@ -46,6 +48,7 @@ function playerInput(formData: FormData): { input: PlayerInput; errors: Record<s
     registration_number: text(formData, 'registration_number') || null,
     preferred_position: text(formData, 'preferred_position') || null,
     dominant_side: SIDES.includes(side) ? side : null,
+    gender: isGender(text(formData, 'gender')) ? (text(formData, 'gender') as PlayerInput['gender']) : null,
     notes: text(formData, 'notes') || null,
     ...(STATUSES.includes(status) ? { status } : {}),
   }

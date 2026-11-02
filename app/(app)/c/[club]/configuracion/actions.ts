@@ -1,7 +1,8 @@
 'use server'
 
+import { isBranch } from '@/lib/branches'
 import type { ApiResult } from '@/lib/api/client'
-import { optionalInt, runApiAction, text, type ActionResult } from '@/lib/action-result'
+import { failure, optionalInt, revalidateClub, runApiAction, runCall, text, type ActionResult } from '@/lib/action-result'
 import {
   copyCompetition,
   createCategory,
@@ -141,7 +142,7 @@ export async function deleteSeasonAction(id: number): Promise<ConfigResult> {
 
 /* Categorías */
 
-const CATEGORY_FIELDS = ['sport_id', 'season_id', 'name', 'min_age', 'max_age']
+const CATEGORY_FIELDS = ['sport_id', 'season_id', 'name', 'min_age', 'max_age', 'branch']
 
 export async function saveCategoryAction(id: number | null, formData: FormData): Promise<ConfigResult> {
   const input: CategoryInput = {
@@ -150,6 +151,7 @@ export async function saveCategoryAction(id: number | null, formData: FormData):
     name: text(formData, 'name'),
     min_age: optionalInt(formData, 'min_age'),
     max_age: optionalInt(formData, 'max_age'),
+    branch: isBranch(text(formData, 'branch')) ? (text(formData, 'branch') as CategoryInput['branch']) : null,
   }
 
   const fieldErrors: Record<string, string> = {}
@@ -215,11 +217,11 @@ export async function copyCompetitionAction(id: number, formData: FormData): Pro
   if (!name) fieldErrors.name = 'El nombre es obligatorio.'
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors }
 
-  return run(
-    () => copyCompetition(id, { season_id: seasonId, name, registration_deadline: text(formData, 'registration_deadline') || null }),
-    `Competencia copiada como "${name}". Falta elegir sus categorías.`,
-    ['season_id', 'name', 'registration_deadline'],
-  )
+  // Devuelve el id de la copia: la pantalla la abre para elegir sus categorías.
+  const result = await runCall(() => copyCompetition(id, { season_id: seasonId, name, registration_deadline: text(formData, 'registration_deadline') || null }))
+  if (!result.ok) return 'kind' in result ? failure(result, ['season_id', 'name', 'registration_deadline']) : { ok: false, error: result.error }
+  await revalidateClub()
+  return { ok: true, message: `Competencia duplicada como "${name}". Elegí sus categorías.`, id: result.data.data.id }
 }
 
 /* Sedes (FRO-39) */

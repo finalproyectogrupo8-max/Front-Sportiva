@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Layers, Pencil, Plus, Power } from 'lucide-react'
 import { saveCategoryAction, setCategoryActiveAction } from '@/app/(app)/c/[club]/configuracion/actions'
 import { FormSelect, Pill } from '@/components/club/shared'
+import { BRANCHES, isBranch } from '@/lib/branches'
 import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
 import type { Category, Season, Sport } from '@/lib/api/club'
@@ -12,6 +13,7 @@ import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, 
 import { EmptyConfig } from '@/components/club/empty-state'
 
 const ALL = 'todos'
+const NO_BRANCH = 'sin-rama'
 
 function ageRange(category: Category): string {
   const { min_age: min, max_age: max } = category
@@ -31,7 +33,7 @@ export function CategoriesSection({
   categories: Category[]
   sports: Sport[]
   seasons: Season[]
-  filters: { sport: string; season: string }
+  filters: { sport: string; season: string; branch: string }
   can: { create: boolean; update: boolean; delete: boolean }
 }) {
   const router = useRouter()
@@ -46,7 +48,7 @@ export function CategoriesSection({
   const seasonName = new Map(seasons.map((s) => [s.id, s.name]))
   const ready = sports.some((s) => s.is_active) && seasons.length > 0
 
-  const setFilter = (key: 'deporte' | 'temporada', value: string) => {
+  const setFilter = (key: 'deporte' | 'temporada' | 'rama', value: string) => {
     const sp = new URLSearchParams(searchParams.toString())
     if (value === ALL) sp.delete(key)
     else sp.set(key, value)
@@ -70,12 +72,12 @@ export function CategoriesSection({
     )
   }
 
-  const filtered = filters.sport !== ALL || filters.season !== ALL
+  const filtered = filters.sport !== ALL || filters.season !== ALL || filters.branch !== ALL
 
   return (
     <section className="flex flex-col gap-4" aria-label="Categorías">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className={`grid w-full gap-3 sm:w-auto sm:grid-cols-2 ${filtering ? 'opacity-60' : ''}`}>
+        <div className={`grid w-full gap-3 sm:w-auto sm:grid-cols-3 ${filtering ? 'opacity-60' : ''}`}>
           <div className="sm:w-52">
             <FormSelect
               id="filter-sport"
@@ -94,6 +96,15 @@ export function CategoriesSection({
               options={[{ value: ALL, label: 'Todas' }, ...seasons.map((s) => ({ value: String(s.id), label: s.name }))]}
             />
           </div>
+          <div className="sm:w-40">
+            <FormSelect
+              id="filter-branch"
+              label="Rama"
+              value={filters.branch}
+              onChange={(v) => setFilter('rama', v)}
+              options={[{ value: ALL, label: 'Todas' }, ...Object.entries(BRANCHES).map(([value, label]) => ({ value, label }))]}
+            />
+          </div>
         </div>
         {addButton}
       </div>
@@ -104,7 +115,7 @@ export function CategoriesSection({
           title={filtered ? 'No hay categorías con estos filtros' : 'Todavía no cargaste categorías'}
           description={
             filtered
-              ? 'Probá con otro deporte o temporada.'
+              ? 'Probá con otro deporte, temporada o rama.'
               : 'Creá las categorías de la temporada, por ejemplo Sub-13, Sub-15 o Primera.'
           }
         />
@@ -126,6 +137,11 @@ export function CategoriesSection({
             <tr key={category.id} className="transition-colors hover:bg-muted/40">
               <td className="px-4 py-3">
                 <span className="font-medium">{category.name}</span>
+                {isBranch(category.branch) && (
+                  <Pill tone="neutral" className="ml-2">
+                    {BRANCHES[category.branch]}
+                  </Pill>
+                )}
                 <span className="block text-xs text-muted-foreground sm:hidden">
                   {sportName.get(category.sport_id)} · {seasonName.get(category.season_id)}
                 </span>
@@ -225,6 +241,7 @@ function CategoryForm({
   const [sportId, setSportId] = useState(
     category ? String(category.sport_id) : defaults.sport !== ALL ? defaults.sport : String(activeSports[0]?.id ?? ''),
   )
+  const [branch, setBranch] = useState<string>(category?.branch ?? NO_BRANCH)
   const [seasonId, setSeasonId] = useState(
     category ? String(category.season_id) : defaults.season !== ALL ? defaults.season : String(currentSeason?.id ?? ''),
   )
@@ -237,6 +254,7 @@ function CategoryForm({
         const data = new FormData(e.currentTarget)
         data.set('sport_id', sportId)
         data.set('season_id', seasonId)
+        data.set('branch', branch === NO_BRANCH ? '' : branch)
         execute(() => saveCategoryAction(category?.id ?? null, data), onDone)
       }}
     >
@@ -272,6 +290,17 @@ function CategoryForm({
           autoFocus
           error={fieldErrors.name}
         />
+        <div className="flex flex-col gap-1.5">
+          <FormSelect
+            id="category-branch"
+            label="Rama"
+            value={branch}
+            onChange={setBranch}
+            options={[{ value: NO_BRANCH, label: 'Sin definir' }, ...Object.entries(BRANCHES).map(([value, label]) => ({ value, label }))]}
+          />
+          {fieldErrors.branch && <p className="text-xs text-destructive">{fieldErrors.branch}</p>}
+          <p className="text-xs text-muted-foreground">Con rama femenina o masculina, el sistema avisa si sumás a un jugador de otro género.</p>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <Field
             id="category-min"

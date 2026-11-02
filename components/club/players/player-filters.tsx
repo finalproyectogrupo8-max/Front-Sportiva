@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, Search, X } from 'lucide-react'
 import { FormSelect } from '@/components/club/shared'
+import { GENDERS } from '@/lib/branches'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +18,7 @@ export function PlayerFilters({ categories }: { categories: { id: number; label:
   const q = params.get('q') ?? ''
   const category = params.get('categoria') ?? 'todas'
   const status = params.get('estado') ?? 'active'
+  const gender = params.get('genero') ?? 'todos'
 
   const set = (updates: Record<string, string | null>) => {
     const sp = new URLSearchParams(params.toString())
@@ -73,6 +75,15 @@ export function PlayerFilters({ categories }: { categories: { id: number; label:
             value={category}
             onChange={(v) => set({ categoria: v === 'todas' ? null : v })}
             options={[{ value: 'todas', label: 'Todas' }, ...categories.map((c) => ({ value: String(c.id), label: c.label }))]}
+          />
+        </div>
+        <div className="sm:w-40">
+          <FormSelect
+            id="filter-gender"
+            label="Género"
+            value={gender}
+            onChange={(v) => set({ genero: v === 'todos' ? null : v })}
+            options={[{ value: 'todos', label: 'Todos' }, ...Object.entries(GENDERS).map(([value, label]) => ({ value, label }))]}
           />
         </div>
         <div className="sm:w-44">

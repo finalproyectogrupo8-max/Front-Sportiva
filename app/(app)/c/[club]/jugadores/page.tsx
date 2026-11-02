@@ -10,13 +10,14 @@ import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { listCategories, listSports, type Category } from '@/lib/api/club'
 import { clubEligibility, playerEligibility } from '@/lib/api/eligibility'
 import { getPlayer, listContacts, listPlayerMemberships, listPlayers } from '@/lib/api/players'
+import { isGender, withBranch } from '@/lib/branches'
 import { requireSession } from '@/lib/session'
 
 export const metadata: Metadata = { title: 'Jugadores — Sportiva' }
 
 type Props = {
   params: Promise<{ club: string }>
-  searchParams: Promise<{ q?: string; categoria?: string; estado?: string; page?: string; id?: string }>
+  searchParams: Promise<{ q?: string; categoria?: string; estado?: string; genero?: string; page?: string; id?: string }>
 }
 
 /** Categorías activas con el deporte en el nombre si el club tiene más de uno ("Sub-15 · Fútbol"). */
@@ -29,7 +30,7 @@ async function categoryOptions(): Promise<(Category & { label: string })[]> {
     .filter((c) => c.is_active)
     .map((c) => ({
       ...c,
-      label: manySports && sportName.get(c.sport_id) ? `${c.name} · ${sportName.get(c.sport_id)}` : c.name,
+      label: manySports && sportName.get(c.sport_id) ? `${withBranch(c.name, c.branch)} · ${sportName.get(c.sport_id)}` : withBranch(c.name, c.branch),
     }))
 }
 
@@ -67,7 +68,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
   let players, categories, detail
   try {
     ;[players, categories, detail] = await Promise.all([
-      listPlayers({ search: query.q?.trim() || undefined, category_id: categoryId, status: query.estado === 'todos' ? undefined : query.estado || 'active', page }),
+      listPlayers({ search: query.q?.trim() || undefined, category_id: categoryId, gender: isGender(query.genero) ? query.genero : undefined, status: query.estado === 'todos' ? undefined : query.estado || 'active', page }),
       categoryOptions(),
       selectedId ? loadDetail(selectedId, can('player_contacts.view'), can('player_requirements.view')) : Promise.resolve(null),
     ])
@@ -106,7 +107,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
             <PlayersTable
               club={club}
               players={players.data.data}
-              filtered={Boolean(query.q || categoryId || (query.estado && query.estado !== 'active'))}
+              filtered={Boolean(query.q || categoryId || isGender(query.genero) || (query.estado && query.estado !== 'active'))}
               canCreate={flags.create}
             />
             <Pagination meta={players.data.meta} label={{ one: 'jugador', many: 'jugadores' }} />
