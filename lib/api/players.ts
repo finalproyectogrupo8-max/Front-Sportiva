@@ -33,6 +33,7 @@ export type PlayerInput = {
   registration_number: string | null
   preferred_position: string | null
   dominant_side: string | null
+  gender: 'female' | 'male' | 'other' | null
   status?: PlayerStatus
   notes: string | null
 }
@@ -58,6 +59,7 @@ export type CoachInput = {
 export function listPlayers(query: {
   search?: string
   category_id?: number
+  gender?: string
   status?: string
   page?: number
   per_page?: number

@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react'
 import { createPlayerAction, updatePlayerAction } from '@/app/(app)/c/[club]/jugadores/actions'
 import { ConfigSheet, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { FormSelect } from '@/components/club/shared'
+import { GENDERS } from '@/lib/branches'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { SheetFooter } from '@/components/ui/sheet'
@@ -61,6 +62,7 @@ export function PlayerForm({
   const { pending, fieldErrors, error, execute } = useConfigAction()
   const [side, setSide] = useState(player?.dominant_side ?? NONE)
   const [status, setStatus] = useState(player?.status ?? 'active')
+  const [gender, setGender] = useState<string>(player?.gender ?? NONE)
   const [category, setCategory] = useState(NONE)
   const today = new Date().toISOString().slice(0, 10)
 
@@ -71,6 +73,7 @@ export function PlayerForm({
         e.preventDefault()
         const data = new FormData(e.currentTarget)
         data.set('dominant_side', side === NONE ? '' : side)
+        data.set('gender', gender === NONE ? '' : gender)
         if (player) {
           data.set('status', status)
           execute(() => updatePlayerAction(player.id, data), () => onDone())
@@ -115,6 +118,13 @@ export function PlayerForm({
               <option key={p} value={p} />
             ))}
           </datalist>
+          <FormSelect
+            id="player-gender"
+            label="Género"
+            value={gender}
+            onChange={setGender}
+            options={[{ value: NONE, label: 'Sin dato' }, ...Object.entries(GENDERS).map(([value, label]) => ({ value, label }))]}
+          />
           <FormSelect
             id="player-side"
             label="Perfil hábil"

@@ -26,6 +26,7 @@ import {
 } from '@/lib/api/club'
 import { CONFIG_TABS, canSeeConfig, type ConfigTab } from '@/lib/club-config'
 import { getSetupSteps } from '@/lib/club-setup'
+import { isBranch } from '@/lib/branches'
 import { requireSession } from '@/lib/session'
 import { cn } from '@/lib/utils'
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = { title: 'Configuración del club — Sportiva
 
 type Props = {
   params: Promise<{ club: string }>
-  searchParams: Promise<{ tab?: string; deporte?: string; temporada?: string }>
+  searchParams: Promise<{ tab?: string; deporte?: string; temporada?: string; rama?: string }>
 }
 
 export default async function ConfigPage({ params, searchParams }: Props) {
@@ -95,7 +96,7 @@ export default async function ConfigPage({ params, searchParams }: Props) {
           canEditProfile={can('club.update')}
           crud={crud}
           // '' = sin filtro elegido (Competencias arranca en la temporada en curso); 'todos' = todas.
-          filters={{ sport: query.deporte ?? '', season: query.temporada ?? '' }}
+          filters={{ sport: query.deporte ?? '', season: query.temporada ?? '', branch: query.rama ?? '' }}
         />
       </PageBody>
     </>
@@ -111,7 +112,7 @@ type TabData =
   | { tab: 'sedes'; venues: Venue[] }
   | { tab: 'deportes'; sports: SportRow[] }
   | { tab: 'temporadas'; seasons: SeasonRow[] }
-  | { tab: 'categorias'; categories: Category[]; sports: Sport[]; seasons: Season[]; sport?: number; season?: number }
+  | { tab: 'categorias'; categories: Category[]; sports: Sport[]; seasons: Season[]; sport?: number; season?: number; branch?: string }
   | {
       tab: 'competencias'
       competitions: Competition[]
@@ -123,7 +124,7 @@ type TabData =
     }
   | { tab: 'error'; result?: Failure }
 
-async function loadTab(tab: ConfigTab, filters: { sport: string; season: string }): Promise<TabData> {
+async function loadTab(tab: ConfigTab, filters: { sport: string; season: string; branch: string }): Promise<TabData> {
   try {
     if (tab === 'perfil') {
       const result = await getClub()
@@ -182,7 +183,7 @@ async function loadTab(tab: ConfigTab, filters: { sport: string; season: string 
     const sport = Number(filters.sport) || undefined
     const season = Number(filters.season) || undefined
     const [categories, sports, seasons] = await Promise.all([
-      listCategories({ sport_id: sport, season_id: season }),
+      listCategories({ sport_id: sport, season_id: season, branch: isBranch(filters.branch) ? filters.branch : undefined }),
       listSports(),
       listSeasons(),
     ])
@@ -194,6 +195,7 @@ async function loadTab(tab: ConfigTab, filters: { sport: string; season: string 
       seasons: seasons.ok ? seasons.data.data : [],
       sport,
       season,
+      branch: isBranch(filters.branch) ? filters.branch : undefined,
     }
   } catch {
     return { tab: 'error' }
@@ -211,7 +213,7 @@ async function TabContent({
   tab: ConfigTab
   canEditProfile: boolean
   crud: (resource: string) => Crud
-  filters: { sport: string; season: string }
+  filters: { sport: string; season: string; branch: string }
 }) {
   const data = await loadTab(tab, filters)
 
@@ -233,7 +235,7 @@ async function TabContent({
           categories={data.categories}
           sports={data.sports}
           seasons={data.seasons}
-          filters={{ sport: data.sport ? String(data.sport) : 'todos', season: data.season ? String(data.season) : 'todos' }}
+          filters={{ sport: data.sport ? String(data.sport) : 'todos', season: data.season ? String(data.season) : 'todos', branch: data.branch ?? 'todos' }}
           can={crud('categories')}
         />
       )

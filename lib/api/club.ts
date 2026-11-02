@@ -31,6 +31,7 @@ export type CategoryInput = {
   name?: string
   min_age?: number | null
   max_age?: number | null
+  branch?: 'female' | 'male' | 'mixed' | null
   is_active?: boolean
 }
 
@@ -93,7 +94,7 @@ export function deleteSeason(id: number): Promise<ApiResult<void>> {
 /* Categorías */
 
 export function listCategories(
-  query: { sport_id?: number; season_id?: number; per_page?: number } = {},
+  query: { sport_id?: number; season_id?: number; branch?: string; per_page?: number } = {},
 ): Promise<ApiResult<Page<Category>>> {
   return apiFetch('/categories', { query: { sort: 'name', per_page: 100, ...query } })
 }
