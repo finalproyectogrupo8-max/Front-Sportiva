@@ -18,6 +18,19 @@ export type SelectTenantState = {
   error?: string
 }
 
+export type ForgotPasswordState = {
+  success?: boolean
+  error?: string
+  fieldErrors?: { email?: string }
+  email?: string
+}
+
+export type ResetPasswordState = {
+  invalidLink?: boolean
+  error?: string
+  fieldErrors?: { password?: string; confirmation?: string }
+}
+
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get('email') ?? '').trim()
   const password = String(formData.get('password') ?? '')
@@ -80,6 +93,99 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   }
 
   redirect('/clubes')
+}
+
+export async function requestPasswordReset(
+  _prev: ForgotPasswordState,
+  formData: FormData,
+): Promise<ForgotPasswordState> {
+  const email = String(formData.get('email') ?? '').trim()
+
+  let result
+  try {
+    result = await apiFetch<{ message?: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
+      auth: 'none',
+    })
+  } catch {
+    return { error: 'No pudimos procesar el pedido. Probá de nuevo en unos minutos.', email }
+  }
+
+  if (!result.ok) {
+    switch (result.kind) {
+      case 'validation':
+        return {
+          fieldErrors: { email: result.errors.email?.[0] ?? 'Ingresá un email válido.' },
+          email,
+        }
+      case 'rate_limited':
+        return { error: 'Demasiados intentos. Esperá un minuto y probá de nuevo.', email }
+      default:
+        return { error: 'No pudimos procesar el pedido. Probá de nuevo en unos minutos.', email }
+    }
+  }
+
+  return {
+    success: true,
+    email,
+  }
+}
+
+export async function resetPassword(
+  _prev: ResetPasswordState,
+  formData: FormData,
+): Promise<ResetPasswordState> {
+  const email = String(formData.get('email') ?? '').trim()
+  const token = String(formData.get('token') ?? '')
+  const password = String(formData.get('password') ?? '')
+  const passwordConfirmation = String(formData.get('password_confirmation') ?? '')
+
+  if (!email || !token) {
+    return { invalidLink: true }
+  }
+
+  let result
+  try {
+    result = await apiFetch<never>('/auth/reset-password', {
+      method: 'POST',
+      body: {
+        email,
+        token,
+        password,
+        password_confirmation: passwordConfirmation,
+      },
+      auth: 'none',
+    })
+  } catch {
+    return { error: 'No pudimos restablecer la contraseña. Probá de nuevo en unos minutos.' }
+  }
+
+  if (!result.ok) {
+    if (result.kind === 'rate_limited') {
+      return { error: 'Demasiados intentos. Esperá un minuto y probá de nuevo.' }
+    }
+
+    if (result.kind === 'validation') {
+      const passwordError = result.errors.password?.[0]
+      const confirmationError = result.errors.password_confirmation?.[0]
+
+      if (passwordError || confirmationError) {
+        return {
+          fieldErrors: {
+            password: passwordError,
+            confirmation: confirmationError,
+          },
+        }
+      }
+
+      return { invalidLink: true }
+    }
+
+    return { error: 'No pudimos restablecer la contraseña. Probá de nuevo en unos minutos.' }
+  }
+
+  redirect('/login?aviso=contrasena-actualizada')
 }
 
 /**
