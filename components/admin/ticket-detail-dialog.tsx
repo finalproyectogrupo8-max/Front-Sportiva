@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TicketStatusBadge } from '@/components/admin/ticket-status-badge'
@@ -162,6 +163,13 @@ export function TicketDetailDialog({ ticket, open, onOpenChange }: TicketDetailD
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Link
+              href={`/admin/clubes?${new URLSearchParams({ nuevo: '1', nombre: ticket.club_name ?? '', contacto: ticket.name, email: ticket.email })}`}
+              className={buttonVariants({ variant: 'ghost', className: 'mr-auto gap-2' })}
+            >
+              <Building2 className="size-4" aria-hidden="true" />
+              Crear club
+            </Link>
             <Button
               type="button"
               variant="outline"

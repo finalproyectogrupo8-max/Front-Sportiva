@@ -505,3 +505,16 @@ export async function deleteAdminTenant(tenantId: number): Promise<ApiResult<nul
     auth: 'platform',
   })
 }
+
+/* ==========================================================================
+   NEWSLETTER (FRO-27)
+   ========================================================================== */
+
+export type NewsletterSubscriber = { id: number; email: string; subscribed_at: string | null }
+
+/** `GET /admin/newsletter-subscribers`: suscriptores de la landing. */
+export async function getNewsletterSubscribers(query: { search?: string; page?: number; per_page?: number } = {}): Promise<
+  ApiResult<{ data: NewsletterSubscriber[]; meta: { total: number; current_page: number; last_page: number; from: number | null; to: number | null } }>
+> {
+  return apiFetch('/admin/newsletter-subscribers', { auth: 'platform', query: { per_page: 50, ...query } })
+}

@@ -21,6 +21,10 @@ export default async function AdminClubesPage({
     page?: string
     per_page?: string
     sort?: string
+    nuevo?: string
+    nombre?: string
+    contacto?: string
+    email?: string
   }>
 }) {
   // Guard de acceso: si no es admin de plataforma, redirige a /clubes.
@@ -76,7 +80,13 @@ export default async function AdminClubesPage({
         </p>
       </div>
         <div className="shrink-0">
-          <NewClubSheet />
+          <NewClubSheet
+            prefill={
+              params.nuevo === '1'
+                ? { name: params.nombre?.slice(0, 255), admin_name: params.contacto?.slice(0, 255), admin_email: params.email?.slice(0, 255) }
+                : undefined
+            }
+          />
         </div>
       </div>
 
