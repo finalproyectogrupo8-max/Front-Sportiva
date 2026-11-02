@@ -1234,6 +1234,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/physical-evaluations/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Prueba en vivo: la misma prueba a varios jugadores de una categoría, el mismo día. Si el jugador
+         *     ya tiene una evaluación ese día en la categoría, la prueba se suma (o se corrige) ahí; si no,
+         *     se crea la evaluación. Todo o nada
+         */
+        post: operations["physicalEvaluation.session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/physical-evaluations": {
         parameters: {
             query?: never;
@@ -2859,6 +2880,26 @@ export interface components {
              * @description PDF o foto del celular (HEIC), hasta 10 MB. La foto de la ficha, solo imagen y hasta 5 MB.
              */
             file: string;
+        };
+        /**
+         * StoreEvaluationSessionRequest
+         * @description Una prueba tomada a toda una categoría el mismo día: un resultado por jugador.
+         */
+        StoreEvaluationSessionRequest: {
+            category_id: number;
+            /** Format: date-time */
+            evaluated_at: string;
+            evaluator_coach_id?: number | null;
+            metric_key: string;
+            metric_name: string;
+            unit?: string | null;
+            /** @description Solo los jugadores que hicieron la prueba. */
+            results: {
+                player_id: number;
+                numeric_value?: number | null;
+                text_value?: string | null;
+                notes?: string | null;
+            }[];
         };
         /** StoreFacilityComponentRequest */
         StoreFacilityComponentRequest: {
@@ -7726,6 +7767,38 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "physicalEvaluation.session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreEvaluationSessionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            saved: number;
+                            evaluation_ids: {
+                                [key: string]: number;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
         };
     };

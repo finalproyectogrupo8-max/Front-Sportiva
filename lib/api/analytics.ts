@@ -74,3 +74,18 @@ export function updateEvaluation(id: number, input: Partial<EvaluationInput>): P
 export function deleteEvaluation(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/physical-evaluations/${id}`, { method: 'DELETE' })
 }
+
+export type EvaluationSessionInput = {
+  category_id: number
+  evaluated_at: string
+  evaluator_coach_id: number | null
+  metric_key: string
+  metric_name: string
+  unit: string | null
+  results: { player_id: number; numeric_value: number | null; text_value?: string | null; notes?: string | null }[]
+}
+
+/** Prueba en vivo: el mismo test a varios jugadores de la categoría, el mismo día. */
+export function saveEvaluationSession(input: EvaluationSessionInput): Promise<ApiResult<{ data: { saved: number; evaluation_ids: number[] } }>> {
+  return apiFetch('/physical-evaluations/session', { method: 'POST', body: input })
+}

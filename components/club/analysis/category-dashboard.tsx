@@ -3,9 +3,10 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, ArrowLeft, ChevronRight } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ChevronRight, Timer } from 'lucide-react'
 import { ConfigSheet } from '@/components/club/forms'
 import { Meter, ModuleHeader, PageBody, Pill, Segmented } from '@/components/club/shared'
+import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { CHART_COLORS, MetricTrend, ResultsChart, StatusBreakdown, WeeklyAttendanceChart } from './charts'
 import { EvaluationList } from './evaluations'
@@ -58,7 +59,17 @@ export function CategoryDashboard({
       <ModuleHeader
         title={detail.category_name}
         description={`${detail.players} jugadores · ${detail.sessions} sesiones registradas en el período`}
-        actions={<Segmented label="Período" value={period} onChange={(v) => setParam('periodo', v)} options={PERIODS.map((p) => ({ ...p }))} />}
+        actions={
+          <>
+            <Segmented label="Período" value={period} onChange={(v) => setParam('periodo', v)} options={PERIODS.map((p) => ({ ...p }))} />
+            {can.create && players.length > 0 && (
+              <Link href={`${pathname}/prueba`} className={buttonVariants({ className: 'h-9 gap-2' })}>
+                <Timer className="size-4" aria-hidden="true" />
+                Tomar una prueba
+              </Link>
+            )}
+          </>
+        }
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link href={backHref} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
