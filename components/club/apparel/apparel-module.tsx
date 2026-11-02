@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Check, ClipboardList, Loader2, PackageCheck, Pencil, Plus, Send, Shirt, Trash2, X } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { Check, ClipboardList, Loader2, Megaphone, PackageCheck, Pencil, Plus, Send, Shirt, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   approveOrderAction,
@@ -19,7 +20,7 @@ import {
 import { EmptyConfig } from '@/components/club/empty-state'
 import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { FormSelect, ModuleHeader, PageBody, Pill, Segmented, Stat, type Tone } from '@/components/club/shared'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -38,6 +39,7 @@ type Can = {
   createItem: boolean
   updateItem: boolean
   deleteItem: boolean
+  announce: boolean
 }
 
 export const ORDER_STATUS: Record<string, { label: string; tone: Tone }> = {
@@ -364,6 +366,7 @@ function OrderDetail({ order, can, onClose }: { order: Order; can: Can; onClose:
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [mode, setMode] = useState<'view' | 'reject' | 'deliver'>('view')
+  const announcementsPath = usePathname().replace(/\/indumentaria.*$/, '/comunicados')
   const [reason, setReason] = useState('')
   const [comment, setComment] = useState('')
   const [delivered, setDelivered] = useState<Record<number, number>>(() => Object.fromEntries((order.apparel_order_items ?? []).map((l) => [l.id, Number(l.delivered_quantity)])))
@@ -499,6 +502,20 @@ function OrderDetail({ order, can, onClose }: { order: Order; can: Can; onClose:
 
       {mode === 'view' && (
         <SheetFooter className="mt-auto flex-row flex-wrap gap-2 border-t">
+          {(order.status === 'delivered' || order.status === 'partially_delivered') && can.announce && order.category_id && (
+            <Link
+              href={`${announcementsPath}?${new URLSearchParams({
+                nuevo: '1',
+                categoria: String(order.category_id),
+                asunto: 'Retiro de indumentaria',
+                cuerpo: `Ya está la indumentaria del pedido ${order.order_number}. Pueden retirarla en el club.`,
+              })}`}
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              <Megaphone className="size-4" aria-hidden="true" />
+              Avisar retiro
+            </Link>
+          )}
           {order.status === 'draft' && can.delete && (
             <Button variant="ghost" className="gap-1.5 text-destructive hover:text-destructive" disabled={pending} onClick={() => setRemoving(true)}>
               <Trash2 className="size-4" aria-hidden="true" />

@@ -13,6 +13,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { CLUB_TZ } from '@/lib/club-time'
 import { cn } from '@/lib/utils'
 
 type Rate = { recorded: number; present: number; rate: number | null }
@@ -71,7 +72,7 @@ const FORM: Record<'W' | 'D' | 'L', { label: string; tone: Tone }> = {
 }
 
 const rateTone = (rate: number | null): Tone => (rate === null ? 'neutral' : rate >= 80 ? 'ok' : rate >= 60 ? 'warn' : 'bad')
-const shortDate = (iso: string) => new Date(iso).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString('es-AR', { timeZone: CLUB_TZ, day: 'numeric', month: 'short' })
 /** Código estable de la prueba a partir del nombre: "Velocidad 30 m" → "velocidad_30_m". */
 const metricKey = (name: string) =>
   name
@@ -359,7 +360,7 @@ function Evaluations({
                   <div className="flex flex-col">
                     <span className="font-medium">{e.player_name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(e.evaluated_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(e.evaluated_at).toLocaleDateString('es-AR', { timeZone: CLUB_TZ, day: 'numeric', month: 'long', year: 'numeric' })}
                       {e.evaluator_name ? ` · ${e.evaluator_name}` : ''}
                     </span>
                   </div>
@@ -428,7 +429,7 @@ function EvaluationSheet({ evaluation, players, coaches, onClose }: { evaluation
   return (
     <ConfigSheet open={evaluation !== null} onOpenChange={(open) => !open && onClose()} title={current ? 'Editar evaluación' : 'Nueva evaluación física'} description="Una fila por prueba. Si el resultado no es un número, se guarda como texto." wide>
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 px-4 pb-4"
         onSubmit={(e) => {
           e.preventDefault()
           const formData = new FormData(e.currentTarget)
