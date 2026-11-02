@@ -21,6 +21,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/categories/{category}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tablero de una categoría: totales, asistencia semana a semana, distribución por estado y los
+         *     partidos jugados uno por uno, para los gráficos del módulo Análisis
+         */
+        get: operations["analytics.category"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/categories/{category}/players": {
         parameters: {
             query?: never;
@@ -1208,6 +1228,27 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["order.deliveries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/physical-evaluations/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Prueba en vivo: la misma prueba a varios jugadores de una categoría, el mismo día. Si el jugador
+         *     ya tiene una evaluación ese día en la categoría, la prueba se suma (o se corrige) ahí; si no,
+         *     se crea la evaluación. Todo o nada
+         */
+        post: operations["physicalEvaluation.session"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2840,6 +2881,26 @@ export interface components {
              */
             file: string;
         };
+        /**
+         * StoreEvaluationSessionRequest
+         * @description Una prueba tomada a toda una categoría el mismo día: un resultado por jugador.
+         */
+        StoreEvaluationSessionRequest: {
+            category_id: number;
+            /** Format: date-time */
+            evaluated_at: string;
+            evaluator_coach_id?: number | null;
+            metric_key: string;
+            metric_name: string;
+            unit?: string | null;
+            /** @description Solo los jugadores que hicieron la prueba. */
+            results: {
+                player_id: number;
+                numeric_value?: number | null;
+                text_value?: string | null;
+                notes?: string | null;
+            }[];
+        };
         /** StoreFacilityComponentRequest */
         StoreFacilityComponentRequest: {
             name: string;
@@ -3642,6 +3703,77 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "analytics.category": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            category_id: number;
+                            category_name: string;
+                            players: number;
+                            attendance: {
+                                recorded: number;
+                                present: number;
+                                rate: number | null;
+                            };
+                            sessions: number;
+                            /** @description Registros de asistencia por estado: present, late, excused, absent. */
+                            by_status: string[];
+                            /** @description Una fila por semana (lunes) del período. */
+                            weekly: {
+                                week_start: string;
+                                recorded: number;
+                                present: number;
+                                rate: number | null;
+                            }[];
+                            results: {
+                                played: number;
+                                won: number;
+                                drawn: number;
+                                lost: number;
+                                goals_for: number;
+                                goals_against: number;
+                                /** @description Los últimos 5, del más viejo al más nuevo: `W`, `D` o `L`. */
+                                form: ("W" | "D" | "L")[];
+                            };
+                            /** @description Partidos jugados del período, del más viejo al más nuevo. */
+                            matches: {
+                                id: number;
+                                date: string;
+                                opponent: string;
+                                is_home: boolean;
+                                our_score: number;
+                                opponent_score: number;
+                                /** @enum {string} */
+                                result: "W" | "D" | "L";
+                            }[];
+                            evaluations: number;
+                        };
+                        meta: {
+                            from: string;
+                            to: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "analytics.players": {
@@ -7635,6 +7767,38 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "physicalEvaluation.session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreEvaluationSessionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            saved: number;
+                            evaluation_ids: {
+                                [key: string]: number;
+                            };
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
         };
     };
