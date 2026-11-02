@@ -4,7 +4,7 @@ Las decisiones que tomamos al construir el recorrido del partido (configuración
 
 Las decisiones de arquitectura grandes están en [adr/](adr/). Las de la API, en su `docs/decisions.md`.
 
-> Actualizado al 31/10/2026.
+> Actualizado al 2/11/2026.
 
 ---
 
@@ -64,14 +64,9 @@ Las decisiones de arquitectura grandes están en [adr/](adr/). Las de la API, en
 
 ## Pendiente
 
-### Próximas tareas del recorrido
+### Hecho desde la última actualización (2/11/2026)
 
-| Ticket | Qué | Notas |
-|---|---|---|
-| **FRO-37** | Asistencia: precargar con las respuestas de la convocatoria (los que dijeron "No puedo" ya marcados), fotos y borrador sin conexión | Lo próximo |
-| **FRO-38** | Inicio según el rol (qué ve el profe, el coordinador, el utilero) | |
-| **FRO-15** | Sacar los datos de ejemplo del inicio, de la paleta Ctrl + K y de Análisis | |
-| **TIZ-40 / FRO-40** | Rama (femenino, masculino, mixto) en categorías y género en jugadores; **duplicar una competencia en la misma temporada** | La parte de duplicar no depende de la API: hoy la API ya acepta la misma temporada |
+FRO-37 (asistencia precargada y sin conexión), FRO-38 (inicio por rol y navegación móvil), FRO-26 (notificaciones), FRO-19 (Materiales, Indumentaria y Canchas), FRO-15 (sin datos de ejemplo), FRO-20 (Análisis y Proyecto, con la prueba en vivo), FRO-23 (Comunicados), FRO-21 (ABM del panel admin), FRO-40 (rama, género y duplicar competencia), FRO-14 + TIZ-34 (Equipo del club) y FRO-28 (Mi perfil).
 
 ### Bloqueado o a definir
 
@@ -79,13 +74,8 @@ Las decisiones de arquitectura grandes están en [adr/](adr/). Las de la API, en
 |---|---|---|
 | **TIZ-35** | Coordinador por deporte (el de fútbol ve solo fútbol) | A definir con el equipo |
 | **TIZ-38** | Roles reales del club, "A definir". Según la charla con un club: presidente y vicepresidente no usan el sistema; coordinadores por deporte y profes sí; utilero y quien hace pedidos depende del club, pero quedan como roles estándar; el admin del club se parece al coordinador | Definir con el equipo |
-| **TIZ-34 / FRO-14** | Usuarios del club y pantalla de equipo | Espera TIZ-23 (Tiziano) |
-| **TIZ-37** | Convocatoria por mail | Espera TIZ-21 (mails) |
-| **TIZ-22 / PR #48** | Recuperación de contraseña | La sigue Sofía |
-
-### Módulos que todavía son de ejemplo
-
-**Indumentaria**, **Materiales** y **Canchas** ya tienen API (Tiziano: inventario y canchas). Falta conectar las pantallas. **Análisis** y **Proyecto** siguen siendo maqueta.
+| **TIZ-23** | Mail propio de invitación al sumar a alguien al equipo | Hoy la persona nueva recibe el de restablecer contraseña, que le sirve para elegir la suya |
+| **TIZ-41 / TIZ-44 / TIZ-47** | Deploy a staging y producción | Cuentas de Laravel Cloud y Vercel |
 
 ### Ideas para más adelante (sin ticket)
 

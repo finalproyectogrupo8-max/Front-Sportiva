@@ -96,7 +96,7 @@ Los datos de un usuario nunca se cachean entre usuarios. Los fetch usan `cache: 
 
 ## Consecuencias
 
-- `lib/auth.ts` (con `admin/admin` hardcodeado), `lib/tenants.ts` y `lib/data.ts` (mocks) se van a reemplazar módulo por módulo.
+- `lib/auth.ts` (con `admin/admin` hardcodeado), `lib/tenants.ts` y `lib/data.ts` (mocks) se van a reemplazar módulo por módulo. *(Hecho: FRO-15 borró los mocks el 2/11/2026.)*
 - La cookie actual usa `sameSite: 'none'` y pasa a `'lax'`: no hay uso cross-site, y `lax` agrega protección contra CSRF.
 - Cada request suma un salto extra (browser → Next → Laravel). Next.js y Laravel conviene desplegarlos cerca (misma región o red).
 - Next.js tiene que correr como servidor (sin static export).
@@ -105,7 +105,7 @@ Los datos de un usuario nunca se cachean entre usuarios. Los fetch usan `cache: 
 
 Estas diferencias requieren una decisión de producto. La UI muestra datos que el modelo no guarda:
 
-- **Tabla de posiciones** (`Standing` en `lib/data.ts`): no hay tablas de torneos ni de posiciones.
+- **Tabla de posiciones** (`Standing` en `lib/data.ts`): no hay tablas de torneos ni de posiciones. *(Resuelto en TIZ-20: se carga a mano por competencia.)*
 - **Objetivos de jugador** (`Objective`): el modelo eliminó explícitamente `player_goals` y `goal_progress_updates`.
 - **Notas del entrenador** (`CoachNote`): no hay una tabla equivalente.
 - **Perfil del club** (`city`, `founded`, `color`, `members` en `lib/tenants.ts`): `tenants` solo guarda nombre, slug y datos de conexión.
