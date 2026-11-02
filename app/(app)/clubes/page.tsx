@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { LogOut, Plus, Settings2, ShieldAlert } from 'lucide-react'
+import { LogOut, Plus, Settings2, ShieldAlert, UserRound } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/brand/logo'
 import { ClubSelector } from '@/components/club/club-selector'
@@ -39,6 +39,10 @@ export default async function ClubesPage({
               Administración
             </Link>
           )}
+          <Link href="/perfil?volver=/clubes" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'gap-2 text-muted-foreground')}>
+            <UserRound className="size-4" aria-hidden="true" />
+            Mi perfil
+          </Link>
           <ThemeToggle />
           <form action={logout}>
             <Button type="submit" variant="ghost" size="sm" className="gap-2 text-muted-foreground">
