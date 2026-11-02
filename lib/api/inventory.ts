@@ -57,8 +57,8 @@ export function deleteLocation(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/storage-locations/${id}`, { method: 'DELETE' })
 }
 
-export function listBalances(): Promise<ApiResult<Page<InventoryBalance>>> {
-  return apiFetch('/inventory/balances', { query: { per_page: 100 } })
+export function listBalances(page = 1): Promise<ApiResult<Page<InventoryBalance>>> {
+  return apiFetch('/inventory/balances', { query: { per_page: 100, page } })
 }
 export function listMovements(query: { material_id?: number; location_id?: number; per_page?: number } = {}): Promise<ApiResult<Page<InventoryMovement>>> {
   return apiFetch('/inventory/movements', { query: { sort: '-created_at', per_page: query.per_page ?? 50, material_id: query.material_id, location_id: query.location_id } })

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { AlertTriangle, ArrowLeft, ChevronRight, Timer } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ChevronRight, Download, Timer } from 'lucide-react'
 import { ConfigSheet } from '@/components/club/forms'
 import { Meter, ModuleHeader, PageBody, Pill, Segmented } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
@@ -62,6 +62,10 @@ export function CategoryDashboard({
         actions={
           <>
             <Segmented label="Período" value={period} onChange={(v) => setParam('periodo', v)} options={PERIODS.map((p) => ({ ...p }))} />
+            <a href={`${pathname}/asistencia`} className={buttonVariants({ variant: 'ghost', className: 'h-9 gap-2' })} title="Planilla del mes en curso, para Excel">
+              <Download className="size-4" aria-hidden="true" />
+              Asistencia del mes
+            </a>
             {can.create && players.length > 0 && (
               <Link href={`${pathname}/prueba`} className={buttonVariants({ className: 'h-9 gap-2' })}>
                 <Timer className="size-4" aria-hidden="true" />

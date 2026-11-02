@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowDownToLine, ArrowLeftRight, ArrowUpFromLine, Boxes, Pencil, Plus, Scale, Trash2, Warehouse } from 'lucide-react'
+import { ArrowDownToLine, ArrowLeftRight, Download, ArrowUpFromLine, Boxes, Pencil, Plus, Scale, Trash2, Warehouse } from 'lucide-react'
 import {
   deleteLocationAction,
   deleteMaterialAction,
@@ -13,7 +13,8 @@ import {
 import { EmptyConfig } from '@/components/club/empty-state'
 import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { FormSelect, Meter, ModuleHeader, PageBody, Pill, Segmented, Stat, type Tone } from '@/components/club/shared'
-import { Button } from '@/components/ui/button'
+import { usePathname } from 'next/navigation'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { SheetFooter } from '@/components/ui/sheet'
 import type { InventoryBalance, InventoryMovement, Material, StorageLocation } from '@/lib/api/inventory'
@@ -74,6 +75,8 @@ export function MaterialsModule({
   })
   const lowCount = activeMaterials.filter((m) => qty(m.id) < Number(m.minimum_stock)).length
 
+  const pathname = usePathname()
+
   return (
     <>
       <ModuleHeader
@@ -82,6 +85,12 @@ export function MaterialsModule({
         description="Stock de utilería por depósito: ingresos, egresos, ajustes por conteo y transferencias, con su historial."
         actions={
           <>
+            {balances.length > 0 && (
+              <a href={`${pathname}/exportar`} className={buttonVariants({ variant: 'ghost', className: 'gap-1.5' })}>
+                <Download className="size-4" aria-hidden="true" />
+                Exportar stock
+              </a>
+            )}
             {can.transfer && activeLocations.length > 1 && (
               <Button variant="outline" className="gap-1.5" onClick={() => setTransferring({})}>
                 <ArrowLeftRight className="size-4" aria-hidden="true" />

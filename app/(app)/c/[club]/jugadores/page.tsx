@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Download, Printer } from 'lucide-react'
 import { Pagination } from '@/components/admin/pagination'
 import { NoAccess } from '@/components/club/no-access'
 import { NewPlayerButton } from '@/components/club/players/player-form'
@@ -7,6 +7,7 @@ import { PlayerFilters } from '@/components/club/players/player-filters'
 import { PlayerSheet, type PlayerDetail } from '@/components/club/players/player-sheet'
 import { PlayersTable } from '@/components/club/players/players-table'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
+import { buttonVariants } from '@/components/ui/button'
 import { listCategories, listSports, type Category } from '@/lib/api/club'
 import { clubEligibility, playerEligibility } from '@/lib/api/eligibility'
 import { getPlayer, listContacts, listPlayerMemberships, listPlayers } from '@/lib/api/players'
@@ -92,7 +93,23 @@ export default async function PlayersPage({ params, searchParams }: Props) {
         eyebrow="Deportivo"
         title="Jugadores"
         description="La ficha de cada jugador: datos, contactos de la familia, foto y las categorías en las que juega."
-        actions={flags.create && <NewPlayerButton categories={categories ?? []} />}
+        actions={
+          <>
+            {categoryId && (
+              <>
+                <a href={`/c/${club}/jugadores/exportar?categoria=${categoryId}`} className={buttonVariants({ variant: 'ghost', className: 'gap-1.5' })}>
+                  <Download className="size-4" aria-hidden="true" />
+                  Exportar CSV
+                </a>
+                <a href={`/imprimir/lista-buena-fe?categoria=${categoryId}`} className={buttonVariants({ variant: 'outline', className: 'gap-1.5' })}>
+                  <Printer className="size-4" aria-hidden="true" />
+                  Lista de buena fe
+                </a>
+              </>
+            )}
+            {flags.create && <NewPlayerButton categories={categories ?? []} />}
+          </>
+        }
       >
         <PlayerFilters categories={categories ?? []} />
       </ModuleHeader>
