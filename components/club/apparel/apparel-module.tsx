@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Check, ClipboardList, Loader2, Megaphone, PackageCheck, Pencil, Plus, Send, Shirt, Trash2, X } from 'lucide-react'
+import { Check, ClipboardList, Loader2, Megaphone, Printer, PackageCheck, Pencil, Plus, Send, Shirt, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   approveOrderAction,
@@ -502,6 +502,12 @@ function OrderDetail({ order, can, onClose }: { order: Order; can: Can; onClose:
 
       {mode === 'view' && (
         <SheetFooter className="mt-auto flex-row flex-wrap gap-2 border-t">
+          {(order.apparel_order_items?.length ?? 0) > 0 && (
+            <a href={`/imprimir/pedido/${order.id}`} className={buttonVariants({ variant: 'ghost', className: 'gap-1.5' })}>
+              <Printer className="size-4" aria-hidden="true" />
+              Imprimir para el proveedor
+            </a>
+          )}
           {(order.status === 'delivered' || order.status === 'partially_delivered') && can.announce && order.category_id && (
             <Link
               href={`${announcementsPath}?${new URLSearchParams({

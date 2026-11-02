@@ -68,3 +68,7 @@ export function updateApparelItem(id: number, input: { name: string; description
 export function deleteApparelItem(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/apparel-items/${id}`, { method: 'DELETE' })
 }
+
+export function getOrder(id: number): Promise<ApiResult<One<Order>>> {
+  return apiFetch(`/orders/${id}`)
+}
