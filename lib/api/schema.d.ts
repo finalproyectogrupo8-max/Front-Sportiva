@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/apparel-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["apparel-items.index"];
+        put?: never;
+        post: operations["apparel-items.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/apparel-items/{apparelItem}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["apparel-items.show"];
+        put: operations["apparel-items.update"];
+        post?: never;
+        delete: operations["apparel-items.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/matches/{match}/attendance": {
         parameters: {
             query?: never;
@@ -30,6 +62,38 @@ export interface paths {
         get: operations["attendance.showTraining"];
         put: operations["attendance.recordTraining"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth.forgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth.resetPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -827,6 +891,156 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Notificaciones propias del usuario en el club, paginadas.
+         *     Soporta filtro ?unread=1 para ver solo las pendientes de lectura
+         */
+        get: operations["notification.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Marca una notificación como leída */
+        patch: operations["notification.markAsRead"];
+        trace?: never;
+    };
+    "/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca todas las notificaciones pendientes del usuario en el club como leídas */
+        post: operations["notification.markAllAsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["orders.index"];
+        put?: never;
+        post: operations["orders.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["orders.show"];
+        put: operations["orders.update"];
+        post?: never;
+        delete: operations["orders.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["order.submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["order.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["order.reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{order}/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["order.deliveries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/players": {
         parameters: {
             query?: never;
@@ -917,10 +1131,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** El partido como evento de calendario (.ics) para "Agregar al calendario" */
+        /** El partido como evento de calendario (.ics) para "Agregar al calendario". Acepta el token público o el personal */
         get: operations["publicCallup.calendar"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/callups/{token}/players/{callup}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Respuesta desde el link del grupo: cada uno toca su nombre y elige "Voy" o "No puedo".
+         *     Como una encuesta del grupo, no pide más que el link; el link personal sigue existiendo
+         */
+        post: operations["publicCallup.respondFromGroup"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1409,6 +1643,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/users/{user}/send-password-reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["user.sendPasswordReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -1505,6 +1755,30 @@ export interface components {
             is_platform_admin: boolean;
             created_at: string | null;
             updated_at: string | null;
+        };
+        /** ApparelItemResource */
+        ApparelItemResource: {
+            id: number;
+            name: string;
+            description: string | null;
+            is_active: boolean;
+            created_at: string | null;
+            updated_at: string | null;
+        };
+        /** ApparelOrderItemResource */
+        ApparelOrderItemResource: {
+            id: number;
+            order_id: number;
+            player_id: number;
+            player?: components["schemas"]["PlayerResource"];
+            apparel_item_id: number;
+            apparel_item?: components["schemas"]["ApparelItemResource"];
+            size: string;
+            shirt_number: number | null;
+            alias: string | null;
+            quantity: number;
+            delivered_quantity: number;
+            notes: string | null;
         };
         /** AssignRepairRequestRequest */
         AssignRepairRequestRequest: {
@@ -1692,6 +1966,16 @@ export interface components {
             /** Format: date-time */
             registration_deadline?: string | null;
         };
+        /** DeliverOrderRequest */
+        DeliverOrderRequest: {
+            location_id?: number | null;
+            comment?: string | null;
+            deliveries?: {
+                id?: number;
+                quantity?: number;
+                delivered_quantity?: number;
+            }[] | null;
+        };
         /** DocumentResource */
         DocumentResource: {
             id: number;
@@ -1734,6 +2018,11 @@ export interface components {
             created_at: string | null;
             updated_at: string | null;
             components?: components["schemas"]["FacilityComponentResource"][];
+        };
+        /** ForgotPasswordRequest */
+        ForgotPasswordRequest: {
+            /** Format: email */
+            email: string;
         };
         /** InventoryBalanceResource */
         InventoryBalanceResource: {
@@ -1828,6 +2117,16 @@ export interface components {
             status: string;
             notes: string | null;
         };
+        /** MaterialOrderItemResource */
+        MaterialOrderItemResource: {
+            id: number;
+            order_id: number;
+            material_id: number;
+            material?: components["schemas"]["MaterialResource"];
+            quantity: number;
+            delivered_quantity: number;
+            notes: string | null;
+        };
         /** MaterialResource */
         MaterialResource: {
             id: number;
@@ -1845,10 +2144,15 @@ export interface components {
             tenant: components["schemas"]["TenantSummaryResource"];
             profile: components["schemas"]["ClubProfileResource"] | null;
             permissions: string[];
-            /** @description Alcance de cada permiso: all (todo el club) u own (sus categorías). */
+            /** @description Alcance de cada permiso: all (todo el club), sport (sus deportes) u own (sus categorías). */
             permission_scopes: {
                 [key: string]: string;
             };
+            /** @description Deportes asignados al usuario en el club. */
+            sports: {
+                id: number;
+                name: string;
+            }[];
         };
         /** MeTenantsResource */
         MeTenantsResource: {
@@ -1869,6 +2173,48 @@ export interface components {
             shirt_number: number | null;
             /** @description `active` mientras juega en la categoría; `ended` cuando se cerró. */
             status: string;
+        };
+        /** NotificationResource */
+        NotificationResource: {
+            id: number;
+            type: string;
+            title: string;
+            body: string;
+            data: {
+                [key: string]: unknown;
+            } | null;
+            read_at: string | null;
+            created_at: string;
+        };
+        /** OrderResource */
+        OrderResource: {
+            id: number;
+            order_number: string;
+            type: string;
+            requested_by: number;
+            category_id: number | null;
+            category?: components["schemas"]["CategoryResource"];
+            status: string;
+            priority: string;
+            description: string | null;
+            approved_by: number | null;
+            approved_at: string | null;
+            delivered_at: string | null;
+            created_at: string | null;
+            updated_at: string | null;
+            apparel_order_items?: (components["schemas"]["ApparelOrderItemResource"] & Record<string, never>)[];
+            material_order_items?: (components["schemas"]["MaterialOrderItemResource"] & Record<string, never>)[];
+            status_history?: components["schemas"]["OrderStatusHistoryResource"][];
+        };
+        /** OrderStatusHistoryResource */
+        OrderStatusHistoryResource: {
+            id: number;
+            order_id: number;
+            changed_by: number;
+            old_status: string | null;
+            new_status: string;
+            comment: string | null;
+            created_at: string | null;
         };
         /** PermissionModuleResource */
         PermissionModuleResource: {
@@ -1942,6 +2288,10 @@ export interface components {
                 notes?: string | null;
             }[];
         };
+        /** RejectOrderRequest */
+        RejectOrderRequest: {
+            reason: string;
+        };
         /** RepairRequestResource */
         RepairRequestResource: {
             id: number;
@@ -1978,6 +2328,14 @@ export interface components {
             document_id: number | null;
             rejection_reason: string | null;
         };
+        /** ResetPasswordRequest */
+        ResetPasswordRequest: {
+            /** Format: email */
+            email: string;
+            token: string;
+            password: string;
+            password_confirmation: string;
+        };
         /** ResolveRepairRequestRequest */
         ResolveRepairRequestRequest: {
             description: string;
@@ -2010,6 +2368,11 @@ export interface components {
             permission_scopes: {
                 [key: string]: string;
             };
+            /** @description Deportes asignados al usuario en el club. */
+            sports: {
+                id: number;
+                name: string;
+            }[];
         };
         /** SportResource */
         SportResource: {
@@ -2039,6 +2402,12 @@ export interface components {
             is_active: boolean;
             created_at: string | null;
             updated_at: string | null;
+        };
+        /** StoreApparelItemRequest */
+        StoreApparelItemRequest: {
+            name: string;
+            description?: string | null;
+            is_active?: boolean;
         };
         /**
          * StoreCategoryCoachRequest
@@ -2206,6 +2575,29 @@ export interface components {
             /** @description Si ya juega en otra categoría del mismo deporte, cierra esa asignación (pase de categoría). */
             close_previous?: boolean;
         };
+        /** StoreOrderRequest */
+        StoreOrderRequest: {
+            /** @enum {string} */
+            type: "apparel" | "material";
+            category_id?: number | null;
+            /** @enum {string} */
+            priority?: "low" | "normal" | "high" | "urgent";
+            description?: string | null;
+            apparel_order_items?: {
+                player_id?: number;
+                apparel_item_id?: number;
+                size?: string;
+                shirt_number?: number | null;
+                alias?: string | null;
+                quantity?: number;
+                notes?: string | null;
+            }[];
+            material_order_items?: {
+                material_id?: number;
+                quantity?: number;
+                notes?: string | null;
+            }[];
+        };
         /** StorePlayerContactRequest */
         StorePlayerContactRequest: {
             name: string;
@@ -2258,7 +2650,7 @@ export interface components {
             permissions: {
                 name: string;
                 /** @enum {string} */
-                scope: "all" | "own";
+                scope: "all" | "sport" | "own";
             }[];
         };
         /** StoreSeasonRequest */
@@ -2306,6 +2698,8 @@ export interface components {
              *     contra la base del club, en ClubMembers.
              */
             roles: string[];
+            /** @description IDs de deportes del club (GET /api/sports o base del club). */
+            sport_ids?: number[];
             is_active?: string;
         };
         /** StoreTenantRequest */
@@ -2394,6 +2788,11 @@ export interface components {
                 slug: string;
                 name: string;
             }[];
+            /** @description Deportes asignados al miembro en el club (base del club). */
+            sports?: {
+                id: number;
+                name: string;
+            }[];
             is_active: boolean;
             user?: components["schemas"]["App.Http.Resources.Admin.UserResource"];
             tenant?: components["schemas"]["TenantResource"];
@@ -2451,6 +2850,12 @@ export interface components {
             location: string | null;
             objectives: string | null;
             notes: string | null;
+        };
+        /** UpdateApparelItemRequest */
+        UpdateApparelItemRequest: {
+            name?: string;
+            description?: string | null;
+            is_active?: boolean;
         };
         /** UpdateCategoryRequest */
         UpdateCategoryRequest: {
@@ -2531,6 +2936,27 @@ export interface components {
         UpdateMembershipRequest: {
             shirt_number: number | null;
         };
+        /** UpdateOrderRequest */
+        UpdateOrderRequest: {
+            category_id?: number | null;
+            /** @enum {string} */
+            priority?: "low" | "normal" | "high" | "urgent";
+            description?: string | null;
+            apparel_order_items?: {
+                player_id?: number;
+                apparel_item_id?: number;
+                size?: string;
+                shirt_number?: number | null;
+                alias?: string | null;
+                quantity?: number;
+                notes?: string | null;
+            }[];
+            material_order_items?: {
+                material_id?: number;
+                quantity?: number;
+                notes?: string | null;
+            }[];
+        };
         /** UpdatePlayerRequest */
         UpdatePlayerRequest: {
             first_name?: string;
@@ -2566,7 +2992,7 @@ export interface components {
             permissions?: {
                 name: string;
                 /** @enum {string} */
-                scope: "all" | "own";
+                scope: "all" | "sport" | "own";
             }[];
         };
         /** UpdateSeasonRequest */
@@ -2609,6 +3035,7 @@ export interface components {
         UpdateTenantMembershipRequest: {
             /** @description Reemplaza la lista completa de roles del miembro en el club. */
             roles?: string[];
+            sport_ids?: number[];
             is_active?: boolean;
             user_id?: string;
             tenant_id?: string;
@@ -2717,6 +3144,175 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "apparel-items.index": {
+        parameters: {
+            query?: {
+                search?: string | null;
+                is_active?: boolean | null;
+                per_page?: number | null;
+                sort?: "name" | "-name" | "id" | "-id" | "created_at" | "-created_at" | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `ApparelItemResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ApparelItemResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "apparel-items.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreApparelItemRequest"];
+            };
+        };
+        responses: {
+            /** @description `ApparelItemResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ApparelItemResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "apparel-items.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The apparel item ID */
+                apparelItem: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `ApparelItemResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ApparelItemResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "apparel-items.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The apparel item ID */
+                apparelItem: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateApparelItemRequest"];
+            };
+        };
+        responses: {
+            /** @description `ApparelItemResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ApparelItemResource"];
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "apparel-items.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The apparel item ID */
+                apparelItem: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "attendance.showMatch": {
         parameters: {
             query?: never;
@@ -2856,6 +3452,67 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "auth.forgotPassword": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Si la cuenta está activa, vas a recibir un enlace para restablecer tu contraseña.";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+            /** @description Se superó el límite de solicitudes de restablecimiento. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    "auth.resetPassword": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             422: components["responses"]["ValidationException"];
         };
     };
@@ -5426,6 +6083,537 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "notification.index": {
+        parameters: {
+            query?: {
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `NotificationResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["NotificationResource"][];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Error overview.
+                         * @example
+                         */
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    "notification.markAsRead": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `NotificationResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationResource"];
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Error overview.
+                         * @example
+                         */
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    "notification.markAllAsRead": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Todas las notificaciones fueron marcadas como leídas.";
+                        affected: number;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Error overview.
+                         * @example
+                         */
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    "orders.index": {
+        parameters: {
+            query?: {
+                type?: "apparel" | "material" | null;
+                status?: "draft" | "submitted" | "pending" | "approved" | "preparing" | "partially_delivered" | "delivered" | "rejected" | null;
+                category_id?: number | null;
+                requested_by?: number | null;
+                priority?: "low" | "normal" | "high" | "urgent" | null;
+                per_page?: number | null;
+                sort?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["OrderResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "orders.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "orders.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "orders.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Solo se pueden editar o eliminar pedidos en estado borrador.";
+                        /** @constant */
+                        code: "order_not_draft";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "orders.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Solo se pueden editar o eliminar pedidos en estado borrador.";
+                        /** @constant */
+                        code: "order_not_draft";
+                    };
+                };
+            };
+        };
+    };
+    "order.submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    comment?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Solo se pueden editar o eliminar pedidos en estado borrador.";
+                        /** @constant */
+                        code: "order_not_draft";
+                    };
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El pedido debe tener al menos una línea para enviarse.";
+                        /** @constant */
+                        code: "order_empty";
+                    };
+                };
+            };
+        };
+    };
+    "order.approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    comment?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El pedido debe estar enviado para poder ser aprobado o rechazado.";
+                        /** @constant */
+                        code: "order_not_submitted";
+                    } | {
+                        /** @constant */
+                        message: "El pedido ya fue aprobado.";
+                        /** @constant */
+                        code: "order_already_approved";
+                    };
+                };
+            };
+        };
+    };
+    "order.reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Transición de estado no permitida para el pedido.";
+                        /** @constant */
+                        code: "invalid_order_transition";
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "order.deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The order ID */
+                order: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeliverOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description `OrderResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OrderResource"];
+                    } | Record<string, never>;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "players.index": {
         parameters: {
             query?: {
@@ -5748,8 +6936,10 @@ export interface operations {
                                     updated: boolean;
                                 };
                                 players: {
+                                    id: number;
                                     name: string;
                                     shirt_number: number | null;
+                                    response: string;
                                 }[];
                             };
                             me: {
@@ -5812,8 +7002,10 @@ export interface operations {
                                     updated: boolean;
                                 };
                                 players: {
+                                    id: number;
                                     name: string;
                                     shirt_number: number | null;
+                                    response: string;
                                 }[];
                             };
                             me: {
@@ -5848,6 +7040,67 @@ export interface operations {
                     "text/calendar; charset=utf-8": string;
                 };
             };
+        };
+    };
+    "publicCallup.respondFromGroup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+                callup: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    response: "going" | "not_going";
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            club: {
+                                name: string;
+                                short_name: string | null;
+                                primary_color: string | null;
+                                logo_url: string | null;
+                            };
+                            match: {
+                                category: string;
+                                competition: string;
+                                opponent: string;
+                                is_home: boolean;
+                                match_date: string;
+                                meet_at: string | null;
+                                venue: string | null;
+                                maps_url: string | null;
+                                uniform: string | null;
+                                uniform_color: string | null;
+                                what_to_bring: string | null;
+                                status: string;
+                                updated: boolean;
+                            };
+                            players: {
+                                id: number;
+                                name: string;
+                                shirt_number: number | null;
+                                response: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            422: components["responses"]["ValidationException"];
         };
     };
     "publicCallup.show": {
@@ -5890,8 +7143,10 @@ export interface operations {
                                 updated: boolean;
                             };
                             players: {
+                                id: number;
                                 name: string;
                                 shirt_number: number | null;
+                                response: string;
                             }[];
                         };
                     };
@@ -7758,6 +9013,34 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "user.sendPasswordReset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The user ID */
+                user: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Si el usuario está activo, recibirá un enlace para restablecer su contraseña.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
         };
     };
