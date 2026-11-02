@@ -333,7 +333,7 @@ export function AttendanceTaker({
         <div
           className={cn(
             'sticky bottom-0 flex items-center gap-3 border-t py-3 backdrop-blur',
-            inSheet ? '-mx-6 bg-popover/95 px-6' : '-mx-1 bg-background/95 px-1',
+            inSheet ? '-mx-6 bg-popover/95 px-6' : 'bottom-16 -mx-1 bg-background/95 px-1 md:bottom-0',
           )}
         >
           <span className="hidden text-sm text-muted-foreground sm:block">
