@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings } from 'lucide-react'
+import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +26,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { CommandPalette } from './command-palette'
 import { SetupGuide } from './setup-guide'
 import { Initials } from './shared'
-import { useAlerts } from './use-alerts'
+import { NotificationBell } from './notification-bell'
 
 export function TopBar({
   userName,
@@ -50,7 +50,6 @@ export function TopBar({
   const showConfig = CONFIG_PERMISSIONS.some(can)
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
-  const alerts = useAlerts()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -228,35 +227,7 @@ export function TopBar({
 
           <ThemeToggle />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon" className="relative hidden size-9 sm:inline-flex" />}
-              aria-label={`Alertas: ${alerts.length}`}
-            >
-              <Bell className="size-4" aria-hidden="true" />
-              {alerts.length > 0 && (
-                <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-warning ring-2 ring-card" aria-hidden="true" />
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Requiere atención</DropdownMenuLabel>
-                {alerts.slice(0, 6).map((a) => (
-                  <DropdownMenuItem key={a.id} render={<Link href={a.href} />} className="items-start gap-2.5 py-2">
-                    <span
-                      className={cn('mt-1.5 size-2 shrink-0 rounded-full', a.tone === 'bad' ? 'bg-destructive' : 'bg-warning')}
-                      aria-hidden="true"
-                    />
-                    <span className="flex flex-col">
-                      <span className="font-medium">{a.title}</span>
-                      <span className="text-xs text-muted-foreground">{a.detail}</span>
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-                {alerts.length === 0 && <p className="px-2 py-3 text-sm text-muted-foreground">Todo en orden.</p>}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationBell club={tenant.slug} />
 
           <DropdownMenu>
             <DropdownMenuTrigger
