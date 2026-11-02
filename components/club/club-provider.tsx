@@ -1,15 +1,11 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { ClubData } from '@/lib/data'
+import { createContext, useContext, useEffect, useMemo } from 'react'
 import { getModule, visibleModules, type ModuleDef } from '@/lib/modules'
-import { normalizeTenant, type ApiTenant, type Tenant } from '@/lib/tenants'
+import { tenantFromApi, type ApiTenant, type Tenant } from '@/lib/tenants'
 
 type ClubContextValue = {
   tenant: Tenant
-  data: ClubData
-  update: <K extends keyof ClubData>(key: K, fn: (prev: ClubData[K]) => ClubData[K]) => void
-  playerName: (id: string) => string
   /** Si el usuario tiene el permiso (`<recurso>.<acción>`) en este club. Es solo UX: la API valida igual. */
   can: (permission: string) => boolean
   /** Alcance del permiso: `all` (todo el club), `own` (sus categorías) o null si no lo tiene. */
@@ -24,20 +20,17 @@ const ClubContext = createContext<ClubContextValue | null>(null)
 
 export function ClubProvider({
   tenant: rawTenant,
-  initialData,
   permissions,
   permissionScopes,
   children,
 }: {
-  tenant: ApiTenant | Tenant
-  initialData: ClubData
+  tenant: ApiTenant
   /** Permisos del usuario en el club, de `GET /api/me`. */
   permissions: string[]
   permissionScopes?: Record<string, string>
   children: React.ReactNode
 }) {
-  const tenant = useMemo(() => normalizeTenant(rawTenant), [rawTenant])
-  const [data, setData] = useState(initialData)
+  const tenant = useMemo(() => tenantFromApi(rawTenant), [rawTenant])
 
   // El color del club es solo un acento (--club: escudo, chips). La estructura y los botones
   // usan siempre la marca Sportiva. Se pone en <html> para que también lo vean los portales
@@ -49,10 +42,6 @@ export function ClubProvider({
       root.style.removeProperty('--club')
     }
   }, [tenant.color])
-
-  const update = useCallback<ClubContextValue['update']>((key, fn) => {
-    setData((prev) => ({ ...prev, [key]: fn(prev[key]) }))
-  }, [])
 
   const access = useMemo(() => {
     const granted = new Set(permissions)
@@ -67,19 +56,7 @@ export function ClubProvider({
     } satisfies Pick<ClubContextValue, 'can' | 'scopeOf' | 'modules' | 'canSee'>
   }, [permissions, permissionScopes])
 
-  const value = useMemo<ClubContextValue>(() => {
-    const byId = new Map(data.players.map((p) => [p.id, p]))
-    return {
-      ...access,
-      tenant,
-      data,
-      update,
-      playerName: (id) => {
-        const p = byId.get(id)
-        return p ? `${p.nombre} ${p.apellido}` : 'Sin asignar'
-      },
-    }
-  }, [access, tenant, data, update])
+  const value = useMemo<ClubContextValue>(() => ({ ...access, tenant }), [access, tenant])
 
   return (
     <ClubContext.Provider value={value}>
