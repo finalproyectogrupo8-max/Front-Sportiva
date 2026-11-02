@@ -10,7 +10,8 @@ Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**,
 
 | Para… | Leé |
 | --- | --- |
-| Usar la app (por pantalla y por rol) | [docs/guia-de-uso.md](docs/guia-de-uso.md) |
+| Usar la app, paso a paso por rol | [docs/manual/](docs/manual/README.md) |
+| Cómo funciona cada pantalla y por qué | [docs/guia-de-uso.md](docs/guia-de-uso.md) |
 | Entender cómo está armado el front: sesión, carpetas, cómo sumar un endpoint, design system | [docs/arquitectura-front.md](docs/arquitectura-front.md) |
 | Login, tokens y contrato con Laravel | [docs/integracion-api-laravel.md](docs/integracion-api-laravel.md) |
 | Decisiones de producto y pendientes | [docs/decisiones-producto.md](docs/decisiones-producto.md) |

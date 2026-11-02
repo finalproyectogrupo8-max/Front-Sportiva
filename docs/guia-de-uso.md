@@ -250,7 +250,7 @@ De los convocados se muestra solo el nombre y la inicial del apellido. Nunca apa
 
 ## 11. Todo con datos reales
 
-Todos los módulos leen y guardan en la API: no quedan datos de ejemplo. Lo que todavía no tiene datos muestra un estado vacío con la acción para empezar. El manual por rol, con los módulos nuevos (Análisis, Proyecto, Comunicados, Equipo, Materiales, Indumentaria y Canchas), está en FRO-24.
+Todos los módulos leen y guardan en la API: no quedan datos de ejemplo. Lo que todavía no tiene datos muestra un estado vacío con la acción para empezar. El manual paso a paso por rol (admin de plataforma, administrador del club, coordinador, profe, preparador físico, utilero, mantenimiento y familias) está en [manual/](manual/README.md).
 
 ---
 
