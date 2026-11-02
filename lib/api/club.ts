@@ -190,3 +190,14 @@ export function updateVenue(id: number, input: Partial<VenueInput>): Promise<Api
 export function deleteVenue(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/venues/${id}`, { method: 'DELETE' })
 }
+
+/* Calendario suscribible por categoría (FRO-32) */
+
+export type CalendarLink = { url: string; webcal_url: string; google_url: string }
+
+export function getCalendarLink(categoryId: number): Promise<ApiResult<{ data: CalendarLink }>> {
+  return apiFetch(`/categories/${categoryId}/calendar-link`)
+}
+export function regenerateCalendarLink(categoryId: number): Promise<ApiResult<{ data: CalendarLink }>> {
+  return apiFetch(`/categories/${categoryId}/calendar-link`, { method: 'POST' })
+}
