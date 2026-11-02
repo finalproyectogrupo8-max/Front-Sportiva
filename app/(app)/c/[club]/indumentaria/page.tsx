@@ -44,6 +44,7 @@ export default async function ApparelPage({
         createItem: can('apparel_items.create'),
         updateItem: can('apparel_items.update'),
         deleteItem: can('apparel_items.delete'),
+        announce: can('announcements.send'),
       }}
     />
   )

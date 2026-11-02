@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { CLUB_TZ } from '@/lib/club-time'
 import { cn } from '@/lib/utils'
 
 type Objective = {
@@ -271,7 +272,7 @@ function StandingsEditor({
   return (
     <ConfigSheet open={open} onOpenChange={onOpenChange} title="Tabla de posiciones" description={`${title}. Ordená los equipos del primero al último y marcá cuál es el club.`} wide>
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 px-4 pb-4"
         onSubmit={(e) => {
           e.preventDefault()
           const filled = rows.filter((r) => r.team_name.trim() !== '').map((r) => ({ ...r, team_name: r.team_name.trim() }))
@@ -393,7 +394,7 @@ function Objectives({ seasonId, objectives, categories, canEdit }: { seasonId: n
                     {o.due_date && (
                       <>
                         <Flag className="size-3.5" aria-hidden="true" />
-                        Para el {new Date(`${o.due_date}T12:00:00`).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        Para el {new Date(`${o.due_date}T12:00:00`).toLocaleDateString('es-AR', { timeZone: CLUB_TZ, day: 'numeric', month: 'short', year: 'numeric' })}
                       </>
                     )}
                   </span>
@@ -452,7 +453,7 @@ function ObjectiveSheet({
   return (
     <ConfigSheet open={objective !== null} onOpenChange={(open) => !open && onClose()} title={current ? 'Editar objetivo' : 'Nuevo objetivo'} description="Si tiene una meta numérica, el avance se calcula solo.">
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 px-4 pb-4"
         onSubmit={(e) => {
           e.preventDefault()
           const formData = new FormData(e.currentTarget)

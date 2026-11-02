@@ -8,6 +8,7 @@ import { CallupPanel } from '@/components/club/matches/callup-panel'
 import { MatchActions, ResultForm } from '@/components/club/matches/match-detail'
 import { NoAccess } from '@/components/club/no-access'
 import { Pill, type Tone } from '@/components/club/shared'
+import { buttonVariants } from '@/components/ui/button'
 import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
 import { getAttendance, getCallup, getMatch } from '@/lib/api/matches'
 import { dayKey, formatLongDay, formatTime } from '@/lib/club-time'
@@ -93,10 +94,25 @@ export default async function MatchPage({ params }: { params: Promise<{ club: st
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
-      <Link href={back} className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Volver al calendario
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href={back} className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Volver al calendario
+        </Link>
+        {can('announcements.send') && match.category_id && (
+          <Link
+            href={`/c/${club}/comunicados?${new URLSearchParams({
+              nuevo: '1',
+              categoria: String(match.category_id),
+              asunto: `Partido ${match.is_home ? 'vs' : 'en cancha de'} ${match.opponent} · ${formatLongDay(match.match_date)}`,
+            })}`}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          >
+            <Megaphone className="size-4" aria-hidden="true" />
+            Avisar a la categoría
+          </Link>
+        )}
+      </div>
 
       {/* Encabezado: el partido y todo lo que necesita saber el jugador, con el mapa al costado. */}
       <header className={cn('grid overflow-hidden rounded-2xl bg-ink text-ink-foreground', mapQuery && 'lg:grid-cols-[minmax(0,1fr)_380px]')}>
