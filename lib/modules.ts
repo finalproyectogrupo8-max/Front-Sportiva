@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  UserCog,
   Megaphone,
   ClipboardCheck,
   Package,
@@ -23,6 +24,7 @@ export type ModuleId =
   | 'profes'
   | 'canchas'
   | 'comunicados'
+  | 'equipo'
 
 export type ModuleDef = {
   id: ModuleId
@@ -48,6 +50,7 @@ export const MODULES: ModuleDef[] = [
   { id: 'materiales', name: 'Materiales', description: 'Stock y reposición de utilería', icon: Package, area: 'Operación', permissions: ['inventory.view', 'material_orders.view', 'materials.view'] },
   { id: 'canchas', name: 'Canchas', description: 'Estado, limpieza y mantenimiento', icon: Warehouse, area: 'Infraestructura', permissions: ['facilities.view', 'repairs.view', 'maintenance.view'] },
   { id: 'comunicados', name: 'Comunicados', description: 'Mails a jugadores, tutores y staff', icon: Megaphone, area: 'Operación', permissions: ['announcements.view'] },
+  { id: 'equipo', name: 'Equipo', description: 'Staff del club, sus roles y su acceso', icon: UserCog, area: 'Operación', permissions: ['club_users.view'] },
 ]
 
 /** Altas rápidas (top bar y buscador): cada una pide el permiso de crear en su recurso. */
