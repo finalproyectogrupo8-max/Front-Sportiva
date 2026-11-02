@@ -147,9 +147,11 @@ export async function deleteTrainingAction(id: number): Promise<ActionResult> {
 export async function recordAttendanceAction(
   kind: 'matches' | 'trainings',
   id: number,
-  records: { player_id: number; status: AttendanceStatus }[],
+  records: { player_id: number; status: AttendanceStatus; notes?: string | null }[],
 ): Promise<ActionResult> {
-  const valid = records.filter((r) => Number.isInteger(r.player_id) && ATTENDANCE.includes(r.status))
+  const valid = records
+    .filter((r) => Number.isInteger(r.player_id) && ATTENDANCE.includes(r.status))
+    .map((r) => ({ player_id: r.player_id, status: r.status, notes: r.notes?.trim().slice(0, 255) || null }))
   if (valid.length === 0) return { ok: false, error: 'Marcá al menos a un jugador.' }
   const present = valid.filter((r) => r.status === 'present' || r.status === 'late').length
   return runApiAction(() => recordAttendance(kind, id, valid), `Asistencia guardada: ${present} de ${valid.length} presentes.`, ['*'])

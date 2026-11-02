@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { NoAccess } from '@/components/club/no-access'
-import { getAttendance, getMatch, getTraining } from '@/lib/api/matches'
+import { getAttendance, getCallup, getMatch, getTraining } from '@/lib/api/matches'
 import { formatLongDay, formatTime } from '@/lib/club-time'
 import { requireSession } from '@/lib/session'
 import { AttendanceTaker } from './attendance-taker'
@@ -16,8 +16,13 @@ export async function AttendancePage({ club, kind, id }: { club: string; kind: '
   }
   if (!id) notFound()
 
-  const [event, roster] = await Promise.all([kind === 'matches' ? getMatch(id) : getTraining(id), getAttendance(kind, id)])
+  const [event, roster, callup] = await Promise.all([
+    kind === 'matches' ? getMatch(id) : getTraining(id),
+    getAttendance(kind, id),
+    kind === 'matches' && permissions.has('callups.view') ? getCallup(id).catch(() => null) : Promise.resolve(null),
+  ])
   if (!event.ok || !roster.ok) notFound()
+  const answers = callup?.ok && callup.data.data.published_at ? callup.data.data.callups : undefined
 
   const data = event.data.data
   const isMatch = kind === 'matches'
@@ -38,7 +43,7 @@ export async function AttendancePage({ club, kind, id }: { club: string; kind: '
           {formatLongDay(startsAt)} · {formatTime(startsAt)} h
         </p>
       </header>
-      <AttendanceTaker kind={kind} eventId={id} rows={roster.data.data} canRecord={permissions.has('attendance.record')} columns={2} />
+      <AttendanceTaker kind={kind} eventId={id} rows={roster.data.data} canRecord={permissions.has('attendance.record')} callup={answers} columns={2} />
     </div>
   )
 }

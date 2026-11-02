@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import type { AttendanceRow } from '@/lib/api/matches'
 import { cn } from '@/lib/utils'
-import { AttendanceTaker } from './attendance-taker'
+import { AttendanceTaker, type CallupAnswer } from './attendance-taker'
 
 /** Resumen de asistencia en la página del partido; la lista se toma en un panel lateral. */
 export function AttendanceCard({
@@ -18,6 +18,7 @@ export function AttendanceCard({
   subtitle,
   rows,
   canRecord,
+  callup,
   pageHref,
 }: {
   kind: 'matches' | 'trainings'
@@ -26,6 +27,7 @@ export function AttendanceCard({
   subtitle: string
   rows: AttendanceRow[]
   canRecord: boolean
+  callup?: CallupAnswer[]
   /** La misma lista en página completa (para la cancha o para compartir el link). */
   pageHref: string
 }) {
@@ -81,6 +83,7 @@ export function AttendanceCard({
                 eventId={eventId}
                 rows={rows}
                 canRecord={canRecord}
+                callup={callup}
                 inSheet
                 onSaved={() => {
                   setOpen(false)

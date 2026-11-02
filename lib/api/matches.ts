@@ -15,6 +15,8 @@ export type AttendanceRow = {
   player_id: number
   player_name: string
   shirt_number: number | null
+  /** Documento con la foto del jugador (null si no tiene). */
+  photo_document_id?: number | null
   /** null: todavía no se tomó. */
   status: AttendanceStatus | null
   notes: string | null
