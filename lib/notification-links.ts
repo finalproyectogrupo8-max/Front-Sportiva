@@ -21,6 +21,9 @@ export function notificationHref(club: string, n: NotificationLike): string | nu
       const section = data.order_type === 'material' ? 'materiales' : 'indumentaria'
       return id('order_id') ? `${base}/${section}?pedido=${id('order_id')}` : `${base}/${section}`
     }
+    case 'repair_assigned':
+    case 'repair_resolved':
+      return id('repair_request_id') ? `${base}/canchas?reparacion=${id('repair_request_id')}` : `${base}/canchas`
     default:
       return null
   }
@@ -29,7 +32,7 @@ export function notificationHref(club: string, n: NotificationLike): string | nu
 /** Tono del punto de color: rojo para lo urgente, ámbar para avisos, verde para buenas noticias. */
 export function notificationTone(type: string): 'bad' | 'warn' | 'ok' | 'info' {
   if (type === 'attendance_drop' || type === 'registration_closing' || type === 'order_rejected') return 'bad'
-  if (type === 'order_approved' || type === 'order_delivered') return 'ok'
+  if (type === 'order_approved' || type === 'order_delivered' || type === 'repair_resolved') return 'ok'
   if (type === 'order_partially_delivered') return 'info'
   return 'warn'
 }
