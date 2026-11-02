@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AssignClubDialog } from '@/components/admin/assign-club-dialog'
+import { EditUserSheet } from '@/components/admin/edit-user-sheet'
 import { toggleUserStatusAction } from '@/app/(app)/admin/usuarios/actions'
 import type { AdminUser } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
@@ -155,6 +156,7 @@ export function UserTable({ users }: { users: AdminUser[] }) {
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1.5">
                     {/* Los admins de plataforma siempre entran a /admin: una membresía no les sirve. */}
+                    <EditUserSheet user={user} />
                     {user.is_active && !user.is_platform_admin && <AssignClubDialog user={user} />}
                     <StatusToggle user={user} />
                   </div>

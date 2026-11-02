@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft, Database, Info, UserCheck, UserX, Users } fro
 import { requirePlatformAdmin } from '@/lib/session'
 import { getAdminTenant, getTenantMemberships, getTenantPermissions, getTenantRoles } from '@/lib/api/admin'
 import { TenantStatusBadge } from '@/components/admin/club-table'
+import { EditClubActions } from '@/components/admin/edit-club'
 import { AddMemberSheet } from '@/components/admin/membership-form'
 import { ClubRolesSection } from '@/components/admin/club-roles-section'
 import { MembershipTable } from '@/components/admin/membership-table'
@@ -76,6 +77,9 @@ export default async function AdminClubDetailPage({
               {tenant.name}
             </h1>
             <TenantStatusBadge status={tenant.status} />
+            <div className="ml-auto">
+              <EditClubActions tenant={tenant} />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>
