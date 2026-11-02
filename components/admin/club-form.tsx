@@ -233,8 +233,11 @@ function AdminField({
  * Botón "Nuevo club": abre el alta en un panel lateral. Al guardar, el panel se cierra enseguida:
  * la base del club se crea en segundo plano y el vigilante avisa con un toast cuando está lista.
  */
-export function NewClubSheet() {
-  const [open, setOpen] = useState(false)
+export type ClubPrefill = { name?: string; admin_name?: string; admin_email?: string }
+
+/** Con `prefill` (desde un ticket de contacto) se abre solo y con los datos cargados. */
+export function NewClubSheet({ prefill }: { prefill?: ClubPrefill }) {
+  const [open, setOpen] = useState(Boolean(prefill))
   // Cada apertura arranca un formulario vacío.
   const [session, setSession] = useState(0)
 
@@ -252,15 +255,15 @@ export function NewClubSheet() {
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
-          {open && <NewClubFlow key={session} onCreated={() => setOpen(false)} />}
+          {open && <NewClubFlow key={session} prefill={session === 0 ? prefill : undefined} onCreated={() => setOpen(false)} />}
         </SheetContent>
       </Sheet>
     </>
   )
 }
 
-function NewClubFlow({ onCreated }: { onCreated: () => void }) {
-  const [state, action, pending] = useActionState<CreateTenantState, FormData>(createTenantAction, {})
+function NewClubFlow({ prefill, onCreated }: { prefill?: ClubPrefill; onCreated: () => void }) {
+  const [state, action, pending] = useActionState<CreateTenantState, FormData>(createTenantAction, prefill ? { values: prefill } : {})
   const watchProvisioning = useWatchProvisioning()
 
   useEffect(() => {
