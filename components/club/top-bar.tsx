@@ -19,7 +19,6 @@ import { logout, selectTenant } from '@/lib/auth'
 import type { Schemas } from '@/lib/api/client'
 import { CONFIG_PERMISSIONS, type SetupStep } from '@/lib/club-config'
 import { QUICK_CREATE, getModule } from '@/lib/modules'
-import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -113,16 +112,7 @@ export function TopBar({
                       {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
                     </DropdownMenuItem>
                   ))
-                : TENANTS.map((t) => (
-                    <DropdownMenuItem key={t.slug} render={<Link href={`/c/${t.slug}`} />} className="gap-3 py-2">
-                      <ClubCrest short={t.short} color={t.color} className="size-7 rounded-md text-[10px]" />
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate font-medium">{t.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">{t.city}</span>
-                      </span>
-                      {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
-                    </DropdownMenuItem>
-                  ))}
+                : null}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/clubes" />}>

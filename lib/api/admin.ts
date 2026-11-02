@@ -100,7 +100,7 @@ export async function updateAdminUser(
 }
 
 /* ==========================================================================
-   CLUBES (TENANTS)
+   CLUBES
    ========================================================================== */
 
 export type AdminTenant = Schemas['TenantResource']
