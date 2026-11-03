@@ -8,7 +8,7 @@ export type TeamMember = {
   id: number
   display_name: string
   email: string | null
-  status: 'active' | 'disabled'
+  status: 'active' | 'disabled' | 'invited'
   roles: { slug: string; name: string }[]
   sport_ids: number[]
   is_self: boolean
@@ -29,4 +29,7 @@ export function inviteMember(input: InviteInput): Promise<ApiResult<{ data: Team
 }
 export function updateMember(id: number, input: MemberUpdate): Promise<ApiResult<{ data: TeamMember }>> {
   return apiFetch(`/club-users/${id}`, { method: 'PATCH', body: input })
+}
+export function resendTeamInvite(id: number): Promise<ApiResult<{ message: string }>> {
+  return apiFetch(`/club-users/${id}/resend-invite`, { method: 'POST' })
 }

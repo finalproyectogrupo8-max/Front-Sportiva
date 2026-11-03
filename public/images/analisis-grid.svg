@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" fill="none" width="100%" height="100%">
+  <defs>
+    <radialGradient id="analisisGlow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#C87650" stop-opacity="0.16" />
+      <stop offset="50%" stop-color="#C87650" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#C87650" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="lineAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C87650" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#C87650" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#D4BAA3" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <rect width="1440" height="900" fill="url(#analisisGlow)" />
+
+  <!-- Coordinate Background Grid -->
+  <g stroke="#D4BAA3" stroke-width="0.75" stroke-opacity="0.12">
+    <line x1="120" y1="150" x2="1320" y2="150" stroke-dasharray="6 6" />
+    <line x1="120" y1="300" x2="1320" y2="300" stroke-dasharray="6 6" />
+    <line x1="120" y1="450" x2="1320" y2="450" stroke-dasharray="6 6" />
+    <line x1="120" y1="600" x2="1320" y2="600" stroke-dasharray="6 6" />
+    <line x1="120" y1="750" x2="1320" y2="750" stroke-dasharray="6 6" />
+
+    <line x1="240" y1="100" x2="240" y2="800" stroke-dasharray="6 6" />
+    <line x1="480" y1="100" x2="480" y2="800" stroke-dasharray="6 6" />
+    <line x1="720" y1="100" x2="720" y2="800" stroke-dasharray="6 6" />
+    <line x1="960" y1="100" x2="960" y2="800" stroke-dasharray="6 6" />
+    <line x1="1200" y1="100" x2="1200" y2="800" stroke-dasharray="6 6" />
+  </g>
+
+  <!-- Polar Radar Chart System (Right side) -->
+  <g transform="translate(1050, 420)">
+    <!-- Radar concentric rings -->
+    <circle cx="0" cy="0" r="240" stroke="#D4BAA3" stroke-width="1" stroke-opacity="0.2" fill="none" />
+    <circle cx="0" cy="0" r="180" stroke="#C87650" stroke-width="1.2" stroke-opacity="0.25" fill="none" stroke-dasharray="8 6" />
+    <circle cx="0" cy="0" r="120" stroke="#D4BAA3" stroke-width="1" stroke-opacity="0.25" fill="none" />
+    <circle cx="0" cy="0" r="60" stroke="#C87650" stroke-width="1" stroke-opacity="0.3" fill="none" />
+    <circle cx="0" cy="0" r="4" fill="#C87650" />
+
+    <!-- Radar axes -->
+    <line x1="-240" y1="0" x2="240" y2="0" stroke="#D4BAA3" stroke-width="1" stroke-opacity="0.25" />
+    <line x1="0" y1="-240" x2="0" y2="240" stroke="#D4BAA3" stroke-width="1" stroke-opacity="0.25" />
+    <line x1="-170" y1="-170" x2="170" y2="170" stroke="#D4BAA3" stroke-width="0.8" stroke-opacity="0.18" />
+    <line x1="-170" y1="170" x2="170" y2="-170" stroke="#D4BAA3" stroke-width="0.8" stroke-opacity="0.18" />
+
+    <!-- Performance Polygon (Radar data shape) -->
+    <polygon points="0,-190 140,-70 120,130 -40,160 -150,50 -110,-90"
+      stroke="#C87650" stroke-width="2" stroke-opacity="0.6" fill="#C87650" fill-opacity="0.08" />
+
+    <!-- Data vertices -->
+    <circle cx="0" cy="-190" r="4" fill="#C87650" />
+    <circle cx="140" cy="-70" r="4" fill="#D4BAA3" />
+    <circle cx="120" cy="130" r="4" fill="#C87650" />
+    <circle cx="-40" cy="160" r="4" fill="#D4BAA3" />
+    <circle cx="-150" cy="50" r="4" fill="#C87650" />
+    <circle cx="-110" cy="-90" r="4" fill="#D4BAA3" />
+  </g>
+
+  <!-- Performance Curve / Trajectory Graph (Left & Center) -->
+  <path d="M 160 620 C 320 580, 420 640, 580 480 C 700 360, 820 400, 960 260"
+    stroke="url(#lineAccent)" stroke-width="3" fill="none" stroke-linecap="round" />
+  
+  <path d="M 160 680 C 300 660, 460 600, 620 540 C 760 480, 860 460, 980 340"
+    stroke="#D4BAA3" stroke-width="1.5" stroke-dasharray="6 6" stroke-opacity="0.3" fill="none" />
+
+  <!-- Data checkpoints -->
+  <circle cx="160" cy="620" r="5" fill="#C87650" stroke="#10100F" stroke-width="2" />
+  <circle cx="580" cy="480" r="6" fill="#C87650" stroke="#10100F" stroke-width="2" />
+  <circle cx="960" cy="260" r="7" fill="#C87650" stroke="#D4BAA3" stroke-width="2" />
+
+  <!-- Target bullseye (Top Left) -->
+  <g transform="translate(320, 240)">
+    <circle cx="0" cy="0" r="70" stroke="#D4BAA3" stroke-width="1" stroke-opacity="0.2" fill="none" />
+    <circle cx="0" cy="0" r="45" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.35" fill="none" />
+    <circle cx="0" cy="0" r="20" stroke="#C87650" stroke-width="2" stroke-opacity="0.5" fill="none" />
+    <line x1="-80" y1="0" x2="80" y2="0" stroke="#C87650" stroke-width="1" stroke-opacity="0.3" />
+    <line x1="0" y1="-80" x2="0" y2="80" stroke="#C87650" stroke-width="1" stroke-opacity="0.3" />
+  </g>
+</svg>
+

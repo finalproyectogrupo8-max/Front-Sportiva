@@ -10,6 +10,7 @@ import { requirePlatformAdmin } from '@/lib/session'
 import { getAdminTickets } from '@/lib/api/admin'
 import { AdminNav } from '@/components/admin/admin-nav'
 import { ProvisioningWatcher } from '@/components/admin/provisioning-watcher'
+import { PageBackground } from '@/components/club/module-background'
 
 export default async function AdminLayout({
   children,
@@ -81,8 +82,11 @@ export default async function AdminLayout({
         </div>
       </header>
 
-      <main className="flex-1">
-        <ProvisioningWatcher>{children}</ProvisioningWatcher>
+      <main className="relative flex-1 isolate">
+        <PageBackground moduleId="admin" />
+        <div className="relative z-10">
+          <ProvisioningWatcher>{children}</ProvisioningWatcher>
+        </div>
       </main>
       <AppFooter />
     </div>

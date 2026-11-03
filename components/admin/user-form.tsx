@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { CheckCircle2, Eye, EyeOff, Loader2, UserPlus } from 'lucide-react'
+import { CheckCircle2, Loader2, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -90,7 +90,9 @@ function NewUserFlow({ onAnother, onClose }: { onAnother: () => void; onClose: (
     <>
       <SheetHeader className="pr-12">
         <SheetTitle>Nuevo usuario</SheetTitle>
-        <SheetDescription>La contraseña inicial debe tener al menos 12 caracteres.</SheetDescription>
+        <SheetDescription>
+          Le vamos a enviar una invitación por mail para que elija su contraseña.
+        </SheetDescription>
       </SheetHeader>
       <UserFormFields key={formKey(state)} state={state} action={action} pending={pending} />
     </>
@@ -106,8 +108,6 @@ function UserFormFields({
   action: (payload: FormData) => void
   pending: boolean
 }) {
-  const [showPassword, setShowPassword] = useState(false)
-
   return (
     <form action={action} className="flex flex-1 flex-col">
       <div className="flex flex-col gap-4 px-4 pb-4">
@@ -152,47 +152,6 @@ function UserFormFields({
           {state.fieldErrors?.email && (
             <p id="email-error" className="text-xs text-destructive">
               {state.fieldErrors.email}
-            </p>
-          )}
-        </div>
-
-        {/* Contraseña */}
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="create-user-password">Contraseña inicial</Label>
-          <div className="relative">
-            <Input
-              id="create-user-password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="Mínimo 12 caracteres"
-              aria-invalid={state.fieldErrors?.password ? true : undefined}
-              aria-describedby="password-help password-error"
-              required
-              disabled={pending}
-              className="pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? (
-                <EyeOff className="size-4" aria-hidden="true" />
-              ) : (
-                <Eye className="size-4" aria-hidden="true" />
-              )}
-            </button>
-          </div>
-          {state.fieldErrors?.password ? (
-            <p id="password-error" className="text-xs text-destructive">
-              {state.fieldErrors.password}
-            </p>
-          ) : (
-            <p id="password-help" className="text-xs text-muted-foreground">
-              Exigido por la API: mínimo 12 caracteres.
             </p>
           )}
         </div>

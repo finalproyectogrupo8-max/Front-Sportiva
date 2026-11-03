@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings, UserRound } from 'lucide-react'
+import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings, UserRound, UsersRound } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -45,6 +45,7 @@ export function TopBar({
   const base = `/c/${tenant.slug}`
   const section = pathname.split('/')[3] ?? ''
   const current = getModule(section)
+  const isTeamPage = section === 'equipo'
   const inConfig = section === 'configuracion'
   const showConfig = CONFIG_PERMISSIONS.some(can)
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
@@ -62,7 +63,7 @@ export function TopBar({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const CurrentIcon = current?.icon ?? (inConfig ? Settings : House)
+  const CurrentIcon = current?.icon ?? (isTeamPage ? UsersRound : inConfig ? Settings : House)
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-md">
@@ -130,17 +131,26 @@ export function TopBar({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" className="hidden h-9 gap-2 px-2 md:inline-flex" />}
-            aria-label={`Cambiar de módulo (ahora: ${current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
+            aria-label={`Cambiar de módulo (ahora: ${isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
           >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
-            <span className="hidden font-medium sm:inline">{current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
-            <ChevronsUpDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden="true" />
+            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
+            <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
             <DropdownMenuItem render={<Link href={base} />} className="mb-1 gap-3 py-2">
               <House className="size-4" aria-hidden="true" />
               <span className="font-medium">Hoy en el club</span>
             </DropdownMenuItem>
+            {can('club_users.view') && (
+              <DropdownMenuItem
+                render={<Link href={`${base}/equipo`} />}
+                className={cn('mb-1 gap-3 py-2', isTeamPage && 'bg-muted')}
+              >
+                <UsersRound className="size-4" aria-hidden="true" />
+                <span className="font-medium">Equipo del club</span>
+              </DropdownMenuItem>
+            )}
             <div className="grid grid-cols-2 gap-1">
               {modules.map((m) => (
                 <DropdownMenuItem

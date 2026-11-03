@@ -1,8 +1,10 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { ModuleHeaderBackground } from './module-background'
 
 export function ModuleHeader({
   eyebrow,
@@ -10,19 +12,25 @@ export function ModuleHeader({
   description,
   actions,
   children,
+  moduleId,
 }: {
   eyebrow?: string
   title: string
   description?: string
   actions?: React.ReactNode
   children?: React.ReactNode
+  moduleId?: string
 }) {
+  const pathname = usePathname()
+  const resolvedModule = moduleId ?? pathname?.split('/')[3]
+
   return (
-    <div className="border-b bg-card">
-      <div className="mx-auto flex max-w-[120rem] flex-col gap-5 px-4 pb-4 pt-6 sm:px-6 lg:px-10">
+    <header className="relative overflow-hidden border-b border-border/70 bg-card/80 dark:bg-[#141413]/75 backdrop-blur-md shadow-xs">
+      <ModuleHeaderBackground moduleId={resolvedModule} />
+      <div className="relative z-10 mx-auto flex max-w-[120rem] flex-col gap-5 px-4 pb-4 pt-6 sm:px-6 lg:px-10">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div className="flex flex-col gap-1">
-            {eyebrow && <p className="text-xs font-medium uppercase tracking-widest text-primary">{eyebrow}</p>}
+            {eyebrow && <p className="text-xs font-semibold uppercase tracking-widest text-primary drop-shadow-xs">{eyebrow}</p>}
             <h1 className="font-display text-4xl font-bold uppercase leading-none text-balance">{title}</h1>
             {description && <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{description}</p>}
           </div>
@@ -30,12 +38,23 @@ export function ModuleHeader({
         </div>
         {children}
       </div>
-    </div>
+    </header>
   )
 }
 
-export function PageBody({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('mx-auto flex max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10', className)}>{children}</div>
+export function PageBody({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+  moduleId?: string
+}) {
+  return (
+    <div className={cn('mx-auto flex max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10', className)}>
+      {children}
+    </div>
+  )
 }
 
 export function Segmented<T extends string>({

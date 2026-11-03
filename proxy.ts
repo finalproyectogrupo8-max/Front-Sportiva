@@ -5,6 +5,14 @@ import { PLATFORM_COOKIE, SESSION_COOKIE } from '@/lib/session-cookies'
 // No llama a la API ni valida el token: eso lo hace requireSession() en cada página.
 export function proxy(request: NextRequest) {
   const hasSession = request.cookies.has(SESSION_COOKIE) || request.cookies.has(PLATFORM_COOKIE)
+  if (request.nextUrl.pathname === '/aceptar-invitacion') {
+    if (hasSession) return NextResponse.redirect(new URL('/clubes', request.url))
+
+    const response = NextResponse.next()
+    response.headers.set('Referrer-Policy', 'no-referrer')
+    return response
+  }
+
   if (!hasSession) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
@@ -14,5 +22,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Las rutas de autenticación y recuperación quedan públicas: el proxy solo protege módulos privados.
-  matcher: ['/clubes/:path*', '/c/:path*', '/admin/:path*', '/perfil/:path*', '/imprimir/:path*'],
+  matcher: ['/clubes/:path*', '/c/:path*', '/admin/:path*', '/perfil/:path*', '/imprimir/:path*', '/aceptar-invitacion'],
 }

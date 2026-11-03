@@ -236,6 +236,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/accept-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth.acceptInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -416,6 +432,24 @@ export interface paths {
         put: operations["categories.update"];
         post?: never;
         delete: operations["categories.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{category}/calendar-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Devuelve el link (lo crea la primera vez) */
+        get: operations["categoryCalendar.show"];
+        put?: never;
+        /** Genera un link nuevo: el anterior deja de funcionar */
+        post: operations["categoryCalendar.store"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -606,6 +640,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["clubUser.update"];
+        trace?: never;
+    };
+    "/club-users/{clubUser}/resend-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["clubUser.resendInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/coaches": {
@@ -1155,6 +1205,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/newsletter-subscribers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["newsletterSubscriber.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications": {
         parameters: {
             query?: never;
@@ -1422,6 +1488,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["playerContact.update"];
+        trace?: never;
+    };
+    "/public/calendar/{token}.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["publicCalendar.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/public/callups/respond/{token}": {
@@ -2009,6 +2091,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/users/{user}/resend-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["user.resendInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -2096,6 +2194,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptInviteRequest */
+        AcceptInviteRequest: {
+            /** Format: email */
+            email: string;
+            token: string;
+            password: string;
+            password_confirmation: string;
+        };
         /** AnnouncementRecipientResource */
         AnnouncementRecipientResource: {
             id: number;
@@ -2134,6 +2240,7 @@ export interface components {
             id: number;
             name: string;
             email: string;
+            status: string;
             is_active: boolean;
             is_platform_admin: boolean;
             created_at: string | null;
@@ -2914,6 +3021,7 @@ export interface components {
             email: string;
             /** @description Obligatorio si la persona todavía no tiene usuario en Sportiva. */
             name?: string | null;
+            password?: string | null;
             roles: string[];
             /** @description Deportes del coordinador de deporte. */
             sport_ids?: number[];
@@ -3268,7 +3376,7 @@ export interface components {
                 name?: string;
                 /** Format: email */
                 email?: string;
-                password?: string;
+                password?: string | null;
             };
         };
         /**
@@ -3291,7 +3399,7 @@ export interface components {
             name: string;
             /** Format: email */
             email: string;
-            password: string;
+            password?: string | null;
             is_platform_admin?: string;
             is_active?: string;
         };
@@ -3678,6 +3786,7 @@ export interface components {
             id: number;
             name: string;
             email: string;
+            status: string;
             /** @description Solo para que el front decida si muestra /admin: la API verifica el permiso en cada request. */
             is_platform_admin: boolean;
         };
@@ -4614,6 +4723,46 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "auth.acceptInvite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInviteRequest"];
+            };
+        };
+        responses: {
+            /** @description Invitación aceptada exitosamente. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+            /** @description Token inválido, vencido o email incorrecto. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                        errors: {
+                            email: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
     "auth.login": {
         parameters: {
             query?: never;
@@ -5126,6 +5275,70 @@ export interface operations {
             404: components["responses"]["ModelNotFoundException"];
         };
     };
+    "categoryCalendar.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            url: string;
+                            /** @description Para el calendario del celular (iPhone, Outlook). */
+                            webcal_url: null | unknown[] | string | Record<string, never>;
+                            /** @description Agregar en Google Calendar por URL. */
+                            google_url: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "categoryCalendar.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The category ID */
+                category: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            url: string;
+                            /** @description Para el calendario del celular (iPhone, Outlook). */
+                            webcal_url: null | unknown[] | string | Record<string, never>;
+                            /** @description Agregar en Google Calendar por URL. */
+                            google_url: string;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
     "categoryCoach.index": {
         parameters: {
             query?: {
@@ -5607,6 +5820,46 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "clubUser.resendInvite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The club user ID */
+                clubUser: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Invitación reenviada correctamente.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El usuario no tiene una invitación pendiente.";
+                        /** @constant */
+                        code: "not_invited";
+                    };
+                };
+            };
         };
     };
     "coaches.index": {
@@ -7522,6 +7775,46 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "newsletterSubscriber.index": {
+        parameters: {
+            query?: {
+                search?: string | null;
+                per_page?: number;
+                format?: "json" | "csv";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Transfer-Encoding"?: "chunked";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: number;
+                            email: string;
+                            subscribed_at: string | null;
+                        }[];
+                        meta: {
+                            total: number;
+                            current_page: number;
+                            last_page: number;
+                            from: number | null;
+                            to: number | null;
+                        };
+                    };
+                    "text/csv; charset=UTF-8": string;
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "notification.index": {
         parameters: {
             query?: {
@@ -8532,6 +8825,30 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "publicCalendar.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    "Content-Disposition"?: "inline; filename=\"calendario.ics\"";
+                    "Cache-Control"?: "public, max-age=900";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/calendar; charset=utf-8": string;
+                };
+            };
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "publicCallup.showPersonal": {
@@ -10816,6 +11133,47 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             403: components["responses"]["AuthorizationException"];
             404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "user.resendInvite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The user ID */
+                user: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "Invitación reenviada correctamente.";
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        message: "El usuario no tiene una invitación pendiente.";
+                        /** @constant */
+                        code: "not_invited";
+                    };
+                };
+            };
         };
     };
     "users.index": {
