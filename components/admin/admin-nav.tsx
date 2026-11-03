@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, Mail, MessageSquare, Users } from 'lucide-react'
+import { Building2, Mail, MessageSquare, ScrollText, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -30,6 +30,12 @@ const NAV_ITEMS = [
     icon: Mail,
     active: (path: string) => path.startsWith('/admin/newsletter'),
   },
+  {
+    href: '/admin/actividad',
+    label: 'Actividad',
+    icon: ScrollText,
+    active: (path: string) => path.startsWith('/admin/actividad'),
+  },
 ]
 
 interface AdminNavProps {
@@ -40,7 +46,10 @@ export function AdminNav({ newTicketsCount = 0 }: AdminNavProps) {
   const pathname = usePathname()
 
   return (
-    <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación del panel">
+    <nav
+      className="flex max-w-full items-center gap-1 overflow-x-auto pb-0.5 sm:gap-2 md:overflow-visible md:pb-0"
+      aria-label="Navegación del panel"
+    >
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon
         const isActive = item.active(pathname)
@@ -51,7 +60,7 @@ export function AdminNav({ newTicketsCount = 0 }: AdminNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+              'flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
               isActive
                 ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',

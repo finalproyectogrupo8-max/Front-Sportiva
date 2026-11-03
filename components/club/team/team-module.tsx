@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ComponentProps } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { UserPlus, Users } from 'lucide-react'
 import { inviteMemberAction, resendMemberInviteAction, updateMemberAction } from '@/app/(app)/c/[club]/equipo/actions'
@@ -9,6 +9,7 @@ import { UserStatusBadge } from '@/components/admin/user-status-badge'
 import { EmptyConfig } from '@/components/club/empty-state'
 import { ConfigSheet, ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { ModuleHeader, PageBody, Pill } from '@/components/club/shared'
+import { TeamActivity } from '@/components/club/team/team-activity'
 import { Button } from '@/components/ui/button'
 import { CLUB_TZ } from '@/lib/club-time'
 import { cn } from '@/lib/utils'
@@ -26,13 +27,29 @@ type Member = {
 type Role = { slug: string; name: string; description: string | null; is_system: boolean }
 type Named = { id: number; name: string }
 type Can = { invite: boolean; update: boolean; disable: boolean }
+type ActivityData = ComponentProps<typeof TeamActivity>['activity']
 
 /** Roles que trabajan con deportes asignados: piden elegirlos. */
 const SPORT_ROLES = ['sport_coordinator']
 
 const since = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('es-AR', { timeZone: CLUB_TZ, day: 'numeric', month: 'short', year: 'numeric' }) : '—')
 
-export function TeamModule({ members, roles, sports, startInvite, can }: { members: Member[]; roles: Role[]; sports: Named[]; startInvite: boolean; can: Can }) {
+export function TeamModule({
+  members,
+  roles,
+  sports,
+  startInvite,
+  activity,
+  can,
+}: {
+  members: Member[]
+  roles: Role[]
+  sports: Named[]
+  startInvite: boolean
+  /** undefined = el usuario no tiene `audit.view`: la sección no se muestra. */
+  activity?: ActivityData
+  can: Can
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const [inviting, setInviting] = useState(startInvite && can.invite)
@@ -71,6 +88,8 @@ export function TeamModule({ members, roles, sports, startInvite, can }: { membe
             {disabled.length > 0 && <MemberTable title={`Sin acceso · ${disabled.length}`} members={disabled} can={can} onEdit={setEditing} onToggle={setToggling} muted />}
           </>
         )}
+
+        {activity !== undefined && <TeamActivity activity={activity} />}
       </PageBody>
 
       {inviting && <InviteSheet roles={roles} sports={sports} onClose={closeInvite} />}
