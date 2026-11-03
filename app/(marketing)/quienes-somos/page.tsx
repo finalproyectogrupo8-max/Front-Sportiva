@@ -17,6 +17,7 @@ const items = [
 export default function QuienesSomosPage() {
   return (
     <InternalPage
+      bgImage="/images/fondo-quienes-somos.jpg"
       eyebrow="Tecnología con espíritu de club"
       title="ENTENDEMOS EL ESFUERZO"
       outline="DE HACER CLUB."

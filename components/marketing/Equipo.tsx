@@ -5,28 +5,41 @@ export interface MiembroEquipo {
   nombre: string
   rol: string
   inicial: string
+  descripcion: string
+  imagen?: string
 }
 
 export const miembrosEquipo: MiembroEquipo[] = [
   {
-    nombre: 'Facundo',
-    rol: 'Desarrollador Backend',
-    inicial: 'F',
-  },
-  {
     nombre: 'Martín',
-    rol: 'Arquitectura y Base de Datos',
+    rol: 'Arquitectura de Base de Datos y Gestión ABM',
     inicial: 'M',
+    descripcion:
+      'Colaboró en la arquitectura de datos y lideró la construcción de los módulos ABM. Optimizó los flujos de carga y validaciones para garantizar un registro muy ágil y robusto.',
   },
   {
     nombre: 'Sofía',
-    rol: 'Desarrolladora Frontend',
+    rol: 'Arquitectura de Base de Datos',
     inicial: 'S',
+    imagen: '/images/equipo/sofia.jpg',
+    descripcion:
+      'Estructuró el modelo de datos relacional y el esquema multitenant del club. Aseguró la total integridad referencial y la optimización de consultas para cada ficha y plantel.',
+  },
+  {
+    nombre: 'Facundo',
+    rol: 'Desarrollo Backend y APIs',
+    inicial: 'F',
+    imagen: '/images/equipo/facundo.jpg',
+    descripcion:
+      'Lideró el desarrollo del servidor y la arquitectura de APIs en Laravel. Implementó la autenticación por roles, permisos y endpoints centrales con gran solidez y rendimiento.',
   },
   {
     nombre: 'Tiziano',
-    rol: 'Desarrollador Full Stack y Diseño UI/UX',
+    rol: 'Desarrollo Frontend y UI/UX',
     inicial: 'T',
+    imagen: '/images/equipo/tiziano.jpg',
+    descripcion:
+      'Construyó la aplicación web interactiva utilizando Next.js y Tailwind CSS. Diseñó pantallas fluidas y muy accesibles, conectando cada flujo al backend con una total solidez.',
   },
 ]
 
@@ -34,7 +47,7 @@ export function Equipo() {
   return (
     <section className="relative w-full bg-[#111110] py-24 px-6 sm:px-12 text-white border-t border-zinc-800/80 overflow-hidden">
       {/* Fondo decorativo vectorizado con next/image */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
+      <div className="absolute inset-0 pointer-events-none z-0">
         <Image
           src="/images/court-pattern.svg"
           alt=""
@@ -64,24 +77,41 @@ export function Equipo() {
           {miembrosEquipo.map((miembro) => (
             <article
               key={miembro.nombre}
-              className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-8 flex flex-col items-center text-center justify-between h-full transition-all duration-300 hover:border-[#C8643C]/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/60 group"
+              className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-7 flex flex-col items-center text-center h-full transition-all duration-300 hover:border-[#C8643C]/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/60 group"
             >
-              <div className="flex flex-col items-center">
-                {/* Círculo para avatar / inicial */}
-                <div className="w-20 h-20 rounded-full bg-zinc-800/90 border-2 border-zinc-700/80 flex items-center justify-center text-2xl font-bold text-[#C8643C] group-hover:border-[#C8643C] group-hover:scale-105 transition-all duration-300 shadow-inner">
-                  {miembro.inicial}
+              <div className="flex flex-col items-center w-full">
+                {/* Círculo para avatar / foto */}
+                <div className="relative w-24 h-24 rounded-full bg-zinc-800/90 border-2 border-zinc-700/80 flex items-center justify-center text-2xl font-bold text-[#C8643C] group-hover:border-[#C8643C] group-hover:scale-105 transition-all duration-300 shadow-inner overflow-hidden shrink-0">
+                  {miembro.imagen ? (
+                    <Image
+                      src={miembro.imagen}
+                      alt={miembro.nombre}
+                      fill
+                      sizes="96px"
+                      className="object-cover object-center"
+                    />
+                  ) : (
+                    miembro.inicial
+                  )}
                 </div>
 
                 {/* Nombre */}
-                <h3 className="mt-5 text-xl font-bold text-white tracking-wide">
+                <h3 className="mt-4 text-xl font-bold text-white tracking-wide leading-tight">
                   {miembro.nombre}
                 </h3>
+
+                {/* Rol calibrado con altura fija unificada */}
+                <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#C8643C] h-12 flex items-center justify-center text-center text-balance leading-snug">
+                  {miembro.rol}
+                </span>
               </div>
 
-              {/* Rol */}
-              <p className="mt-4 text-sm text-zinc-400 font-medium leading-relaxed">
-                {miembro.rol}
-              </p>
+              {/* Contenedor de descripción con inicio y final perfectamente alineados */}
+              <div className="w-full border-t border-zinc-800/80 pt-4 mt-3 flex-1 flex flex-col justify-start">
+                <p className="text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed text-left">
+                  {miembro.descripcion}
+                </p>
+              </div>
             </article>
           ))}
         </div>

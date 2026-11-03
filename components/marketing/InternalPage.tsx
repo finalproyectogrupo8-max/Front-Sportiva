@@ -39,7 +39,7 @@ export default function InternalPage({
   items,
   statement,
   statementAccent,
-  bgImage = '/images/club-gym.png',
+  bgImage = '/images/fondo-quienes-somos.jpg',
   children,
 }: InternalPageProps) {
   return (

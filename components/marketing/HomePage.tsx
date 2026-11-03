@@ -251,7 +251,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           <span id="nosotros" className="sr-only" />
           <div className="why-background">
             <Image
-              src="/images/stadium-mesh.svg"
+              src="/images/fondo-quienes-somos.jpg"
               alt=""
               fill
               sizes="100vw"

@@ -18,7 +18,7 @@ const items = [
 export default function FuncionesPage() {
   return (
     <InternalPage
-      bgImage="/images/funciones-court.jpg"
+      bgImage="/images/fondo-funciones.jpg"
       eyebrow="Una plataforma. Todo tu club."
       title="LAS HERRAMIENTAS"
       outline="QUE ORDENAN EL JUEGO."
