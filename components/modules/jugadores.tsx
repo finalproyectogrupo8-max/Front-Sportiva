@@ -45,6 +45,7 @@ export function JugadoresModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="jugadores"
         eyebrow="Deportivo"
         title="Jugadores"
         description="Ficha de cada jugador: edad, categoría, estado del pase, puesto y datos de indumentaria."
@@ -83,7 +84,7 @@ export function JugadoresModule() {
         </div>
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="jugadores">
         <div className="overflow-hidden rounded-xl border bg-card">
           <table className="w-full text-sm">
             <caption className="sr-only">Listado de jugadores</caption>

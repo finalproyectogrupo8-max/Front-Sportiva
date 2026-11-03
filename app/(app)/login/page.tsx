@@ -5,7 +5,13 @@ import { Logo } from '@/components/brand/logo'
 import { LoginForm } from '@/components/auth/login-form'
 import { landingPath } from '@/lib/session'
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invitacion?: string }>
+}) {
+  const params = await searchParams
+
   // Si ya hay sesión, no tiene sentido mostrar el login.
   const destination = await landingPath()
   if (destination) redirect(destination)
@@ -63,6 +69,16 @@ export default async function LoginPage() {
               Accedé al panel de tu club con tu correo electrónico y contraseña.
             </p>
           </div>
+
+          {params.invitacion === 'aceptada' && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-sm text-emerald-300"
+            >
+              Listo, ya podés ingresar.
+            </p>
+          )}
 
           <LoginForm />
         </div>

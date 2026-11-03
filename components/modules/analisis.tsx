@@ -68,6 +68,7 @@ export function AnalisisModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="analisis"
         eyebrow="Deportivo"
         title="Análisis de jugadores"
         description="Eficacia, constancia y horas de práctica comparadas contra el promedio del plantel."
@@ -83,7 +84,7 @@ export function AnalisisModule() {
         />
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="analisis">
         {current && (
           <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
             <section className="flex flex-col gap-4 rounded-xl border bg-card p-5">

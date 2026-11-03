@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, CalendarClock, MapPin } from 'lucide-react'
 import { TODAY, daysFromToday, formatDay, points } from '@/lib/data'
 import type { ModuleId } from '@/lib/modules'
@@ -70,7 +71,27 @@ export function HomeDashboard() {
   return (
     <div className="flex flex-col">
       <section className="relative overflow-hidden bg-ink text-ink-foreground">
-        <div className="court-lines absolute inset-0 text-ink-foreground" aria-hidden="true" />
+        {/* Panoramic Club Arena Background */}
+        <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden="true">
+          <Image
+            src="/images/club-gym.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-60"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse at 80% 25%, rgba(200, 118, 80, 0.40) 0%, rgba(212, 186, 163, 0.15) 50%, transparent 75%)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/75 to-ink/40" />
+        </div>
+
+        <div className="court-lines absolute inset-0 text-ink-foreground opacity-50" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-[120rem] gap-8 px-4 py-8 sm:px-6 lg:px-10 lg:grid-cols-[1fr_1.15fr] lg:py-10">
           <div className="flex flex-col justify-between gap-6 animate-rise">
             <div className="flex flex-col gap-2">

@@ -66,7 +66,7 @@ export function RoleChecklist({
         })}
       </div>
       <p className="text-[11px] text-muted-foreground">Podés elegir más de uno: los permisos se suman.</p>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p role="alert" aria-live="polite" className="text-xs text-destructive">{error}</p>}
     </fieldset>
   )
 }

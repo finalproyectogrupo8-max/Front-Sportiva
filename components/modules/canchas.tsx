@@ -86,6 +86,7 @@ export function CanchasModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="canchas"
         eyebrow="Infraestructura"
         title="Estado de canchas"
         description="Aros, tableros, piso, arcos, relojes e iluminación. Limpieza diaria y mantenimiento con historial."
@@ -98,7 +99,7 @@ export function CanchasModule() {
           )
         }
       />
-      <PageBody>
+      <PageBody moduleId="canchas">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Elementos operativos" value={`${all.filter((e) => e.estado === 'ok').length}/${all.length}`} />
           <Stat label="A revisar" value={all.filter((e) => e.estado === 'revisar').length} />

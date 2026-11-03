@@ -37,6 +37,7 @@ export function CompetenciaModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="competencia"
         eyebrow="Deportivo"
         title="Proyecto deportivo"
         description="Objetivos de temporada, tabla de posiciones, puntos a favor y en contra, y estadísticas por partido."
@@ -44,7 +45,7 @@ export function CompetenciaModule() {
         <Segmented label="Deporte" value={sport} onChange={setSport} options={tenant.sports.map((s) => ({ value: s, label: s }))} />
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="competencia">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <Stat label="Posición" value={`${pos}°`} hint={standing.torneo} />
           <Stat label="Puntos" value={points(own)} hint={`${own.pg}G · ${own.pp}P`} />

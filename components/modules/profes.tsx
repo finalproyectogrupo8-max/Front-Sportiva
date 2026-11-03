@@ -44,11 +44,12 @@ export function ProfesModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="profes"
         eyebrow="Operación"
         title="Control de profes"
         description="Asistencia a entrenamientos, cumplimiento de la planificación y seguimiento de jugadores a cargo."
       />
-      <PageBody>
+      <PageBody moduleId="profes">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Profes activos" value={data.coaches.length} />
           <Stat label="Asistencia promedio" value={`${avgAsist}%`} hint="entrenamientos dictados / planificados" />

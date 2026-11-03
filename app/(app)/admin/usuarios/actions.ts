@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminUser, updateAdminUser } from '@/lib/api/admin'
+import { createAdminUser, resendAdminUserInvite, updateAdminUser } from '@/lib/api/admin'
 import { fieldError } from '@/lib/api/validation-messages'
 import { requirePlatformAdmin } from '@/lib/session'
 
@@ -12,7 +12,6 @@ export type CreateUserState = {
   fieldErrors?: {
     name?: string
     email?: string
-    password?: string
   }
   values?: {
     name?: string
@@ -31,29 +30,22 @@ export async function createUserAction(
 
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim()
-  const password = String(formData.get('password') ?? '')
 
   // Pre-validaciones básicas en servidor
-  const fieldErrors: { name?: string; email?: string; password?: string } = {}
+  const fieldErrors: { name?: string; email?: string } = {}
   if (!name) {
     fieldErrors.name = 'El nombre es obligatorio.'
   }
   if (!email) {
     fieldErrors.email = 'El email es obligatorio.'
   }
-  if (!password) {
-    fieldErrors.password = 'La contraseña es obligatoria.'
-  } else if (password.length < 12) {
-    fieldErrors.password = 'La contraseña debe tener al menos 12 caracteres.'
-  }
-
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, fieldErrors, values: { name, email } }
   }
 
   let result
   try {
-    result = await createAdminUser({ name, email, password })
+    result = await createAdminUser({ name, email })
   } catch {
     return {
       ok: false,
@@ -69,7 +61,6 @@ export async function createUserAction(
         fieldErrors: {
           name: fieldError(result.errors, 'name'),
           email: fieldError(result.errors, 'email'),
-          password: fieldError(result.errors, 'password'),
         },
         values: { name, email },
       }
@@ -95,7 +86,7 @@ export async function createUserAction(
 
   return {
     ok: true,
-    message: `Usuario ${result.data.data.name} creado correctamente.`,
+    message: `Enviamos una invitación a ${result.data.data.email}.`,
     user: { id: result.data.data.id, name: result.data.data.name, email: result.data.data.email },
     timestamp: Date.now(),
   }
@@ -128,3 +119,37 @@ export async function toggleUserStatusAction(
   return { ok: true, is_active: result.data.data.is_active }
 }
 
+export async function resendAdminInviteAction(
+  userId: number,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requirePlatformAdmin()
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return { ok: false, error: 'El usuario seleccionado no es válido.' }
+  }
+
+  let result
+  try {
+    result = await resendAdminUserInvite(userId)
+  } catch {
+    return { ok: false, error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.' }
+  }
+
+  if (!result.ok) {
+    if (result.status === 409) {
+      return { ok: false, error: 'La invitación ya no está pendiente. Refrescá la lista.' }
+    }
+    if (result.kind === 'rate_limited') {
+      const retryMessage = result.retryAfter
+        ? ` Probá de nuevo en ${result.retryAfter} segundos.`
+        : ' Esperá un rato antes de intentar de nuevo.'
+      return { ok: false, error: `Alcanzaste el límite de reenvíos.${retryMessage}` }
+    }
+    if (result.kind === 'forbidden') {
+      return { ok: false, error: 'No tenés permisos para reenviar esta invitación.' }
+    }
+    return { ok: false, error: 'No se pudo reenviar la invitación. Probá de nuevo.' }
+  }
+
+  revalidatePath('/admin/usuarios')
+  return { ok: true }
+}

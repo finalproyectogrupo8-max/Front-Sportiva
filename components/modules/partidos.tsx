@@ -38,6 +38,7 @@ export function PartidosModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="partidos"
         eyebrow="Deportivo"
         title="Partidos"
         description="Día, horario, sede y color de ropa de juego para cada categoría. Compartilo con planteles y familias."
@@ -69,7 +70,7 @@ export function PartidosModule() {
         </div>
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="partidos">
         {Object.entries(groups).map(([fecha, matches]) => {
           const d = daysFromToday(fecha)
           return (

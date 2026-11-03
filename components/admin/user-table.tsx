@@ -1,15 +1,18 @@
 'use client'
 
 import { useTransition } from 'react'
-import { CheckCircle2, Loader2, ShieldCheck, UserX, XCircle } from 'lucide-react'
+import { Loader2, ShieldCheck, UserX } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AssignClubDialog } from '@/components/admin/assign-club-dialog'
 import { toggleUserStatusAction } from '@/app/(app)/admin/usuarios/actions'
+import { resendAdminInviteAction } from '@/app/(app)/admin/usuarios/actions'
 import type { AdminUser } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
+import { UserStatusBadge } from '@/components/admin/user-status-badge'
+import { ResendInviteButton } from '@/components/admin/resend-invite-button'
 
 
 function StatusToggle({ user }: { user: AdminUser }) {
@@ -127,23 +130,7 @@ export function UserTable({ users }: { users: AdminUser[] }) {
 
                 {/* Estado */}
                 <td className="px-4 py-3">
-                  {user.is_active ? (
-                    <Badge
-                      variant="outline"
-                      className="gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-normal"
-                    >
-                      <CheckCircle2 className="size-3" aria-hidden="true" />
-                      Activo
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="outline"
-                      className="gap-1 border-muted bg-muted/60 text-muted-foreground text-xs font-normal"
-                    >
-                      <XCircle className="size-3" aria-hidden="true" />
-                      Inactivo
-                    </Badge>
-                  )}
+                  <UserStatusBadge status={user.status} />
                 </td>
 
                 {/* Fecha */}
@@ -156,7 +143,14 @@ export function UserTable({ users }: { users: AdminUser[] }) {
                   <div className="flex items-center justify-end gap-1.5">
                     {/* Los admins de plataforma siempre entran a /admin: una membresía no les sirve. */}
                     {user.is_active && !user.is_platform_admin && <AssignClubDialog user={user} />}
-                    <StatusToggle user={user} />
+                    {user.status === 'invited' ? (
+                      <ResendInviteButton
+                        name={user.email}
+                        onResend={() => resendAdminInviteAction(user.id)}
+                      />
+                    ) : (
+                      <StatusToggle user={user} />
+                    )}
                   </div>
                 </td>
               </tr>

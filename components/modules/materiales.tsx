@@ -57,6 +57,7 @@ export function MaterialesModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="materiales"
         eyebrow="Operación"
         title="Materiales"
         description="Stock de utilería por depósito y circuito de reposición: solicitud, aprobación e ingreso."
@@ -81,7 +82,7 @@ export function MaterialesModule() {
         />
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="materiales">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Ítems en inventario" value={data.materials.length} />
           <Stat label="Unidades totales" value={data.materials.reduce((s, m) => s + m.stock, 0)} />

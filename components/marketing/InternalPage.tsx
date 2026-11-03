@@ -22,6 +22,7 @@ type InternalPageProps = {
   items: Item[]
   statement: string
   statementAccent: string
+  bgImage?: string
   children?: ReactNode
 }
 
@@ -38,25 +39,27 @@ export default function InternalPage({
   items,
   statement,
   statementAccent,
+  bgImage = '/images/club-gym.png',
   children,
 }: InternalPageProps) {
   return (
     <PageShell>
       <section className="route-hero relative">
-        <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
           <Image
-            src="/images/club-gym.png"
+            src={bgImage}
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-20"
+            className="object-cover object-center opacity-70"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#10100f] via-[#10100f]/85 to-[#10100f]/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#10100f]/90 via-[#10100f]/55 to-[#10100f]/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#10100f] via-transparent to-transparent" />
         </div>
-        <div className="route-grid" aria-hidden="true" />
+        <div className="route-grid pointer-events-none z-0" aria-hidden="true" />
         <motion.div
-          className="route-hero-copy"
+          className="route-hero-copy relative z-10"
           initial="hidden"
           animate="visible"
           variants={reveal}
@@ -70,7 +73,7 @@ export default function InternalPage({
           </Link>
         </motion.div>
         <motion.div
-          className="route-panel"
+          className="route-panel relative z-10"
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: .7, delay: .15 }}

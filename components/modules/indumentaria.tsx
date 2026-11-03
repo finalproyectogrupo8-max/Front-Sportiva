@@ -70,6 +70,7 @@ export function IndumentariaModule() {
   return (
     <>
       <ModuleHeader
+        moduleId="indumentaria"
         eyebrow="Operación"
         title="Indumentaria"
         description="Pedidos de camisetas, shorts y abrigos por jugador, con talle, número y alias estampado."
@@ -97,7 +98,7 @@ export function IndumentariaModule() {
         />
       </ModuleHeader>
 
-      <PageBody>
+      <PageBody moduleId="indumentaria">
         <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 xl:grid-cols-4">
           {ESTADOS_PEDIDO.map((estado) => {
             const col = orders.filter((o) => o.estado === estado)

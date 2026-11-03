@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { ClubProvider } from '@/components/club/club-provider'
 import { TopBar } from '@/components/club/top-bar'
+import { PageBackground } from '@/components/club/module-background'
 import { requireSession } from '@/lib/session'
 import { getClubData } from '@/lib/data'
 import { normalizeTenant } from '@/lib/tenants'
@@ -50,7 +51,10 @@ export default async function ClubLayout({
           userRole={roles.length > 0 ? roles.join(' · ') : 'Sin rol en el club'}
           userTenants={session.tenants}
         />
-        <main className="flex-1">{children}</main>
+        <div className="relative flex-1 isolate min-h-[calc(100dvh-5rem)]">
+          <PageBackground />
+          <main className="relative z-10 flex-1">{children}</main>
+        </div>
       </div>
     </ClubProvider>
   )

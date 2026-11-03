@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" fill="none" width="100%" height="100%">
+  <defs>
+    <marker id="coachArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#C87650" />
+    </marker>
+    <radialGradient id="coachGlow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#C87650" stop-opacity="0.15" />
+      <stop offset="55%" stop-color="#C87650" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#C87650" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1440" height="900" fill="url(#coachGlow)" />
+
+  <!-- Coach Clipboard Frame (Center) -->
+  <g transform="translate(720, 450)">
+    <!-- Board Outline -->
+    <rect x="-420" y="-360" width="840" height="720" rx="24" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.2" fill="none" />
+    <rect x="-400" y="-340" width="800" height="680" rx="16" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="10 8" fill="none" />
+
+    <!-- Top Metallic Clip -->
+    <rect x="-110" y="-380" width="220" height="40" rx="8" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" fill="#10100F" />
+    <circle cx="0" cy="-360" r="8" stroke="#C87650" stroke-width="2" fill="none" />
+
+    <!-- Training Cones (Triangles with high-visibility stripe) -->
+    <!-- Cone 1 -->
+    <g transform="translate(-260, -180)">
+      <polygon points="0,-24 -16,14 16,14" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="#C87650" fill-opacity="0.15" />
+      <line x1="-10" y1="2" x2="10" y2="2" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+    <!-- Cone 2 -->
+    <g transform="translate(0, -220)">
+      <polygon points="0,-24 -16,14 16,14" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="#C87650" fill-opacity="0.15" />
+      <line x1="-10" y1="2" x2="10" y2="2" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+    <!-- Cone 3 -->
+    <g transform="translate(260, -180)">
+      <polygon points="0,-24 -16,14 16,14" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="#C87650" fill-opacity="0.15" />
+      <line x1="-10" y1="2" x2="10" y2="2" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+    <!-- Cone 4 (Lower) -->
+    <g transform="translate(-140, 160)">
+      <polygon points="0,-24 -16,14 16,14" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="#C87650" fill-opacity="0.15" />
+      <line x1="-10" y1="2" x2="10" y2="2" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+    <!-- Cone 5 (Lower) -->
+    <g transform="translate(140, 160)">
+      <polygon points="0,-24 -16,14 16,14" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="#C87650" fill-opacity="0.15" />
+      <line x1="-10" y1="2" x2="10" y2="2" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+
+    <!-- Slalom / Agility Drill Movement Route -->
+    <path d="M -300 240 C -300 0, -200 -120, -140 -20 C -80 80, -20 -160, 40 -60 C 100 40, 200 -120, 260 20 C 300 120, 320 240, 320 240"
+      stroke="#C87650" stroke-width="2.5" stroke-dasharray="10 6" stroke-opacity="0.6" fill="none" marker-end="url(#coachArrow)" />
+
+    <!-- Coach Whistle & Stopwatch vector lines (Bottom Left) -->
+    <g transform="translate(-280, 200)">
+      <circle cx="0" cy="0" r="30" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.4" fill="none" />
+      <line x1="0" y1="-30" x2="0" y2="-40" stroke="#D4BAA3" stroke-width="3" stroke-opacity="0.4" />
+      <line x1="0" y1="0" x2="0" y2="-18" stroke="#C87650" stroke-width="2" stroke-opacity="0.6" />
+      <line x1="0" y1="0" x2="14" y2="6" stroke="#C87650" stroke-width="2" stroke-opacity="0.6" />
+    </g>
+
+    <!-- Attendance Checklist Vector Graphic (Bottom Right) -->
+    <g transform="translate(240, 180)" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.35">
+      <rect x="-40" y="-30" width="80" height="60" rx="4" fill="none" />
+      <line x1="-30" y1="-15" x2="0" y2="-15" />
+      <path d="M 12 -17 L 18 -11 L 28 -21" stroke="#C87650" stroke-width="2" stroke-opacity="0.8" fill="none" />
+      <line x1="-30" y1="2" x2="0" y2="2" />
+      <path d="M 12 0 L 18 6 L 28 -4" stroke="#C87650" stroke-width="2" stroke-opacity="0.8" fill="none" />
+      <line x1="-30" y1="19" x2="10" y2="19" />
+    </g>
+  </g>
+</svg>
+

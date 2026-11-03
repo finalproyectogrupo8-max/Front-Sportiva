@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search } from 'lucide-react'
+import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, UsersRound } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -40,6 +40,7 @@ export function TopBar({
   const pathname = usePathname()
   const base = `/c/${tenant.slug}`
   const current = getModule(pathname.split('/')[3] ?? '')
+  const isTeamPage = pathname === `${base}/equipo`
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
   const alerts = useAlerts()
@@ -55,7 +56,7 @@ export function TopBar({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const CurrentIcon = current?.icon ?? House
+  const CurrentIcon = isTeamPage ? UsersRound : current?.icon ?? House
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-md">
@@ -131,7 +132,7 @@ export function TopBar({
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-2" />} aria-label="Cambiar de módulo">
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
-            <span className="font-medium">{current?.name ?? 'Hoy'}</span>
+            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? 'Hoy'}</span>
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
@@ -139,6 +140,15 @@ export function TopBar({
               <House className="size-4" aria-hidden="true" />
               <span className="font-medium">Hoy en el club</span>
             </DropdownMenuItem>
+            {can('club_users.view') && (
+              <DropdownMenuItem
+                render={<Link href={`${base}/equipo`} />}
+                className={cn('mb-1 gap-3 py-2', isTeamPage && 'bg-muted')}
+              >
+                <UsersRound className="size-4" aria-hidden="true" />
+                <span className="font-medium">Equipo del club</span>
+              </DropdownMenuItem>
+            )}
             <div className="grid grid-cols-2 gap-1">
               {modules.map((m) => (
                 <DropdownMenuItem

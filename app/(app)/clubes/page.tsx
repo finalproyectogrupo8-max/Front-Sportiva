@@ -4,6 +4,7 @@ import { LogOut, Plus, Settings2, ShieldAlert } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/brand/logo'
 import { ClubSelector } from '@/components/club/club-selector'
+import { PageBackground } from '@/components/club/module-background'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { logout } from '@/lib/auth'
 import { requireSession } from '@/lib/session'
@@ -26,8 +27,9 @@ export default async function ClubesPage({
   const hasNoTenants = session.tenants.length === 0
 
   return (
-    <main className="min-h-dvh">
-      <header className="mx-auto flex max-w-[120rem] items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-10">
+    <main className="relative min-h-dvh isolate overflow-hidden">
+      <PageBackground moduleId="clubes" />
+      <header className="relative z-10 mx-auto flex max-w-[120rem] items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-10">
         <Logo />
         <nav aria-label="Navegación de la plataforma" className="flex items-center gap-2">
           {session.user.is_platform_admin && (
@@ -49,7 +51,7 @@ export default async function ClubesPage({
         </nav>
       </header>
 
-      <section className="mx-auto flex max-w-[120rem] flex-col gap-10 px-4 pb-16 pt-8 sm:px-6 lg:px-10">
+      <section className="relative z-10 mx-auto flex max-w-[120rem] flex-col gap-10 px-4 pb-16 pt-8 sm:px-6 lg:px-10">
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">Hola, {session.user.name}</p>
           <h1 className="font-display text-5xl font-bold uppercase leading-none text-balance">

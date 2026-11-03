@@ -16,7 +16,8 @@ export type PaginatedAdminUsers = {
     prev: string | null
     next: string | null
   }
-  meta: {
+
+    meta: {
     current_page: number
     from: number | null
     last_page: number
@@ -45,7 +46,7 @@ export type AdminUsersQuery = {
 export type CreateAdminUserData = {
   name: string
   email: string
-  password: string
+  password?: string
   is_platform_admin?: string
   is_active?: string
 }
@@ -96,6 +97,14 @@ export async function updateAdminUser(
     method: 'PATCH',
     auth: 'platform',
     body: data,
+  })
+}
+
+/** `POST /admin/users/{user}/resend-invite` */
+export async function resendAdminUserInvite(userId: number): Promise<ApiResult<{ message: string }>> {
+  return apiFetch<{ message: string }>(`/admin/users/${userId}/resend-invite`, {
+    method: 'POST',
+    auth: 'platform',
   })
 }
 
@@ -152,7 +161,7 @@ export type CreateAdminTenantData = {
   name: string
   slug: string
   /** Opcional: se crea este usuario y se lo asocia al club como administrador. */
-  admin?: { name: string; email: string; password: string }
+  admin?: { name: string; email: string; password?: string }
 }
 
 export type UpdateAdminTenantData = {

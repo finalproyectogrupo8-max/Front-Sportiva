@@ -19,7 +19,6 @@ export type CreateTenantState = {
     slug?: string
     admin_name?: string
     admin_email?: string
-    admin_password?: string
   }
   values?: {
     name?: string
@@ -45,7 +44,6 @@ export async function createTenantAction(
   const rawSlug = String(formData.get('slug') ?? '').trim().toLowerCase()
   const adminName = String(formData.get('admin_name') ?? '').trim()
   const adminEmail = String(formData.get('admin_email') ?? '').trim()
-  const adminPassword = String(formData.get('admin_password') ?? '')
   const values = { name, slug: rawSlug, admin_name: adminName, admin_email: adminEmail }
 
   const fieldErrors: NonNullable<CreateTenantState['fieldErrors']> = {}
@@ -64,7 +62,6 @@ export async function createTenantAction(
 
   if (!adminName) fieldErrors.admin_name = 'El nombre del administrador es obligatorio.'
   if (!adminEmail) fieldErrors.admin_email = 'El email del administrador es obligatorio.'
-  if (adminPassword.length < 12) fieldErrors.admin_password = 'La contraseña debe tener al menos 12 caracteres.'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, fieldErrors, values }
@@ -76,7 +73,7 @@ export async function createTenantAction(
     result = await createAdminTenant({
       name,
       slug: rawSlug,
-      admin: { name: adminName, email: adminEmail, password: adminPassword },
+      admin: { name: adminName, email: adminEmail },
     })
   } catch {
     return {
@@ -95,7 +92,6 @@ export async function createTenantAction(
           slug: fieldError(result.errors, 'slug'),
           admin_name: fieldError(result.errors, 'admin.name'),
           admin_email: fieldError(result.errors, 'admin.email'),
-          admin_password: fieldError(result.errors, 'admin.password'),
         },
         values,
       }

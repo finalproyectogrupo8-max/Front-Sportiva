@@ -143,7 +143,7 @@ function ClubFormFields({
         <div className="flex flex-col gap-0.5">
           <h3 className="text-sm font-semibold text-foreground">Administrador del club</h3>
           <p className="text-xs text-muted-foreground">
-            Se crea este usuario y queda asociado al club. Entra con este email y contraseña.
+            Le vamos a enviar una invitación por mail para que elija su contraseña.
           </p>
         </div>
         <AdminField
@@ -164,15 +164,6 @@ function ClubFormFields({
           autoComplete="off"
           defaultValue={state.values?.admin_email}
           error={state.fieldErrors?.admin_email}
-        />
-        <AdminField
-          id="create-club-admin-password"
-          name="admin_password"
-          type="password"
-          label="Contraseña inicial"
-          placeholder="Mínimo 12 caracteres"
-          autoComplete="new-password"
-          error={state.fieldErrors?.admin_password}
         />
       </fieldset>
 
