@@ -59,9 +59,17 @@ Los mails que manda la API (recuperar contraseña, convocatorias, comunicados) n
 
 ### Paso 2: el front
 
+Automático (instala Node 24 y pnpm si faltan, crea el `.env.local`, instala dependencias y levanta la app):
+
 ```bash
 git clone https://github.com/finalproyectogrupo8-max/Front-Sportiva.git gestion-operativa-club-deportivo
 cd gestion-operativa-club-deportivo
+bash scripts/setup.sh
+```
+
+A mano, si preferís tener el control:
+
+```bash
 cp .env.example .env.local        # API_URL=http://127.0.0.1:8000/api
 pnpm install --frozen-lockfile
 pnpm dev                          # http://localhost:3000
@@ -69,9 +77,12 @@ pnpm dev                          # http://localhost:3000
 
 En el `.env` de la API, `FRONTEND_URL` tiene que apuntar a esta URL (los links de los mails la usan).
 
-### Paso 3: crear un club y entrar
+### Paso 3: entrar
 
-1. Entrá a <http://localhost:3000/login> con `admin@sportiva.com` / `admin123`. Llegás al **panel admin**.
+La API ya viene con datos de demo: un club **Demo Sportiva** con jugadores, partidos, stock y pedidos. El detalle de todas las cuentas está en `docs/datos-demo.md` del repo de la API.
+
+1. Entrá a <http://localhost:3000/login> con `admin.club@sportiva.com` / `demo1234`: sos el administrador del club demo y entrás directo a `/c/demo`. Para el panel de plataforma, usá `admin@sportiva.com` / `admin123`.
+2. Si querés crear otro club: **Clubes → Nuevo club** con `admin@sportiva.com`.
 2. **Clubes → Nuevo club:** nombre, slug (por ejemplo `club_demo`) y su administrador inicial. La base del club se crea en segundo plano (la cola corre en Docker): esperá a que diga **Activo**.
 3. Cerrá sesión y entrá con el administrador del club que cargaste. Llegás a `/c/club_demo`.
 4. La guía "Configurar club" (arriba a la derecha) te lleva por los primeros pasos: deporte, temporada y categorías. Después, jugadores y partidos.
@@ -80,6 +91,7 @@ En el `.env` de la API, `FRONTEND_URL` tiene que apuntar a esta URL (los links d
 
 | Comando | Qué hace |
 | --- | --- |
+| `bash scripts/setup.sh` | Deja el front listo desde cero: Node 24, pnpm, `.env.local`, dependencias y servidor. Se puede correr siempre |
 | `pnpm dev` | Servidor de desarrollo con hot reload (puerto 3000; otro con `pnpm dev --port 3125`) |
 | `pnpm build` / `pnpm start` | Build de producción y servirlo |
 | `pnpm lint` | ESLint |
@@ -103,6 +115,7 @@ Los valores locales van en `.env.local`, que no se commitea. Cada variable nueva
 | No llega un mail | Está en Mailpit (<http://localhost:8025>). Si tampoco, reiniciá la cola: `php artisan queue:restart` |
 | Errores de tipos después de un pull de la API | `pnpm api:types` |
 | Errores raros después de un pull | `pnpm install`; si sigue, borrá `.next/` y reiniciá `pnpm dev` |
+| `EPROTO: The TLS handshake failed` o `ERR_SSL_PROTOCOL_ERROR` | Estás abriendo con `https://` un puerto local que habla HTTP. Usá `http://127.0.0.1:3000`, y revisá que `API_URL` en `.env.local` empiece con `http://` (volver a correr `bash scripts/setup.sh` lo corrige) |
 | Puerto 3000 ocupado | `pnpm dev --port 3001` (y actualizá `FRONTEND_URL` en la API) |
 
 ---
