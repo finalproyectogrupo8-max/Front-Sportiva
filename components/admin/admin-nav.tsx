@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, MessageSquare, Users } from 'lucide-react'
+import { Building2, Mail, MessageSquare, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -23,6 +23,12 @@ const NAV_ITEMS = [
     label: 'Tickets',
     icon: MessageSquare,
     active: (path: string) => path.startsWith('/admin/tickets'),
+  },
+  {
+    href: '/admin/newsletter',
+    label: 'Newsletter',
+    icon: Mail,
+    active: (path: string) => path.startsWith('/admin/newsletter'),
   },
 ]
 

@@ -1,7 +1,10 @@
 import {
   CalendarDays,
+  UserCog,
+  Megaphone,
   ClipboardCheck,
   Package,
+  ShieldCheck,
   Shirt,
   Target,
   TrendingUp,
@@ -11,6 +14,7 @@ import {
 } from 'lucide-react'
 
 export type ModuleId =
+  | 'habilitacion'
   | 'indumentaria'
   | 'materiales'
   | 'partidos'
@@ -19,6 +23,8 @@ export type ModuleId =
   | 'competencia'
   | 'profes'
   | 'canchas'
+  | 'comunicados'
+  | 'equipo'
 
 export type ModuleDef = {
   id: ModuleId
@@ -35,6 +41,7 @@ export type ModuleDef = {
 
 export const MODULES: ModuleDef[] = [
   { id: 'partidos', name: 'Partidos', description: 'Fixture, horarios, sedes y ropa de juego', icon: CalendarDays, area: 'Deportivo', permissions: ['matches.view', 'trainings.view', 'attendance.view'] },
+  { id: 'habilitacion', name: 'Habilitación', description: 'Quién puede jugar y qué papeles le faltan', icon: ShieldCheck, area: 'Deportivo', permissions: ['player_requirements.view'] },
   { id: 'jugadores', name: 'Jugadores', description: 'Fichas, categorías, pases y puestos', icon: Users, area: 'Deportivo', permissions: ['players.view'] },
   { id: 'analisis', name: 'Análisis', description: 'Eficacia, constancia y práctica', icon: TrendingUp, area: 'Deportivo', permissions: ['physical_evaluations.view'] },
   { id: 'competencia', name: 'Proyecto', description: 'Objetivos, tabla y estadísticas', icon: Target, area: 'Deportivo', permissions: ['project.view'] },
@@ -42,6 +49,8 @@ export const MODULES: ModuleDef[] = [
   { id: 'indumentaria', name: 'Indumentaria', description: 'Pedidos por talle, número y alias', icon: Shirt, area: 'Operación', permissions: ['apparel_orders.view', 'apparel_items.view'] },
   { id: 'materiales', name: 'Materiales', description: 'Stock y reposición de utilería', icon: Package, area: 'Operación', permissions: ['inventory.view', 'material_orders.view', 'materials.view'] },
   { id: 'canchas', name: 'Canchas', description: 'Estado, limpieza y mantenimiento', icon: Warehouse, area: 'Infraestructura', permissions: ['facilities.view', 'repairs.view', 'maintenance.view'] },
+  { id: 'comunicados', name: 'Comunicados', description: 'Mails a jugadores, tutores y staff', icon: Megaphone, area: 'Operación', permissions: ['announcements.view'] },
+  { id: 'equipo', name: 'Equipo', description: 'Staff del club, sus roles y su acceso', icon: UserCog, area: 'Operación', permissions: ['club_users.view'] },
 ]
 
 /** Altas rápidas (top bar y buscador): cada una pide el permiso de crear en su recurso. */

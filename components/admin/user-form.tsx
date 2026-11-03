@@ -36,7 +36,7 @@ export function NewUserSheet() {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:sm:max-w-md">
+        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
           {open && <NewUserFlow key={session} onAnother={openNew} onClose={() => setOpen(false)} />}
         </SheetContent>
       </Sheet>

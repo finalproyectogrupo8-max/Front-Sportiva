@@ -109,7 +109,7 @@ export async function resendAdminUserInvite(userId: number): Promise<ApiResult<{
 }
 
 /* ==========================================================================
-   CLUBES (TENANTS)
+   CLUBES
    ========================================================================== */
 
 export type AdminTenant = Schemas['TenantResource']
@@ -167,6 +167,10 @@ export type CreateAdminTenantData = {
 export type UpdateAdminTenantData = {
   name?: string
   status?: 'active' | 'suspended'
+  short_name?: string | null
+  city?: string | null
+  founded_year?: number | null
+  primary_color?: string | null
 }
 
 /**
@@ -486,4 +490,40 @@ export async function getUserMemberships(
     auth: 'platform',
     query,
   })
+}
+
+/**
+ * `POST /admin/users/{user}/send-password-reset`
+ * Le manda al usuario el mail para elegir una contraseña nueva (si está activo).
+ */
+export async function sendAdminPasswordReset(userId: number): Promise<ApiResult<{ message: string }>> {
+  return apiFetch<{ message: string }>(`/admin/users/${userId}/send-password-reset`, {
+    method: 'POST',
+    auth: 'platform',
+  })
+}
+
+/**
+ * `DELETE /admin/tenants/{tenant}`
+ * Baja lógica del club (soft delete): deja de aparecer y sus usuarios no pueden entrar.
+ * La base del club no se borra (ver docs del runbook para purgarla).
+ */
+export async function deleteAdminTenant(tenantId: number): Promise<ApiResult<null>> {
+  return apiFetch<null>(`/admin/tenants/${tenantId}`, {
+    method: 'DELETE',
+    auth: 'platform',
+  })
+}
+
+/* ==========================================================================
+   NEWSLETTER (FRO-27)
+   ========================================================================== */
+
+export type NewsletterSubscriber = { id: number; email: string; subscribed_at: string | null }
+
+/** `GET /admin/newsletter-subscribers`: suscriptores de la landing. */
+export async function getNewsletterSubscribers(query: { search?: string; page?: number; per_page?: number } = {}): Promise<
+  ApiResult<{ data: NewsletterSubscriber[]; meta: { total: number; current_page: number; last_page: number; from: number | null; to: number | null } }>
+> {
+  return apiFetch('/admin/newsletter-subscribers', { auth: 'platform', query: { per_page: 50, ...query } })
 }

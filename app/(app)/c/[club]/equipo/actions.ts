@@ -1,111 +1,47 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { createClubTeamUser, resendClubTeamInvite } from '@/lib/api/club-users'
-import { fieldError } from '@/lib/api/validation-messages'
-import { requireClubSession } from '@/lib/session'
+import { failure, revalidateClub, runCall, type ActionResult } from '@/lib/action-result'
+import { inviteMember, resendTeamInvite, updateMember, type InviteInput, type MemberUpdate } from '@/lib/api/team'
+import { requireSession } from '@/lib/session'
 
-export type InviteClubUserState = {
-  ok?: boolean
-  message?: string
-  error?: string
-  fieldErrors?: { name?: string; email?: string; roles?: string }
-  values?: { name?: string; email?: string; roles?: string[] }
-  timestamp?: number
-}
+const LAST_ADMIN = 'Es el único administrador del club: sumá otro administrador antes de sacarle el rol o el acceso.'
 
-function rolesFrom(formData: FormData): string[] {
-  return [...new Set(formData.getAll('roles').map(String).filter(Boolean))]
-}
-
-function rolesError(errors: Record<string, string[]>): string | undefined {
-  const key = Object.keys(errors).find((field) => field === 'roles' || field.startsWith('roles.'))
-  return key ? fieldError(errors, key) : undefined
-}
-
-export async function inviteClubUserAction(
-  _previous: InviteClubUserState,
-  formData: FormData,
-): Promise<InviteClubUserState> {
-  const session = await requireClubSession()
-  const values = {
-    name: String(formData.get('name') ?? '').trim(),
-    email: String(formData.get('email') ?? '').trim(),
-  }
-  const roles = rolesFrom(formData)
-  const formValues = { ...values, roles }
-  const fieldErrors: NonNullable<InviteClubUserState['fieldErrors']> = {}
-
-  if (!session.permissions?.includes('club_users.invite')) {
-    return { error: 'No tenés permiso para invitar personas al equipo.', values: formValues }
-  }
-  if (!values.email) fieldErrors.email = 'El correo electrónico es obligatorio.'
-  if (roles.length === 0) fieldErrors.roles = 'Elegí al menos un rol.'
-  if (Object.keys(fieldErrors).length > 0) return { fieldErrors, values: formValues }
-
-  let result
-  try {
-    result = await createClubTeamUser({
-      ...(values.name ? { name: values.name } : {}),
-      email: values.email,
-      roles,
-    })
-  } catch {
-    return {
-      error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.',
-      values: formValues,
-    }
-  }
-
-  if (!result.ok) {
-    if (result.kind === 'validation') {
-      return {
-        fieldErrors: {
-          name: fieldError(result.errors, 'name'),
-          email: fieldError(result.errors, 'email'),
-          roles: rolesError(result.errors),
-        },
-        values: formValues,
-      }
-    }
-    if (result.kind === 'forbidden') {
-      return { error: 'No tenés permiso para asignar alguno de esos roles.', values: formValues }
-    }
-    if (result.kind === 'rate_limited') {
-      return { error: 'Alcanzaste el límite de invitaciones. Esperá un rato y volvé a intentar.', values: formValues }
-    }
-    return { error: 'No se pudo agregar a la persona al equipo. Probá de nuevo.', values: formValues }
-  }
-
-  revalidatePath(`/c/${session.tenant.slug}/equipo`)
+export async function inviteMemberAction(input: InviteInput): Promise<ActionResult> {
+  if (!input.email.trim()) return { ok: false, fieldErrors: { email: 'Escribí el email.' } }
+  if (input.roles.length === 0) return { ok: false, fieldErrors: { roles: 'Elegí al menos un rol.' } }
+  const result = await runCall(() => inviteMember({ ...input, email: input.email.trim(), name: input.name?.trim() || null }))
+  if (!result.ok) return 'kind' in result ? failure(result, ['email', 'name', 'roles', 'sport_ids']) : { ok: false, error: result.error }
+  await revalidateClub()
   return {
     ok: true,
     message: result.data.meta.invited
-      ? `Enviamos una invitación a ${values.email} para que elija su contraseña.`
-      : `${values.email} ya tiene acceso al equipo.`,
-    timestamp: Date.now(),
+      ? `Listo: a ${result.data.data.email} le llega un mail para elegir su contraseña.`
+      : `${result.data.data.display_name} ya puede entrar al club.`,
   }
 }
 
-export async function resendClubInviteAction(
-  userId: number,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  const session = await requireClubSession()
+export async function updateMemberAction(id: number, input: MemberUpdate, done: string): Promise<ActionResult> {
+  const result = await runCall(() => updateMember(id, input))
+  if (!result.ok) {
+    if ('kind' in result && result.status === 409) return { ok: false, error: LAST_ADMIN }
+    return 'kind' in result ? failure(result, ['roles', 'sport_ids', 'status']) : { ok: false, error: result.error }
+  }
+  await revalidateClub()
+  return { ok: true, message: done }
+}
+
+export async function resendMemberInviteAction(id: number): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await requireSession()
   if (!session.permissions?.includes('club_users.update')) {
     return { ok: false, error: 'No tenés permiso para reenviar invitaciones.' }
   }
-  if (!Number.isInteger(userId) || userId <= 0) {
+  if (!Number.isInteger(id) || id <= 0) {
     return { ok: false, error: 'La persona seleccionada no es válida.' }
   }
 
-  let result
-  try {
-    result = await resendClubTeamInvite(userId)
-  } catch {
-    return { ok: false, error: 'No pudimos conectar con el servidor. Probá de nuevo en unos minutos.' }
-  }
-
+  const result = await runCall(() => resendTeamInvite(id))
   if (!result.ok) {
+    if (!('kind' in result)) return { ok: false, error: result.error }
     if (result.status === 409) {
       return { ok: false, error: 'La invitación ya no está pendiente. Refrescá la lista.' }
     }
@@ -121,6 +57,6 @@ export async function resendClubInviteAction(
     return { ok: false, error: 'No se pudo reenviar la invitación. Probá de nuevo.' }
   }
 
-  revalidatePath(`/c/${session.tenant.slug}/equipo`)
+  await revalidateClub()
   return { ok: true }
 }

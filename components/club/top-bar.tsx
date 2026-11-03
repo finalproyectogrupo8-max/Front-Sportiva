@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Bell, Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, UsersRound } from 'lucide-react'
+import { Check, ChevronsUpDown, House, LayoutGrid, LogOut, Plus, Search, Settings, UserRound, UsersRound } from 'lucide-react'
 import { ClubCrest, LogoMark } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,37 +17,44 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { logout, selectTenant } from '@/lib/auth'
 import type { Schemas } from '@/lib/api/client'
+import { CONFIG_PERMISSIONS, type SetupStep } from '@/lib/club-config'
 import { QUICK_CREATE, getModule } from '@/lib/modules'
-import { TENANTS } from '@/lib/tenants'
 import { cn } from '@/lib/utils'
 import { useClub } from './club-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { CommandPalette } from './command-palette'
+import { SetupGuide } from './setup-guide'
 import { Initials } from './shared'
-import { useAlerts } from './use-alerts'
+import { NotificationBell } from './notification-bell'
 
 export function TopBar({
   userName,
   userRole,
   userTenants,
+  setupSteps,
 }: {
   userName: string
   userRole: string
   userTenants?: Schemas['TenantSummaryResource'][]
+  /** Pasos de la configuración inicial; null si el usuario no configura el club. */
+  setupSteps?: SetupStep[] | null
 }) {
   const router = useRouter()
   const { tenant, modules, can, canSee } = useClub()
   const pathname = usePathname()
   const base = `/c/${tenant.slug}`
-  const current = getModule(pathname.split('/')[3] ?? '')
-  const isTeamPage = pathname === `${base}/equipo`
+  const section = pathname.split('/')[3] ?? ''
+  const current = getModule(section)
+  const isTeamPage = section === 'equipo'
+  const inConfig = section === 'configuracion'
+  const showConfig = CONFIG_PERMISSIONS.some(can)
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
-  const alerts = useAlerts()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
+      // El autocompletar del navegador dispara keydown sin `key`.
+      if (e.key?.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setPaletteOpen((o) => !o)
       }
@@ -56,7 +63,7 @@ export function TopBar({
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const CurrentIcon = isTeamPage ? UsersRound : current?.icon ?? House
+  const CurrentIcon = current?.icon ?? (isTeamPage ? UsersRound : inConfig ? Settings : House)
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-md">
@@ -74,10 +81,10 @@ export function TopBar({
             render={<Button variant="ghost" className="h-9 gap-2 px-2" />}
             aria-label="Cambiar de club"
           >
-            <ClubCrest short={tenant.short} color={tenant.color} className="size-6 rounded-md text-[10px]" />
+            <ClubCrest short={tenant.short} color={tenant.color} logoUrl={tenant.logoUrl} className="size-6 rounded-md text-[10px]" />
             <span className="hidden max-w-40 truncate font-medium md:inline">{tenant.name}</span>
             <span className="font-medium md:hidden">{tenant.short}</span>
-            <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
+            <ChevronsUpDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-72">
             <DropdownMenuGroup>
@@ -106,16 +113,7 @@ export function TopBar({
                       {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
                     </DropdownMenuItem>
                   ))
-                : TENANTS.map((t) => (
-                    <DropdownMenuItem key={t.slug} render={<Link href={`/c/${t.slug}`} />} className="gap-3 py-2">
-                      <ClubCrest short={t.short} color={t.color} className="size-7 rounded-md text-[10px]" />
-                      <span className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate font-medium">{t.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">{t.city}</span>
-                      </span>
-                      {t.slug === tenant.slug && <Check className="size-4 text-primary" aria-hidden="true" />}
-                    </DropdownMenuItem>
-                  ))}
+                : null}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/clubes" />}>
@@ -125,14 +123,18 @@ export function TopBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <span className="hidden text-border sm:inline" aria-hidden="true">
+        <span className="hidden text-border md:inline" aria-hidden="true">
           /
         </span>
 
+        {/* En el celular, la barra inferior reemplaza a este menú (FRO-38). */}
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-2" />} aria-label="Cambiar de módulo">
+          <DropdownMenuTrigger
+            render={<Button variant="ghost" className="hidden h-9 gap-2 px-2 md:inline-flex" />}
+            aria-label={`Cambiar de módulo (ahora: ${isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
+          >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
-            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? 'Hoy'}</span>
+            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
@@ -166,10 +168,27 @@ export function TopBar({
                 </DropdownMenuItem>
               ))}
             </div>
+            {showConfig && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  render={<Link href={`${base}/configuracion`} />}
+                  className={cn('gap-3 py-2', inConfig && 'bg-muted')}
+                >
+                  <Settings className="size-4" aria-hidden="true" />
+                  <span className="flex flex-col">
+                    <span className="font-medium">Configuración del club</span>
+                    <span className="text-xs text-muted-foreground">Perfil, deportes, categorías y competencias</span>
+                  </span>
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {setupSteps && <SetupGuide steps={setupSteps} club={tenant.slug} />}
+
           <Button
             variant="outline"
             onClick={() => setPaletteOpen(true)}
@@ -208,35 +227,7 @@ export function TopBar({
 
           <ThemeToggle />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon" className="relative hidden size-9 sm:inline-flex" />}
-              aria-label={`Alertas: ${alerts.length}`}
-            >
-              <Bell className="size-4" aria-hidden="true" />
-              {alerts.length > 0 && (
-                <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-warning ring-2 ring-card" aria-hidden="true" />
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Requiere atención</DropdownMenuLabel>
-                {alerts.slice(0, 6).map((a) => (
-                  <DropdownMenuItem key={a.id} render={<Link href={a.href} />} className="items-start gap-2.5 py-2">
-                    <span
-                      className={cn('mt-1.5 size-2 shrink-0 rounded-full', a.tone === 'bad' ? 'bg-destructive' : 'bg-warning')}
-                      aria-hidden="true"
-                    />
-                    <span className="flex flex-col">
-                      <span className="font-medium">{a.title}</span>
-                      <span className="text-xs text-muted-foreground">{a.detail}</span>
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-                {alerts.length === 0 && <p className="px-2 py-3 text-sm text-muted-foreground">Todo en orden.</p>}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationBell club={tenant.slug} />
 
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -257,6 +248,10 @@ export function TopBar({
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href={`/perfil?volver=${encodeURIComponent(`/c/${tenant.slug}`)}`} />}>
+                <UserRound className="size-4" aria-hidden="true" />
+                Mi perfil
+              </DropdownMenuItem>
               <DropdownMenuItem variant="destructive" onClick={() => logout()}>
                 <LogOut className="size-4" aria-hidden="true" />
                 Cerrar sesión

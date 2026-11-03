@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
+import { AppFooter } from '@/components/app-footer'
 import { ClubProvider } from '@/components/club/club-provider'
+import { MobileNav } from '@/components/club/mobile-nav'
 import { TopBar } from '@/components/club/top-bar'
-import { PageBackground } from '@/components/club/module-background'
 import { requireSession } from '@/lib/session'
-import { getClubData } from '@/lib/data'
-import { normalizeTenant } from '@/lib/tenants'
+import { getSetupSteps } from '@/lib/club-setup'
 
 export default async function ClubLayout({
   children,
@@ -23,38 +23,26 @@ export default async function ClubLayout({
     redirect('/clubes')
   }
 
-  // Decisión de arquitectura (FRO-8 - Opción A):
-  // Para la demo, mantenemos los datos mockeados en las vistas internas de los módulos (getClubData).
-  // Se normaliza el tenant de la sesión asignando valores por defecto para que la UI no se rompa.
-  const tenant = normalizeTenant(session.tenant)
-  const data = getClubData(tenant)
+  const setupSteps = await getSetupSteps()
   const roles = session.profile?.roles.map((role) => role.name) ?? []
 
   return (
     <ClubProvider
       key={session.tenant.slug}
       tenant={session.tenant}
-      initialData={data}
       permissions={session.permissions ?? []}
       permissionScopes={session.permissionScopes}
     >
       <div className="flex min-h-dvh flex-col">
-        {/* Decisión de arquitectura (FRO-8 - Opción A):
-            Para la demo, mantenemos los datos mockeados en las vistas internas de los módulos (getClubData),
-            pero agregamos un banner visible en la parte superior del layout indicando que son datos de ejemplo. */}
-        <div className="border-b border-amber-200 bg-amber-100 px-4 py-1.5 text-center text-xs font-medium text-amber-900 dark:border-amber-900/50 dark:bg-amber-950 dark:text-amber-200">
-          Modo Demo · Datos de ejemplo en módulos operativos
-        </div>
-
         <TopBar
+          setupSteps={setupSteps}
           userName={session.user.name}
           userRole={roles.length > 0 ? roles.join(' · ') : 'Sin rol en el club'}
           userTenants={session.tenants}
         />
-        <div className="relative flex-1 isolate min-h-[calc(100dvh-5rem)]">
-          <PageBackground />
-          <main className="relative z-10 flex-1">{children}</main>
-        </div>
+        <main className="flex-1">{children}</main>
+        <AppFooter />
+        <MobileNav />
       </div>
     </ClubProvider>
   )

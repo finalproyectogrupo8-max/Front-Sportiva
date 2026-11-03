@@ -9,7 +9,7 @@ import { login, type LoginState } from '@/lib/auth'
 // El navegador nunca habla con la API ni ve el token: queda en cookies httpOnly (ADR-0001).
 
 const inputClass =
-  'h-11 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 text-sm text-white placeholder-zinc-500 transition focus:border-[#C8643C] focus:outline-none focus:ring-1 focus:ring-[#C8643C] aria-invalid:border-red-500/60'
+  'h-11 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 text-sm text-white placeholder-zinc-500 transition focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand aria-invalid:border-red-500/60'
 
 export function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(login, {})
@@ -71,6 +71,15 @@ export function LoginForm() {
             {state.fieldErrors.password}
           </p>
         )}
+      </div>
+
+      <div className="-mt-3 flex justify-end">
+        <Link
+          href="/recuperar-contrasena"
+          className="text-sm font-semibold text-brand transition hover:brightness-110 hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
       </div>
 
       <button

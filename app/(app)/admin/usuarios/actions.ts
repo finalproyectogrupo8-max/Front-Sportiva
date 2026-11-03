@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createAdminUser, resendAdminUserInvite, updateAdminUser } from '@/lib/api/admin'
+import { createAdminUser, resendAdminUserInvite, sendAdminPasswordReset, updateAdminUser } from '@/lib/api/admin'
 import { fieldError } from '@/lib/api/validation-messages'
 import { requirePlatformAdmin } from '@/lib/session'
 
@@ -152,4 +152,42 @@ export async function resendAdminInviteAction(
 
   revalidatePath('/admin/usuarios')
   return { ok: true }
+}
+
+export type EditResult = { ok: true; message: string } | { ok: false; error?: string; fieldErrors?: Record<string, string> }
+
+/** Edita nombre y email de un usuario. */
+export async function updateUserAction(userId: number, input: { name: string; email: string }): Promise<EditResult> {
+  await requirePlatformAdmin()
+  let result
+  try {
+    result = await updateAdminUser(userId, input)
+  } catch {
+    return { ok: false, error: 'No se pudo conectar con el servidor.' }
+  }
+  if (!result.ok) {
+    if (result.kind === 'validation') {
+      const fieldErrors: Record<string, string> = {}
+      for (const f of ['name', 'email']) {
+        const message = fieldError(result.errors, f)
+        if (message) fieldErrors[f] = message
+      }
+      return { ok: false, fieldErrors }
+    }
+    return { ok: false, error: result.message || 'No se pudo guardar el usuario.' }
+  }
+  revalidatePath('/admin/usuarios')
+  return { ok: true, message: 'Usuario actualizado.' }
+}
+
+/** Le manda al usuario el mail para elegir una contraseña nueva. */
+export async function sendPasswordResetAction(userId: number): Promise<EditResult> {
+  await requirePlatformAdmin()
+  try {
+    const result = await sendAdminPasswordReset(userId)
+    if (!result.ok) return { ok: false, error: result.message || 'No se pudo mandar el mail.' }
+  } catch {
+    return { ok: false, error: 'No se pudo conectar con el servidor.' }
+  }
+  return { ok: true, message: 'Le mandamos el mail para restablecer la contraseña.' }
 }

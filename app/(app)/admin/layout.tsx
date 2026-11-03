@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LogOut, Shield } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { AppFooter } from '@/components/app-footer'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -55,6 +56,10 @@ export default async function AdminLayout({
               </div>
             </div>
 
+            <Link href="/perfil?volver=/admin" className="text-xs text-muted-foreground hover:text-foreground">
+              Mi perfil
+            </Link>
+
             <ThemeToggle />
 
             <form action={logout}>
@@ -83,6 +88,7 @@ export default async function AdminLayout({
           <ProvisioningWatcher>{children}</ProvisioningWatcher>
         </div>
       </main>
+      <AppFooter />
     </div>
   )
 }

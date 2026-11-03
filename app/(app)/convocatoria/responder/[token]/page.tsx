@@ -1,0 +1,31 @@
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { CallupDetails, CallupHeader, CallupNotice, PublicShell } from '@/components/callup/public-callup'
+import { ResponseForm } from '@/components/callup/response-form'
+import { loadPersonalCallup } from '../../load'
+import { callupMetadata } from '../../meta'
+
+type Props = { params: Promise<{ token: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { token } = await params
+  return callupMetadata((await loadPersonalCallup(token))?.page ?? null)
+}
+
+/** Link personal (FRO-36): para recordarle a uno por privado. Confirma con "Voy" o "No puedo". Sin login. */
+export default async function RespondCallupPage({ params }: Props) {
+  const { token } = await params
+  const data = await loadPersonalCallup(token)
+  if (!data) notFound()
+  const { page, me } = data
+  const closed = page.match.status === 'played' || page.match.status === 'cancelled'
+
+  return (
+    <PublicShell club={page.club}>
+      <CallupHeader page={page} />
+      <CallupNotice match={page.match} />
+      <ResponseForm token={token} initial={me} closed={closed} />
+      <CallupDetails page={page} token={token} />
+    </PublicShell>
+  )
+}

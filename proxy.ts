@@ -21,5 +21,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/clubes/:path*', '/c/:path*', '/admin/:path*', '/aceptar-invitacion'],
+  // Las rutas de autenticación y recuperación quedan públicas: el proxy solo protege módulos privados.
+  matcher: ['/clubes/:path*', '/c/:path*', '/admin/:path*', '/perfil/:path*', '/imprimir/:path*', '/aceptar-invitacion'],
 }

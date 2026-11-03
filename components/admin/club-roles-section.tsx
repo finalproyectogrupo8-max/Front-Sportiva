@@ -95,7 +95,7 @@ export function ClubRolesSection({
       )}
 
       <Sheet open={editing !== null} onOpenChange={(value) => !value && setEditing(null)}>
-        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:sm:max-w-2xl">
+        <SheetContent side="right" className="w-full gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-2xl">
           <SheetHeader className="pr-12">
             <SheetTitle>
               {editing === 'new' ? 'Nuevo rol' : readOnly ? current?.name : `Editar ${current?.name}`}

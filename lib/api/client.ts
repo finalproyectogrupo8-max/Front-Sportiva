@@ -54,7 +54,9 @@ function buildUrl(path: string, query: ApiRequest['query']): string {
 
   const url = new URL(base.replace(/\/+$/, '') + path)
   for (const [key, value] of Object.entries(query ?? {})) {
-    if (value !== undefined && value !== null) url.searchParams.set(key, String(value))
+    if (value === undefined || value === null) continue
+    // La regla `boolean` de Laravel acepta 1/0 en la query, no "true"/"false".
+    url.searchParams.set(key, typeof value === 'boolean' ? (value ? '1' : '0') : String(value))
   }
   return url.toString()
 }
@@ -78,8 +80,10 @@ export async function apiFetch<T>(path: string, request: ApiRequest = {}): Promi
   const { method = 'GET', body, query, auth = 'session', sessionErrors = 'redirect' } = request
   const redirectOnSessionErrors = auth !== 'none' && sessionErrors === 'redirect'
 
+  // FormData (archivos) va como multipart: el boundary del Content-Type lo pone fetch.
+  const isForm = body instanceof FormData
   const headers: Record<string, string> = { Accept: 'application/json' }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
 
   if (auth !== 'none') {
     const token = (await cookies()).get(COOKIE_BY_AUTH[auth])?.value
@@ -95,7 +99,7 @@ export async function apiFetch<T>(path: string, request: ApiRequest = {}): Promi
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       // Nada que dependa del usuario se cachea entre usuarios.
       cache: 'no-store',
     })
@@ -146,4 +150,22 @@ export async function apiFetch<T>(path: string, request: ApiRequest = {}): Promi
   }
 
   return { ok: false, kind: 'error', status: response.status, message, code }
+}
+
+/**
+ * Pide un archivo a la API y devuelve la respuesta tal cual, para reenviarla al navegador. Por
+ * defecto con el token del club (fotos y documentos); `auth: 'none'` para los públicos (el .ics de
+ * la convocatoria). null si hace falta sesión y no hay, o si la API no responde.
+ */
+export async function apiFetchFile(path: string, { auth = 'session' }: { auth?: 'session' | 'none' } = {}): Promise<Response | null> {
+  const token = auth === 'session' ? (await cookies()).get(SESSION_COOKIE)?.value : null
+  if (auth === 'session' && !token) return null
+  try {
+    return await fetch(buildUrl(path, undefined), {
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), Accept: '*/*' },
+      cache: 'no-store',
+    })
+  } catch {
+    return null
+  }
 }
