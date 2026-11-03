@@ -77,7 +77,7 @@ export function Equipo() {
           {miembrosEquipo.map((miembro) => (
             <article
               key={miembro.nombre}
-              className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-7 flex flex-col items-center text-center h-full transition-all duration-300 hover:border-[#C8643C]/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/60 group"
+              className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-7 flex flex-col items-center text-center h-full transition-all duration-300 hover:border-[#C8643C]/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/60 group bg-cover bg-center" style={{ backgroundImage: "url('/images/quienes-somos-bg.jpg')" }}
             >
               <div className="flex flex-col items-center w-full">
                 {/* Círculo para avatar / foto */}

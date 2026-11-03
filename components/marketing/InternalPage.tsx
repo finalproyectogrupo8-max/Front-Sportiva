@@ -23,6 +23,7 @@ type InternalPageProps = {
   statement: string
   statementAccent: string
   bgImage?: string
+  showPanel?: boolean
   children?: ReactNode
 }
 
@@ -40,11 +41,12 @@ export default function InternalPage({
   statement,
   statementAccent,
   bgImage = '/images/fondo-quienes-somos.jpg',
+  showPanel = false,
   children,
 }: InternalPageProps) {
   return (
     <PageShell>
-      <section className="route-hero relative">
+      <section className={`route-hero relative${showPanel ? '' : ' route-hero--single'}`}>
         <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
           <Image
             src={bgImage}
@@ -72,20 +74,22 @@ export default function InternalPage({
             <span>Conocé Sportiva en acción</span><ArrowUpRight />
           </Link>
         </motion.div>
-        <motion.div
-          className="route-panel relative z-10"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: .7, delay: .15 }}
-        >
-          <div className="route-panel-top"><span>Operación del club</span><b>En vivo</b></div>
-          {items.slice(0, 3).map((item) => (
-            <div className="route-panel-row" key={item.index}>
-              <span><CheckIcon /></span>
-              <div><b>{item.title}</b><small>{item.detail ?? 'Todo actualizado'}</small></div>
-            </div>
-          ))}
-        </motion.div>
+        {showPanel && (
+          <motion.div
+            className="route-panel relative z-10"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: .7, delay: .15 }}
+          >
+            <div className="route-panel-top"><span>Operación del club</span><b>En vivo</b></div>
+            {items.slice(0, 3).map((item) => (
+              <div className="route-panel-row" key={item.index}>
+                <span><CheckIcon /></span>
+                <div><b>{item.title}</b><small>{item.detail ?? 'Todo actualizado'}</small></div>
+              </div>
+            ))}
+          </motion.div>
+        )}
       </section>
 
       <section className="route-list-section">

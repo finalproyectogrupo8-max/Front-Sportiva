@@ -25,6 +25,7 @@ export default function QuienesSomosPage() {
       items={items}
       statement="AUTOMATIZAMOS LO ABURRIDO."
       statementAccent="POTENCIAMOS LO HUMANO."
+      showPanel={false}
     >
       <Equipo />
     </InternalPage>

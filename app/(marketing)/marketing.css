@@ -1849,6 +1849,14 @@ html.marketing footer {
     var(--ink);
 }
 
+.route-hero--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.route-hero--single .route-hero-copy {
+  max-width: 1000px;
+}
+
 .route-grid {
   position: absolute;
   inset: 0;
