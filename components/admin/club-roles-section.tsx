@@ -31,7 +31,9 @@ type Editing = null | 'new' | ClubRole
 function selectionOf(role: ClubRole | null): PermissionSelection {
   const selection: PermissionSelection = {}
   for (const permission of role?.permissions ?? []) {
-    selection[permission.name] = permission.scope === 'own' ? 'own' : 'all'
+    if (permission.scope === 'all' || permission.scope === 'sport' || permission.scope === 'own') {
+      selection[permission.name] = permission.scope
+    }
   }
   return selection
 }

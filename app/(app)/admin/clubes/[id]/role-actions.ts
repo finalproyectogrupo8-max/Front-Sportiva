@@ -25,7 +25,7 @@ function parsePermissions(raw: FormDataEntryValue | null): RolePermission[] | nu
     const value = JSON.parse(String(raw ?? '[]'))
     if (!Array.isArray(value)) return null
     return value
-      .filter((item) => item && typeof item.name === 'string' && (item.scope === 'all' || item.scope === 'own'))
+      .filter((item) => item && typeof item.name === 'string' && (item.scope === 'all' || item.scope === 'sport' || item.scope === 'own'))
       .map((item) => ({ name: item.name, scope: item.scope }))
   } catch {
     return null

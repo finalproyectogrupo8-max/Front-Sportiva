@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SheetFooter } from '@/components/ui/sheet'
-import type { Category, Competition, CompetitionRequirement, RequirementInput, Season, Sport } from '@/lib/api/club'
+import type { Category, Competition, CompetitionRequirement, RequirementInput, Season, SportOption } from '@/lib/api/club'
 import { formatDay } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { ConfigSheet, ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
@@ -68,7 +68,7 @@ export function CompetitionsSection({
   can,
 }: {
   competitions: Competition[]
-  sports: Sport[]
+  sports: SportOption[]
   seasons: Season[]
   categories: Category[]
   filters: { sport: string; season: string }
@@ -93,7 +93,7 @@ export function CompetitionsSection({
 
   const sportName = new Map(sports.map((s) => [s.id, s.name]))
   const seasonName = new Map(seasons.map((s) => [s.id, s.name]))
-  const ready = sports.length > 0 && seasons.length > 0
+  const ready = sports.some((s) => s.is_active) && seasons.length > 0
 
   const setFilter = (key: 'deporte' | 'temporada', value: string) => {
     const sp = new URLSearchParams(searchParams.toString())
@@ -339,14 +339,14 @@ function CompetitionForm({
   onDone,
 }: {
   competition: Competition | null
-  sports: Sport[]
+  sports: SportOption[]
   seasons: Season[]
   categories: Category[]
   defaults: { sport: string; season: string }
   onDone: () => void
 }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
-  const activeSports = sports.filter((s) => s.is_active || s.id === competition?.sport_id)
+  const activeSports = sports.filter((s) => s.is_active === true || s.id === competition?.sport_id)
   const currentSeason = seasons.find((s) => s.status === 'active') ?? seasons[0]
 
   const [sportId, setSportId] = useState(

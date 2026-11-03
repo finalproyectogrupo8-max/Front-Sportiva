@@ -7,6 +7,7 @@ import { apiFetch, type ApiResult, type Schemas } from './client'
 
 export type Club = Schemas['ClubResource']
 export type Sport = Schemas['SportResource']
+export type SportOption = Pick<Sport, 'id' | 'name'> & Partial<Pick<Sport, 'is_active'>>
 export type Season = Schemas['SeasonResource']
 export type Category = Schemas['CategoryResource']
 export type SeasonStatus = Season['status']

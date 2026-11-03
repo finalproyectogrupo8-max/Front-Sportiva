@@ -3,8 +3,8 @@
 import type { PermissionModule } from '@/lib/api/admin'
 import { cn } from '@/lib/utils'
 
-/** Permisos elegidos: nombre → alcance (`all` todo el club, `own` sus categorías). */
-export type PermissionSelection = Record<string, 'all' | 'own'>
+/** Permisos elegidos: nombre → alcance permitido por el contrato de la API. */
+export type PermissionSelection = Record<string, 'all' | 'sport' | 'own'>
 
 /**
  * Grilla de checks módulo × acción para armar un rol (docs/roles-y-permisos.md §5 de la API).
@@ -21,7 +21,7 @@ export function PermissionGrid({
   onChange?: (next: PermissionSelection) => void
   readOnly?: boolean
 }) {
-  const set = (name: string, scope: 'all' | 'own' | null) => {
+  const set = (name: string, scope: 'all' | 'sport' | 'own' | null) => {
     if (!onChange) return
     const next = { ...value }
     if (scope === null) delete next[name]
@@ -107,6 +107,7 @@ export function PermissionGrid({
                             >
                               <option value="all">Todo el club</option>
                               <option value="own">Sus categorías</option>
+                              {scope === 'sport' && <option value="sport" disabled>Deportes asignados (actual)</option>}
                             </select>
                           )}
                         </span>

@@ -8,7 +8,7 @@ import { FormSelect, Pill } from '@/components/club/shared'
 import { BRANCHES, isBranch } from '@/lib/branches'
 import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
-import type { Category, Season, Sport } from '@/lib/api/club'
+import type { Category, Season, SportOption } from '@/lib/api/club'
 import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { EmptyConfig } from '@/components/club/empty-state'
 
@@ -31,7 +31,7 @@ export function CategoriesSection({
   can,
 }: {
   categories: Category[]
-  sports: Sport[]
+  sports: SportOption[]
   seasons: Season[]
   filters: { sport: string; season: string; branch: string }
   can: { create: boolean; update: boolean; delete: boolean }
@@ -62,7 +62,7 @@ export function CategoriesSection({
     </Button>
   )
 
-  if (!ready) {
+  if (!ready && can.create) {
     return (
       <EmptyConfig
         icon={Layers}
@@ -229,13 +229,13 @@ function CategoryForm({
   onDone,
 }: {
   category: Category | null
-  sports: Sport[]
+  sports: SportOption[]
   seasons: Season[]
   defaults: { sport: string; season: string }
   onDone: () => void
 }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
-  const activeSports = sports.filter((s) => s.is_active || s.id === category?.sport_id)
+  const activeSports = sports.filter((s) => s.is_active === true || s.id === category?.sport_id)
   const currentSeason = seasons.find((s) => s.status === 'active') ?? seasons[0]
 
   const [sportId, setSportId] = useState(

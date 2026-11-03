@@ -319,6 +319,10 @@ Paquetes como `stancl/tenancy` ya resuelven el cambio de conexión, el alta y la
 
 Para que scramble infiera bien los tipos, la API tiene que validar con Form Requests y responder con API Resources, no devolver modelos ni arrays sueltos.
 
+### Posiciones deportivas de jugadores
+
+La integración del catálogo queda pendiente de publicar y regenerar el OpenAPI. Los tipos generados disponibles aquí solo definen `PlayerResource.preferred_position` y no incluyen `position_ids`, posiciones en la respuesta ni endpoints/DTOs para listar o administrar posiciones por deporte. Hasta contar con ese contrato no se deben agregar llamadas, formularios simulados ni asumir cómo se validan club, deporte y estado activo. `preferred_position` se conserva durante esta transición.
+
 ## 7. Decisiones de producto que pedía la UI
 
 Eran cosas que la maqueta mostraba y el modelo de datos no guardaba:
