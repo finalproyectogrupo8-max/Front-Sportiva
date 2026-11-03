@@ -19,11 +19,23 @@ export function RoleChecklist({
   /** Para que los ids de los checkboxes no se repitan si hay varias listas en la página. */
   idPrefix: string
 }) {
-  if (roles.length === 0) {
+  const assignableRoles = roles.filter((role) => role.slug !== 'coordinator')
+  const hasRetiredCoordinator = defaultSelected.includes('coordinator')
+
+  if (assignableRoles.length === 0) {
     return (
-      <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-        El club todavía no tiene roles. Se crean cuando termina el alta del club.
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          {roles.length === 0
+            ? 'El club todavía no tiene roles. Se crean cuando termina el alta del club.'
+            : 'No hay roles disponibles para asignar.'}
+        </p>
+        {hasRetiredCoordinator && (
+          <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
+            Esta membresía conserva el rol retirado «coordinator». Revisá y reasigná sus accesos manualmente.
+          </p>
+        )}
+      </div>
     )
   }
 
@@ -31,7 +43,7 @@ export function RoleChecklist({
     <fieldset className="flex flex-col gap-1.5" aria-invalid={error ? true : undefined}>
       <legend className="sr-only">Roles</legend>
       <div className={cn('flex flex-col divide-y rounded-lg border', error && 'border-destructive/50')}>
-        {roles.map((role) => {
+        {assignableRoles.map((role) => {
           const id = `${idPrefix}-role-${role.slug}`
           return (
             <label
@@ -66,6 +78,11 @@ export function RoleChecklist({
         })}
       </div>
       <p className="text-[11px] text-muted-foreground">Podés elegir más de uno: los permisos se suman.</p>
+      {hasRetiredCoordinator && (
+        <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
+          Esta membresía conserva el rol retirado «coordinator». Revisá y reasigná sus accesos manualmente.
+        </p>
+      )}
       {error && <p role="alert" aria-live="polite" className="text-xs text-destructive">{error}</p>}
     </fieldset>
   )

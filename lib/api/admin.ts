@@ -376,8 +376,8 @@ export async function getTenantMemberships(
 
 /** Módulo de la grilla de permisos, con sus recursos y acciones. */
 export type PermissionModule = Schemas['PermissionModuleResource']
-/** Permiso de un rol con su alcance: `all` (todo el club) u `own` (sus categorías). */
-export type RolePermission = { name: string; scope: 'all' | 'own' }
+/** Permiso de un rol con su alcance definido por el contrato de la API. */
+export type RolePermission = Schemas['StoreRoleRequest']['permissions'][number]
 export type RoleInput = { name: string; description?: string | null; permissions: RolePermission[] }
 
 /**

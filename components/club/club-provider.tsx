@@ -8,8 +8,8 @@ type ClubContextValue = {
   tenant: Tenant
   /** Si el usuario tiene el permiso (`<recurso>.<acción>`) en este club. Es solo UX: la API valida igual. */
   can: (permission: string) => boolean
-  /** Alcance del permiso: `all` (todo el club), `own` (sus categorías) o null si no lo tiene. */
-  scopeOf: (permission: string) => 'all' | 'own' | null
+  /** Alcance del permiso: `all` (todo el club), `sport` (sus deportes), `own` (sus categorías) o null. */
+  scopeOf: (permission: string) => 'all' | 'sport' | 'own' | null
   /** Módulos que el usuario puede ver, en el orden del menú. */
   modules: ModuleDef[]
   /** Si el usuario ve el módulo. */
@@ -49,8 +49,11 @@ export function ClubProvider({
     const visible = new Set<string>(modules.map((m) => m.id))
     return {
       can: (permission: string) => granted.has(permission),
-      scopeOf: (permission: string) =>
-        granted.has(permission) ? (permissionScopes?.[permission] === 'own' ? 'own' : 'all') : null,
+      scopeOf: (permission: string) => {
+        if (!granted.has(permission)) return null
+        const scope = permissionScopes?.[permission]
+        return scope === 'all' || scope === 'sport' || scope === 'own' ? scope : null
+      },
       modules,
       canSee: (moduleId: string) => !!getModule(moduleId) && visible.has(moduleId),
     } satisfies Pick<ClubContextValue, 'can' | 'scopeOf' | 'modules' | 'canSee'>

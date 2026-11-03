@@ -17,8 +17,10 @@ export type Session = {
   profile?: Schemas['ClubProfileResource'] | null
   /** Permisos en el club activo (`<recurso>.<acción>`). La API los vuelve a validar en cada request. */
   permissions?: string[]
-  /** Alcance de cada permiso: `all` (todo el club) u `own` (sus categorías). */
+  /** Alcance de cada permiso: `all` (todo el club), `sport` (sus deportes) u `own` (sus categorías). */
   permissionScopes?: Record<string, string>
+  /** Deportes asignados al usuario en el club activo. */
+  sports?: Schemas['MeResource']['sports']
 }
 
 export type ClubSession = Schemas['MeResource']
@@ -46,6 +48,9 @@ export const requireSession = cache(async (): Promise<Session> => {
         auth: 'session',
         sessionErrors: 'return',
       })
+      if (!tenantsResult.ok) {
+        throw new Error(`No se pudieron cargar los clubes del usuario: ${tenantsResult.message}`)
+      }
 
       return {
         user: meResult.data.user,
@@ -53,7 +58,8 @@ export const requireSession = cache(async (): Promise<Session> => {
         profile: meResult.data.profile,
         permissions: meResult.data.permissions,
         permissionScopes: meResult.data.permission_scopes,
-        tenants: tenantsResult.ok ? tenantsResult.data.tenants : [meResult.data.tenant],
+        sports: meResult.data.sports,
+        tenants: tenantsResult.data.tenants,
       }
     }
   }

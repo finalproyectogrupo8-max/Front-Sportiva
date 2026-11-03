@@ -14,7 +14,7 @@ import type { Sport } from '@/lib/api/club'
 import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { EmptyConfig } from '@/components/club/empty-state'
 
-export type SportRow = Sport & { categories: number }
+export type SportRow = Sport & { categories: number | null }
 
 export function SportsSection({
   sports,
@@ -65,7 +65,7 @@ export function SportsSection({
           {sports.map((sport) => (
             <tr key={sport.id} className="transition-colors hover:bg-muted/40">
               <td className="px-4 py-3 font-medium">{sport.name}</td>
-              <td className="px-4 py-3 tabular-nums text-muted-foreground">{sport.categories}</td>
+              <td className="px-4 py-3 tabular-nums text-muted-foreground">{sport.categories ?? '—'}</td>
               <td className="px-4 py-3">
                 <Pill tone={sport.is_active ? 'ok' : 'neutral'}>{sport.is_active ? 'Activo' : 'Inactivo'}</Pill>
               </td>
