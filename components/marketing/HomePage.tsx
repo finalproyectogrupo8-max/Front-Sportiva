@@ -2,6 +2,7 @@
 
 import { ReactNode, useActionState, useRef, useState } from 'react'
 import Image from 'next/image'
+import HeroVideoBackground from './HeroVideoBackground'
 import Link from 'next/link'
 import { submitDemoRequest, type DemoRequestState } from '@/lib/actions/tickets'
 import Brand from './Brand'
@@ -136,15 +137,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
       <main>
         <section className="hero" id="inicio">
           <div className="hero-background-wrap">
-            <Image
-              src={heroImage}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="hero-image"
-            />
-            <div className="hero-overlay" />
+            <HeroVideoBackground fallbackImage={heroImage} />
             <div className="hero-grain" />
           </div>
 
