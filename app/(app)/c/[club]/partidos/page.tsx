@@ -5,6 +5,7 @@ import { CalendarView } from '@/components/club/matches/calendar-view'
 import { NewEventButtons } from '@/components/club/matches/new-event-buttons'
 import { TrainingSheet } from '@/components/club/matches/training-sheet'
 import { NoAccess } from '@/components/club/no-access'
+import { CalendarShareButton } from '@/components/club/matches/calendar-share'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
 import { calendar, getTraining } from '@/lib/api/matches'
@@ -72,6 +73,12 @@ export default async function MatchesPage({ params, searchParams }: Props) {
         title="Partidos"
         description="El fixture y los entrenamientos de cada categoría. Desde cada partido se carga el resultado y se toma asistencia."
         actions={
+          <>
+          <CalendarShareButton
+            categories={categoryOptions.map((c) => ({ id: c.id, label: c.label }))}
+            initialCategoryId={categoryId}
+            canRegenerate={can('matches.update')}
+          />
           <NewEventButtons
             club={club}
             venues={venues?.ok ? venues.data.data : []}
@@ -79,6 +86,7 @@ export default async function MatchesPage({ params, searchParams }: Props) {
             competitions={competitionOptions}
             can={{ match: can('matches.create'), training: can('trainings.create') }}
           />
+          </>
         }
       >
         <CalendarToolbar view={view} from={from} to={to} anchor={anchor} categories={categoryOptions} />

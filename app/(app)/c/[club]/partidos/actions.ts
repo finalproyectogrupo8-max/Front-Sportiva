@@ -1,5 +1,8 @@
 'use server'
 
+import QRCode from 'qrcode'
+import { getCalendarLink, regenerateCalendarLink } from '@/lib/api/club'
+
 import { failure, optionalInt, revalidateClub, runApiAction, runCall, text, type ActionResult } from '@/lib/action-result'
 import {
   createMatch,
@@ -177,4 +180,24 @@ export async function saveCallupAction(
 
 export async function publishCallupAction(matchId: number): Promise<ActionResult> {
   return runApiAction(() => publishCallup(matchId), 'Convocatoria publicada. Compartila en el grupo.', ['*'])
+}
+
+/* Calendario suscribible (FRO-32) */
+
+export type CalendarShare = { ok: true; url: string; webcal: string; google: string; qrSvg: string } | { ok: false; error: string }
+
+async function share(result: Awaited<ReturnType<typeof getCalendarLink>> | { ok: false; error: string }): Promise<CalendarShare> {
+  if (!result.ok) return { ok: false, error: 'error' in result ? result.error : result.status === 404 ? 'No tenés acceso a esa categoría.' : result.message || 'No se pudo armar el link.' }
+  const { url, webcal_url, google_url } = result.data.data
+  // El QR se arma en el servidor: el link es secreto y no pasa por un servicio de terceros.
+  const qrSvg = await QRCode.toString(webcal_url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' })
+  return { ok: true, url, webcal: webcal_url, google: google_url, qrSvg }
+}
+
+export async function calendarLinkAction(categoryId: number): Promise<CalendarShare> {
+  return share(await runCall(() => getCalendarLink(categoryId)))
+}
+
+export async function regenerateCalendarLinkAction(categoryId: number): Promise<CalendarShare> {
+  return share(await runCall(() => regenerateCalendarLink(categoryId)))
 }
