@@ -35,10 +35,12 @@ export default async function TeamPage({
   const activityFrom = isValidDay(query.actividad_desde) ? query.actividad_desde : undefined
   const activityTo = isValidDay(query.actividad_hasta) ? query.actividad_hasta : undefined
 
+  const canInvite = permissions.has('club_users.invite')
+  const canManage = canInvite || permissions.has('club_users.update')
   const [team, roles, sports, activity] = await Promise.all([
     listTeam(),
-    listTeamRoles().catch(() => null),
-    listSports().catch(() => null),
+    canManage ? listTeamRoles() : Promise.resolve(null),
+    canInvite ? listSports() : Promise.resolve(null),
     canViewActivity
       ? listClubActivity({
           type: activityType,
@@ -48,15 +50,27 @@ export default async function TeamPage({
         }).catch(() => null)
       : Promise.resolve(null),
   ])
+  const errors = [
+    !team.ok ? `No se pudo cargar el equipo: ${team.message}` : null,
+    roles && !roles.ok ? `No se pudieron cargar los roles: ${roles.message}` : null,
+    sports && !sports.ok ? `No se pudieron cargar los deportes: ${sports.message}` : null,
+  ].filter((message): message is string => message !== null)
 
   return (
-    <TeamModule
-      members={team.ok ? team.data.data : []}
-      roles={roles?.ok ? roles.data.data.map((r) => ({ slug: r.slug, name: r.name, description: r.description, is_system: r.is_system })) : []}
-      sports={sports?.ok ? sports.data.data.filter((s) => s.is_active).map((s) => ({ id: s.id, name: s.name })) : []}
-      startInvite={query.nuevo === '1'}
-      activity={canViewActivity ? (activity?.ok ? activity.data : null) : undefined}
-      can={{ invite: permissions.has('club_users.invite'), update: permissions.has('club_users.update'), disable: permissions.has('club_users.disable') }}
-    />
+    <>
+      {errors.map((error) => (
+        <p key={error} role="alert" aria-live="polite" className="mx-auto mt-6 max-w-5xl rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </p>
+      ))}
+      <TeamModule
+        members={team.ok ? team.data.data : []}
+        roles={roles?.ok ? roles.data.data : []}
+        sports={sports?.ok ? sports.data.data.filter((sport) => sport.is_active).map(({ id, name }) => ({ id, name })) : []}
+        startInvite={query.nuevo === '1'}
+        activity={canViewActivity ? (activity?.ok ? activity.data : null) : undefined}
+        can={{ invite: canInvite, update: permissions.has('club_users.update'), disable: permissions.has('club_users.disable') }}
+      />
+    </>
   )
 }

@@ -3,7 +3,9 @@
 import { useState, type ComponentProps } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { UserPlus, Users } from 'lucide-react'
-import { inviteMemberAction, updateMemberAction } from '@/app/(app)/c/[club]/equipo/actions'
+import { inviteMemberAction, resendMemberInviteAction, updateMemberAction } from '@/app/(app)/c/[club]/equipo/actions'
+import { ResendInviteButton } from '@/components/admin/resend-invite-button'
+import { UserStatusBadge } from '@/components/admin/user-status-badge'
 import { EmptyConfig } from '@/components/club/empty-state'
 import { ConfigSheet, ConfirmDialog, Field, FormError, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { ModuleHeader, PageBody, Pill } from '@/components/club/shared'
@@ -16,7 +18,7 @@ type Member = {
   id: number
   display_name: string
   email: string | null
-  status: 'active' | 'disabled'
+  status: 'active' | 'disabled' | 'invited'
   roles: { slug: string; name: string }[]
   sport_ids: number[]
   is_self: boolean
@@ -55,6 +57,7 @@ export function TeamModule({
   const [toggling, setToggling] = useState<Member | null>(null)
   const active = members.filter((m) => m.status === 'active')
   const disabled = members.filter((m) => m.status === 'disabled')
+  const invited = members.filter((m) => m.status === 'invited')
 
   const closeInvite = () => {
     setInviting(false)
@@ -81,6 +84,7 @@ export function TeamModule({
         ) : (
           <>
             <MemberTable title={`Con acceso · ${active.length}`} members={active} can={can} onEdit={setEditing} onToggle={setToggling} />
+            {invited.length > 0 && <MemberTable title={`Invitación pendiente · ${invited.length}`} members={invited} can={can} onEdit={setEditing} onToggle={setToggling} />}
             {disabled.length > 0 && <MemberTable title={`Sin acceso · ${disabled.length}`} members={disabled} can={can} onEdit={setEditing} onToggle={setToggling} muted />}
           </>
         )}
@@ -131,11 +135,12 @@ function MemberTable({
     <section className="flex flex-col gap-2" aria-label={title}>
       <h2 className="text-sm font-semibold text-muted-foreground">{title}</h2>
       <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[620px] table-fixed text-sm">
+        <table className="w-full min-w-[700px] table-fixed text-sm">
           <thead className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
             <tr>
               <th scope="col" className="w-[34%] px-4 py-2.5 font-medium">Persona</th>
               <th scope="col" className="w-[30%] px-4 py-2.5 font-medium">Roles</th>
+              <th scope="col" className="w-[14%] px-4 py-2.5 font-medium">Estado</th>
               <th scope="col" className="hidden w-[16%] px-4 py-2.5 font-medium md:table-cell">En el club desde</th>
               <th scope="col" className="px-4 py-2.5 text-right font-medium"><span className="sr-only">Acciones</span></th>
             </tr>
@@ -157,6 +162,7 @@ function MemberTable({
                     ))}
                   </span>
                 </td>
+                <td className="px-4 py-3"><UserStatusBadge status={m.status} /></td>
                 <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{since(m.created_at)}</td>
                 <td className="px-4 py-3">
                   <span className="flex justify-end gap-1">
@@ -165,7 +171,10 @@ function MemberTable({
                         Roles
                       </Button>
                     )}
-                    {can.disable && !m.is_self && (
+                    {can.update && m.status === 'invited' && (
+                      <ResendInviteButton name={m.display_name} onResend={() => resendMemberInviteAction(m.id)} />
+                    )}
+                    {can.disable && !m.is_self && m.status !== 'invited' && (
                       <Button variant="ghost" size="sm" className={cn(m.status === 'active' && 'text-destructive hover:text-destructive')} onClick={() => onToggle(m)}>
                         {m.status === 'active' ? 'Quitar acceso' : 'Devolver acceso'}
                       </Button>

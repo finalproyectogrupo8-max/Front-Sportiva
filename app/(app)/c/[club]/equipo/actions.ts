@@ -1,7 +1,8 @@
 'use server'
 
 import { failure, revalidateClub, runCall, type ActionResult } from '@/lib/action-result'
-import { inviteMember, updateMember, type InviteInput, type MemberUpdate } from '@/lib/api/team'
+import { inviteMember, resendTeamInvite, updateMember, type InviteInput, type MemberUpdate } from '@/lib/api/team'
+import { requireSession } from '@/lib/session'
 
 const LAST_ADMIN = 'Es el único administrador del club: sumá otro administrador antes de sacarle el rol o el acceso.'
 
@@ -27,4 +28,35 @@ export async function updateMemberAction(id: number, input: MemberUpdate, done: 
   }
   await revalidateClub()
   return { ok: true, message: done }
+}
+
+export async function resendMemberInviteAction(id: number): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await requireSession()
+  if (!session.permissions?.includes('club_users.update')) {
+    return { ok: false, error: 'No tenés permiso para reenviar invitaciones.' }
+  }
+  if (!Number.isInteger(id) || id <= 0) {
+    return { ok: false, error: 'La persona seleccionada no es válida.' }
+  }
+
+  const result = await runCall(() => resendTeamInvite(id))
+  if (!result.ok) {
+    if (!('kind' in result)) return { ok: false, error: result.error }
+    if (result.status === 409) {
+      return { ok: false, error: 'La invitación ya no está pendiente. Refrescá la lista.' }
+    }
+    if (result.kind === 'rate_limited') {
+      const retryMessage = result.retryAfter
+        ? ` Probá de nuevo en ${result.retryAfter} segundos.`
+        : ' Esperá un rato antes de intentar de nuevo.'
+      return { ok: false, error: `Alcanzaste el límite de reenvíos.${retryMessage}` }
+    }
+    if (result.kind === 'forbidden') {
+      return { ok: false, error: 'No tenés permiso para reenviar esta invitación.' }
+    }
+    return { ok: false, error: 'No se pudo reenviar la invitación. Probá de nuevo.' }
+  }
+
+  await revalidateClub()
+  return { ok: true }
 }

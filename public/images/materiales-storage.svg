@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" fill="none" width="100%" height="100%">
+  <defs>
+    <radialGradient id="matGlow" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#C87650" stop-opacity="0.16" />
+      <stop offset="50%" stop-color="#C87650" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#C87650" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="storageGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" stroke="#D4BAA3" stroke-width="0.75" stroke-opacity="0.1" fill="none" />
+      <circle cx="30" cy="30" r="1" fill="#C87650" fill-opacity="0.2" />
+    </pattern>
+  </defs>
+
+  <rect width="1440" height="900" fill="url(#matGlow)" />
+  <rect width="1440" height="900" fill="url(#storageGrid)" />
+
+  <!-- Equipment Rack Shelving (Utilería Storage Blueprint) -->
+  <g transform="translate(720, 450)">
+    <!-- Main Heavy Duty Utilería Shelf Frame -->
+    <rect x="-480" y="-300" width="960" height="600" rx="8" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.25" fill="none" />
+    
+    <!-- Shelf Levels -->
+    <line x1="-480" y1="-100" x2="480" y2="-100" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.35" />
+    <line x1="-480" y1="100" x2="480" y2="100" stroke="#D4BAA3" stroke-width="2" stroke-opacity="0.35" />
+
+    <!-- Vertical Uprights -->
+    <line x1="-160" y1="-300" x2="-160" y2="300" stroke="#C87650" stroke-width="2" stroke-opacity="0.4" />
+    <line x1="160" y1="-300" x2="160" y2="300" stroke="#C87650" stroke-width="2" stroke-opacity="0.4" />
+
+    <!-- Top Shelf: Ball Racks (Soccer & Basketball) -->
+    <!-- Ball 1 -->
+    <g transform="translate(-320, -180)">
+      <circle cx="0" cy="0" r="42" stroke="#C87650" stroke-width="2" stroke-opacity="0.6" fill="none" />
+      <!-- Seam lines -->
+      <path d="M -42 0 A 42 42 0 0 1 42 0" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+      <path d="M 0 -42 A 42 42 0 0 1 0 42" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    </g>
+    <!-- Ball 2 -->
+    <g transform="translate(-200, -180)">
+      <circle cx="0" cy="0" r="42" stroke="#D4BAA3" stroke-width="1.8" stroke-opacity="0.5" fill="none" />
+      <path d="M -30 -30 Q 0 0 30 30" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+      <path d="M -30 30 Q 0 0 30 -30" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    </g>
+    <!-- Ball 3 -->
+    <g transform="translate(0, -180)">
+      <circle cx="0" cy="0" r="42" stroke="#C87650" stroke-width="2" stroke-opacity="0.6" fill="none" />
+      <circle cx="0" cy="0" r="22" stroke="#D4BAA3" stroke-width="1.2" stroke-opacity="0.4" fill="none" />
+    </g>
+    <!-- Ball 4 -->
+    <g transform="translate(200, -180)">
+      <circle cx="0" cy="0" r="42" stroke="#D4BAA3" stroke-width="1.8" stroke-opacity="0.5" fill="none" />
+      <path d="M -42 0 A 42 42 0 0 1 42 0" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    </g>
+    <!-- Ball 5 -->
+    <g transform="translate(320, -180)">
+      <circle cx="0" cy="0" r="42" stroke="#C87650" stroke-width="2" stroke-opacity="0.6" fill="none" />
+      <path d="M 0 -42 A 42 42 0 0 1 0 42" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    </g>
+
+    <!-- Middle Shelf: Training Cones Stack & Bibs / Pecheras Crate -->
+    <g transform="translate(-320, 10)">
+      <!-- Cones nested stack -->
+      <polygon points="0,-40 -26,30 26,30" stroke="#C87650" stroke-width="2" stroke-opacity="0.7" fill="none" />
+      <polygon points="0,-25 -22,30 22,30" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.5" fill="none" />
+      <polygon points="0,-10 -18,30 18,30" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+      <line x1="-36" y1="30" x2="36" y2="30" stroke="#C87650" stroke-width="2" stroke-opacity="0.8" />
+    </g>
+
+    <!-- Storage Crate in center -->
+    <g transform="translate(0, 0)">
+      <rect x="-110" y="-50" width="220" height="90" rx="4" stroke="#D4BAA3" stroke-width="1.8" stroke-opacity="0.35" fill="none" stroke-dasharray="10 6" />
+      <line x1="-90" y1="-5" x2="90" y2="-5" stroke="#C87650" stroke-width="1.5" stroke-opacity="0.4" />
+      <text x="0" y="3" font-family="'Barlow Condensed', sans-serif" font-size="16" font-weight="bold" fill="#D4BAA3" fill-opacity="0.4" text-anchor="middle" letter-spacing="2">
+        PECHERAS · STOCK
+      </text>
+    </g>
+
+    <!-- Agility Hurdles / Escaleras on Right -->
+    <g transform="translate(320, 10)" stroke="#C87650" stroke-width="2" stroke-opacity="0.5">
+      <line x1="-80" y1="20" x2="80" y2="20" />
+      <line x1="-80" y1="20" x2="-80" y2="-10" />
+      <line x1="80" y1="20" x2="80" y2="-10" />
+      <line x1="-80" y1="-10" x2="80" y2="-10" stroke="#D4BAA3" stroke-width="1.5" />
+    </g>
+
+    <!-- Bottom Shelf: Heavy Gear Storage Crates & Medical Kit Box -->
+    <g transform="translate(-320, 200)">
+      <rect x="-100" y="-60" width="200" height="90" rx="6" stroke="#D4BAA3" stroke-width="1.8" stroke-opacity="0.3" fill="none" />
+      <line x1="-70" y1="-15" x2="70" y2="-15" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.25" />
+    </g>
+    <g transform="translate(0, 200)">
+      <!-- First Aid Kit / Botiquín box -->
+      <rect x="-70" y="-50" width="140" height="80" rx="6" stroke="#C87650" stroke-width="2" stroke-opacity="0.5" fill="none" />
+      <line x1="0" y1="-30" x2="0" y2="-10" stroke="#C87650" stroke-width="3" stroke-opacity="0.7" />
+      <line x1="-10" y1="-20" x2="10" y2="-20" stroke="#C87650" stroke-width="3" stroke-opacity="0.7" />
+    </g>
+    <g transform="translate(320, 200)">
+      <rect x="-100" y="-60" width="200" height="90" rx="6" stroke="#D4BAA3" stroke-width="1.8" stroke-opacity="0.3" fill="none" />
+      <line x1="-70" y1="-15" x2="70" y2="-15" stroke="#D4BAA3" stroke-width="1.5" stroke-opacity="0.25" />
+    </g>
+  </g>
+</svg>
+

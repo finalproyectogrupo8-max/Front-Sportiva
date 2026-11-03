@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, House, Menu, Settings, Users } from 'lucide-react'
+import { CalendarDays, House, Menu, Settings, Users, UsersRound } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { CONFIG_PERMISSIONS } from '@/lib/club-config'
 import { cn } from '@/lib/utils'
@@ -90,6 +90,18 @@ export function MobileNav() {
                 </Link>
               </li>
             ))}
+            {can('club_users.view') && (
+              <li className="col-span-2">
+                <Link
+                  href={`${base}/equipo`}
+                  onClick={() => setOpen(false)}
+                  className={cn('flex items-center gap-3 rounded-xl border bg-card p-3', section === 'equipo' && 'border-primary/50 bg-primary/5')}
+                >
+                  <UsersRound className="size-4 text-muted-foreground" aria-hidden="true" />
+                  <span className="text-sm font-medium">Equipo del club</span>
+                </Link>
+              </li>
+            )}
             {showConfig && (
               <li className="col-span-2">
                 <Link
@@ -102,7 +114,7 @@ export function MobileNav() {
                 </Link>
               </li>
             )}
-            {rest.length === 0 && !showConfig && <li className="col-span-2 text-sm text-muted-foreground">No hay más módulos para tu rol.</li>}
+            {rest.length === 0 && !showConfig && !can('club_users.view') && <li className="col-span-2 text-sm text-muted-foreground">No hay más módulos para tu rol.</li>}
           </ul>
         </SheetContent>
       </Sheet>

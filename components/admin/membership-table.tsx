@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useState, useTransition } from 'react'
-import { CheckCircle2, Loader2, PauseCircle, PlayCircle, ShieldCheck, Users, XCircle } from 'lucide-react'
+import { Loader2, PauseCircle, PlayCircle, ShieldCheck, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ import {
 import { RoleChecklist } from '@/components/admin/role-checklist'
 import type { AdminMembership, ClubRole } from '@/lib/api/admin'
 import { formatShortDate } from '@/lib/format-date'
+import { UserStatusBadge } from '@/components/admin/user-status-badge'
 
 function RoleBadges({ membership }: { membership: AdminMembership }) {
   const roles = membership.roles ?? []
@@ -229,20 +230,15 @@ export function MembershipTable({
                   <RoleBadges membership={membership} />
                 </td>
                 <td className="px-4 py-3">
-                  {membership.is_active ? (
-                    <Badge
-                      variant="outline"
-                      className="gap-1.5 border-emerald-500/25 bg-emerald-500/10 text-xs font-normal text-emerald-700 dark:text-emerald-400"
-                    >
-                      <CheckCircle2 className="size-3" aria-hidden="true" />
-                      Activa
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="gap-1.5 text-xs font-normal text-muted-foreground">
-                      <XCircle className="size-3" aria-hidden="true" />
-                      Inactiva
-                    </Badge>
-                  )}
+                  <UserStatusBadge
+                    status={
+                      membership.user?.status === 'invited'
+                        ? 'invited'
+                        : membership.is_active
+                          ? membership.user?.status ?? 'active'
+                          : 'inactive'
+                    }
+                  />
                 </td>
                 <td className="hidden whitespace-nowrap px-4 py-3 text-xs text-muted-foreground sm:table-cell">
                   {formatShortDate(membership.created_at)}
