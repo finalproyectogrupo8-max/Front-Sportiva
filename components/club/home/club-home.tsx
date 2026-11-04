@@ -105,7 +105,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
       {/* Hoy */}
       <section className="relative overflow-hidden bg-ink text-ink-foreground">
         <div className="court-lines absolute inset-0 text-ink-foreground" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:px-10 lg:py-9">
+        <div className="relative mx-auto grid max-w-[120rem] gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:px-10 lg:py-9">
           <div className="flex flex-col justify-center gap-2">
             <p className="text-sm text-ink-foreground/60 first-letter:uppercase">{LONG_DAY.format(new Date())}</p>
             <h1 className="font-display text-5xl font-bold uppercase leading-[0.92] sm:text-6xl">Hola, {firstName}</h1>
@@ -140,7 +140,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-10">
+      <div className="mx-auto grid w-full max-w-[120rem] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] 2xl:grid-cols-[minmax(0,1fr)_26rem] lg:px-10">
         <div className="flex min-w-0 flex-col gap-6">
           {can('matches.view') && (
             <Card title="Partidos de la semana" icon={CalendarDays} action={{ href: `${base}/partidos`, label: 'Calendario' }}>
