@@ -56,7 +56,7 @@ export default async function AdminLayout({
               </div>
             </div>
 
-            <Link href="/perfil?volver=/admin" className="text-xs text-muted-foreground hover:text-foreground">
+            <Link href="/admin/perfil" className="text-xs text-muted-foreground hover:text-foreground">
               Mi perfil
             </Link>
 
