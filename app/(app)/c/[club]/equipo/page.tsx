@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { TeamModule } from '@/components/club/team/team-module'
 import { listSports } from '@/lib/api/club'
 import { listClubActivity, type ClubActivityType } from '@/lib/api/activity'
@@ -27,7 +28,7 @@ export default async function TeamPage({
   const query = await searchParams
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
-  if (!permissions.has('club_users.view')) return <NoAccess moduleName="Equipo" homeHref={`/c/${club}`} />
+  if (!canOpenModule('equipo', session.permissions ?? [])) return <NoAccess moduleName="Equipo" homeHref={`/c/${club}`} />
 
   // El registro de actividad solo lo ve quien tiene `audit.view` (por defecto, el admin del club).
   const canViewActivity = permissions.has('audit.view')

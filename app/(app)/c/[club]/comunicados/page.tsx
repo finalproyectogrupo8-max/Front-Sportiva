@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { AnnouncementsModule } from '@/components/club/announcements/announcements-module'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { getAnnouncement, listAnnouncements, listRecipients, listRoles } from '@/lib/api/announcements'
 import { listCategories, listSeasons } from '@/lib/api/club'
 import { listClubUsers } from '@/lib/api/facilities'
@@ -19,7 +20,7 @@ export default async function AnnouncementsPage({
   const query = await searchParams
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
-  if (!permissions.has('announcements.view')) return <NoAccess moduleName="Comunicados" homeHref={`/c/${club}`} />
+  if (!canOpenModule('comunicados', session.permissions ?? [])) return <NoAccess moduleName="Comunicados" homeHref={`/c/${club}`} />
 
   const canSend = permissions.has('announcements.send')
   // Al staff (roles y usuarios del club) solo le escribe quien tiene alcance sobre todo el club.

@@ -157,7 +157,11 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
           )}
 
           {seesOrders && (
-            <Card title="Pedidos" icon={Shirt} action={can('apparel_orders.view') ? { href: `${base}/indumentaria`, label: 'Ver pedidos' } : undefined}>
+            <Card
+              title="Pedidos"
+              icon={Shirt}
+              action={{ href: `${base}/${can('apparel_orders.view') ? 'indumentaria' : 'materiales'}`, label: 'Ver pedidos' }}
+            >
               {openOrders.length === 0 ? (
                 <Empty>No hay pedidos para aprobar ni para entregar.</Empty>
               ) : (
@@ -168,7 +172,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
                   </div>
                   <ul className="flex flex-col divide-y">
                     {openOrders.slice(0, 5).map((o) => (
-                      <OrderRow key={o.id} order={o} />
+                      <OrderRow key={o.id} order={o} href={`${base}/${o.type === 'apparel' ? 'indumentaria' : 'materiales'}?pedido=${o.id}`} />
                     ))}
                   </ul>
                 </>
@@ -331,11 +335,12 @@ function WeekMatch({ match, base, sheet, showCallup }: { match: CalendarEvent; b
   )
 }
 
-function OrderRow({ order }: { order: Order }) {
+function OrderRow({ order, href }: { order: Order; href: string }) {
   const status = ORDER_STATUS[order.status] ?? { label: order.status, tone: 'neutral' as Tone }
   const items = (order.apparel_order_items?.length ?? 0) + (order.material_order_items?.length ?? 0)
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li>
+      <Link href={href} className="flex items-center gap-3 px-4 py-3 transition hover:bg-muted/50">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
         {order.type === 'apparel' ? <Shirt className="size-4" aria-hidden="true" /> : <Package className="size-4" aria-hidden="true" />}
       </span>
@@ -350,6 +355,7 @@ function OrderRow({ order }: { order: Order }) {
         </span>
       </span>
       <Pill tone={status.tone}>{status.label}</Pill>
+      </Link>
     </li>
   )
 }

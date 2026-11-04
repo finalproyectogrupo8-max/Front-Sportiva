@@ -11,6 +11,7 @@ import {
   updateLocation,
   updateMaterial,
 } from '@/lib/api/inventory'
+import { createOrder, deliverOrder, submitOrder } from '@/lib/api/orders'
 
 const num = (formData: FormData, key: string) => Number(text(formData, key).replace(',', '.'))
 const optional = (formData: FormData, key: string) => text(formData, key) || null
@@ -88,4 +89,49 @@ export async function transferAction(formData: FormData): Promise<ActionResult> 
   }
   if (input.from_location_id === input.to_location_id) return { ok: false, fieldErrors: { to_location_id: 'Elegí un depósito distinto al de origen.' } }
   return runApiAction(() => transferStock(input), 'Transferencia registrada.', ['material_id', 'from_location_id', 'to_location_id', 'quantity', 'reason', 'reference'])
+}
+
+// Pedidos de materiales (TIZ-17 / TIZ-18): el profe pide, quien aprueba lo aprueba y el
+// utilero lo entrega. Enviar, aprobar, rechazar y eliminar usan las mismas acciones que indumentaria.
+
+const PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const
+
+export async function createMaterialOrderAction(input: {
+  category_id: number | null
+  priority: string
+  description: string
+  lines: { material_id: number; quantity: number }[]
+  send: boolean
+}): Promise<ActionResult> {
+  const lines = input.lines.filter((l) => Number.isInteger(l.material_id) && l.quantity > 0)
+  if (lines.length === 0) return { ok: false, error: 'Agregá al menos un material con su cantidad.' }
+
+  const priority = (PRIORITIES as readonly string[]).includes(input.priority) ? (input.priority as (typeof PRIORITIES)[number]) : 'normal'
+  let createdId: number | null = null
+  const created = await runApiAction(
+    async () => {
+      const result = await createOrder({ type: 'material', category_id: input.category_id, priority, description: input.description.trim() || null, material_order_items: lines })
+      if (result.ok) createdId = result.data.data.id
+      return result
+    },
+    input.send ? 'Pedido enviado para aprobar.' : 'Pedido guardado como borrador.',
+    ['*'],
+  )
+  if (!created.ok || !input.send || createdId === null) return created
+  const id: number = createdId
+  return runApiAction(() => submitOrder(id), 'Pedido enviado para aprobar.', [])
+}
+
+/** Entrega: todo lo pendiente o lo de cada línea. Con depósito, descuenta el stock de ahí. */
+export async function deliverMaterialOrderAction(
+  id: number,
+  deliveries: { id: number; delivered_quantity: number }[] | null,
+  locationId: number | null,
+  comment: string,
+): Promise<ActionResult> {
+  return runApiAction(
+    () => deliverOrder(id, { comment: comment.trim() || null, location_id: locationId, deliveries: deliveries ?? undefined }),
+    deliveries ? 'Entrega registrada.' : 'Pedido entregado completo.',
+    ['*'],
+  )
 }

@@ -4,6 +4,7 @@ import { Pagination } from '@/components/admin/pagination'
 import { CoachSheet } from '@/components/club/coaches/coach-sheet'
 import { CoachesList, CoachFilters, NewCoachButton } from '@/components/club/coaches/coaches-list'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { listCategories, listSports } from '@/lib/api/club'
 import { getCoach, listCoaches } from '@/lib/api/players'
@@ -23,7 +24,7 @@ export default async function CoachesPage({ params, searchParams }: Props) {
   const permissions = new Set(session.permissions ?? [])
   const can = (permission: string) => permissions.has(permission)
 
-  if (!can('coaches.view')) return <NoAccess moduleName="Profes" homeHref={`/c/${club}`} />
+  if (!canOpenModule('profes', session.permissions ?? [])) return <NoAccess moduleName="Profes" homeHref={`/c/${club}`} />
 
   const selectedId = Number(query.id) || null
   const status = query.estado === 'todos' ? undefined : query.estado || 'active'

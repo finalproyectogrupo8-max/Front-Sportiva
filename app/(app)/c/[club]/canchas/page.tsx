@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { FacilitiesModule } from '@/components/club/facilities/facilities-module'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { listClubUsers, listFacilities, listMaintenance, listRepairs } from '@/lib/api/facilities'
 import { requireSession } from '@/lib/session'
 
@@ -12,7 +13,7 @@ export default async function FacilitiesPage({ params, searchParams }: { params:
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
   const can = (p: string) => permissions.has(p)
-  if (!can('facilities.view') && !can('repairs.view') && !can('maintenance.view')) return <NoAccess moduleName="Canchas" homeHref={`/c/${club}`} />
+  if (!canOpenModule('canchas', session.permissions ?? [])) return <NoAccess moduleName="Canchas" homeHref={`/c/${club}`} />
 
   const [facilities, repairs, maintenance, users] = await Promise.all([
     listFacilities(),
