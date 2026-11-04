@@ -33,14 +33,15 @@ export type ModuleDef = {
   icon: LucideIcon
   area: 'Deportivo' | 'Operación' | 'Infraestructura'
   /**
-   * Permisos `*.view` que habilitan el módulo: alcanza con tener uno.
+   * Permisos `*.view` que habilitan el módulo: alcanza con tener uno. Tienen que ser los mismos
+   * que pide la página del módulo; si no, aparece en el menú y al entrar dice "Sin acceso".
    * El primero es la clave principal (docs/roles-y-permisos.md de la API).
    */
   permissions: readonly string[]
 }
 
 export const MODULES: ModuleDef[] = [
-  { id: 'partidos', name: 'Partidos', description: 'Fixture, horarios, sedes y ropa de juego', icon: CalendarDays, area: 'Deportivo', permissions: ['matches.view', 'trainings.view', 'attendance.view'] },
+  { id: 'partidos', name: 'Partidos', description: 'Fixture, horarios, sedes y ropa de juego', icon: CalendarDays, area: 'Deportivo', permissions: ['matches.view', 'trainings.view'] },
   { id: 'habilitacion', name: 'Habilitación', description: 'Quién puede jugar y qué papeles le faltan', icon: ShieldCheck, area: 'Deportivo', permissions: ['player_requirements.view'] },
   { id: 'jugadores', name: 'Jugadores', description: 'Fichas, categorías, pases y puestos', icon: Users, area: 'Deportivo', permissions: ['players.view'] },
   { id: 'analisis', name: 'Análisis', description: 'Eficacia, constancia y práctica', icon: TrendingUp, area: 'Deportivo', permissions: ['physical_evaluations.view'] },
@@ -74,4 +75,10 @@ export function canSeeModule(mod: ModuleDef, permissions: readonly string[]) {
 /** Módulos que el usuario puede ver, en el orden del menú. */
 export function visibleModules(permissions: readonly string[]) {
   return MODULES.filter((m) => canSeeModule(m, permissions))
+}
+
+/** La misma regla del menú para la página del módulo: si el menú lo muestra, la página deja entrar. */
+export function canOpenModule(id: ModuleId, permissions: readonly string[]) {
+  const mod = getModule(id)
+  return mod !== undefined && canSeeModule(mod, permissions)
 }

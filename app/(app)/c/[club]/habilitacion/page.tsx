@@ -5,6 +5,7 @@ import { EmptyConfig } from '@/components/club/empty-state'
 import { CategoryCards } from '@/components/club/eligibility/category-cards'
 import { EligibilityGrid } from '@/components/club/eligibility/eligibility-grid'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
 import { categoryEligibility, clubEligibility } from '@/lib/api/eligibility'
@@ -23,7 +24,7 @@ export default async function EligibilityPage({ params, searchParams }: Props) {
   const { categoria } = await searchParams
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
-  if (!permissions.has('player_requirements.view')) {
+  if (!canOpenModule('habilitacion', session.permissions ?? [])) {
     return <NoAccess moduleName="Habilitación" homeHref={`/c/${club}`} />
   }
 

@@ -18,10 +18,15 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { SheetFooter } from '@/components/ui/sheet'
 import type { InventoryBalance, InventoryMovement, Material, StorageLocation } from '@/lib/api/inventory'
+import type { Order } from '@/lib/api/orders'
 import { cn } from '@/lib/utils'
+import { MaterialOrders, type OrderCan } from './material-orders'
 
 type Can = {
   viewStock: boolean
+  viewCatalog: boolean
+  viewOrders: boolean
+  orders: OrderCan
   adjust: boolean
   transfer: boolean
   createMaterial: boolean
@@ -31,7 +36,7 @@ type Can = {
   updateLocation: boolean
   deleteLocation: boolean
 }
-type Tab = 'stock' | 'movimientos' | 'catalogo'
+type Tab = 'stock' | 'movimientos' | 'pedidos' | 'catalogo'
 type MovementType = 'in' | 'out' | 'adjustment'
 
 const MOVEMENT: Record<string, { label: string; sign: 1 | -1 | 0; icon: React.ComponentType<{ className?: string }>; tone: Tone }> = {
@@ -50,6 +55,10 @@ export function MaterialsModule({
   locations,
   balances,
   movements,
+  orders,
+  categories,
+  openOrderId,
+  startNew,
   loadError,
   can,
 }: {
@@ -57,10 +66,15 @@ export function MaterialsModule({
   locations: StorageLocation[]
   balances: InventoryBalance[]
   movements: InventoryMovement[]
+  orders: Order[]
+  categories: { id: number; name: string }[]
+  openOrderId: number | null
+  startNew: boolean
   loadError: boolean
   can: Can
 }) {
-  const [tab, setTab] = useState<Tab>(can.viewStock ? 'stock' : 'catalogo')
+  const [tab, setTab] = useState<Tab>(can.viewOrders && (openOrderId || startNew || !can.viewStock) ? 'pedidos' : can.viewStock ? 'stock' : can.viewOrders ? 'pedidos' : 'catalogo')
+  const [creatingOrder, setCreatingOrder] = useState(startNew && can.orders.create)
   const [location, setLocation] = useState<string>('all')
   const [moving, setMoving] = useState<{ type: MovementType; materialId?: number; locationId?: number } | null>(null)
   const [transferring, setTransferring] = useState<{ materialId?: number; fromId?: number } | null>(null)
@@ -82,22 +96,32 @@ export function MaterialsModule({
       <ModuleHeader
         eyebrow="Operación"
         title="Materiales"
-        description="Stock de utilería por depósito: ingresos, egresos, ajustes por conteo y transferencias, con su historial."
+        description={
+          can.viewStock
+            ? 'Stock de utilería por depósito: ingresos, egresos, ajustes por conteo y transferencias, con su historial.'
+            : 'Pedí los materiales que necesita tu categoría y seguí si ya se aprobaron y entregaron.'
+        }
         actions={
           <>
-            {balances.length > 0 && (
+            {tab === 'pedidos' && can.orders.create && activeMaterials.length > 0 && (
+              <Button className="gap-1.5" onClick={() => setCreatingOrder(true)}>
+                <Plus className="size-4" aria-hidden="true" />
+                Pedir materiales
+              </Button>
+            )}
+            {tab !== 'pedidos' && balances.length > 0 && (
               <a href={`${pathname}/exportar`} className={buttonVariants({ variant: 'ghost', className: 'gap-1.5' })}>
                 <Download className="size-4" aria-hidden="true" />
                 Exportar stock
               </a>
             )}
-            {can.transfer && activeLocations.length > 1 && (
+            {tab !== 'pedidos' && can.transfer && activeLocations.length > 1 && (
               <Button variant="outline" className="gap-1.5" onClick={() => setTransferring({})}>
                 <ArrowLeftRight className="size-4" aria-hidden="true" />
                 Transferir
               </Button>
             )}
-            {can.adjust && activeMaterials.length > 0 && activeLocations.length > 0 && (
+            {tab !== 'pedidos' && can.adjust && activeMaterials.length > 0 && activeLocations.length > 0 && (
               <Button className="gap-1.5" onClick={() => setMoving({ type: 'in' })}>
                 <Plus className="size-4" aria-hidden="true" />
                 Registrar movimiento
@@ -117,7 +141,8 @@ export function MaterialsModule({
                   { value: 'movimientos' as Tab, label: 'Movimientos' },
                 ]
               : []),
-            { value: 'catalogo' as Tab, label: 'Materiales y depósitos' },
+            ...(can.viewOrders ? [{ value: 'pedidos' as Tab, label: 'Pedidos', count: orders.filter((o) => !['delivered', 'rejected'].includes(o.status)).length }] : []),
+            ...(can.viewCatalog ? [{ value: 'catalogo' as Tab, label: 'Materiales y depósitos' }] : []),
           ]}
         />
       </ModuleHeader>
@@ -214,6 +239,19 @@ export function MaterialsModule({
         )}
 
         {tab === 'movimientos' && <MovementsTable movements={movements} />}
+
+        {tab === 'pedidos' && (
+          <MaterialOrders
+            orders={orders}
+            materials={activeMaterials}
+            locations={activeLocations}
+            categories={categories}
+            openOrderId={openOrderId}
+            creating={creatingOrder}
+            onCreatingChange={setCreatingOrder}
+            can={can.orders}
+          />
+        )}
 
         {tab === 'catalogo' && <Catalog materials={materials} locations={locations} can={can} />}
       </PageBody>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ApparelModule } from '@/components/club/apparel/apparel-module'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { listCategories } from '@/lib/api/club'
 import { listApparelItems, listOrders } from '@/lib/api/orders'
 import { requireSession } from '@/lib/session'
@@ -19,7 +20,7 @@ export default async function ApparelPage({
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
   const can = (p: string) => permissions.has(p)
-  if (!can('apparel_orders.view') && !can('apparel_items.view')) return <NoAccess moduleName="Indumentaria" homeHref={`/c/${club}`} />
+  if (!canOpenModule('indumentaria', session.permissions ?? [])) return <NoAccess moduleName="Indumentaria" homeHref={`/c/${club}`} />
 
   const [orders, items, categories] = await Promise.all([
     can('apparel_orders.view') ? listOrders({ type: 'apparel', per_page: 100 }) : Promise.resolve(null),

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CalendarRange } from 'lucide-react'
 import { EmptyConfig } from '@/components/club/empty-state'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { ProjectModule } from '@/components/club/project/project-module'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
@@ -23,7 +24,7 @@ export default async function ProjectPage({
   const query = await searchParams
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
-  if (!permissions.has('project.view')) return <NoAccess moduleName="Proyecto" homeHref={`/c/${club}`} />
+  if (!canOpenModule('competencia', session.permissions ?? [])) return <NoAccess moduleName="Proyecto" homeHref={`/c/${club}`} />
 
   const [seasons, allCompetitions] = await Promise.all([listSeasons(), listCompetitions()])
   const seasonList = (seasons.ok ? seasons.data.data : []).filter((s) => s.status !== 'closed')

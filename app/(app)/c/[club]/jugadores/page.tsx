@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { AlertTriangle, Download, Printer } from 'lucide-react'
 import { Pagination } from '@/components/admin/pagination'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { NewPlayerButton } from '@/components/club/players/player-form'
 import { PlayerFilters } from '@/components/club/players/player-filters'
 import { PlayerSheet, type PlayerDetail } from '@/components/club/players/player-sheet'
@@ -60,7 +61,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
   const permissions = new Set(session.permissions ?? [])
   const can = (permission: string) => permissions.has(permission)
 
-  if (!can('players.view')) return <NoAccess moduleName="Jugadores" homeHref={`/c/${club}`} />
+  if (!canOpenModule('jugadores', session.permissions ?? [])) return <NoAccess moduleName="Jugadores" homeHref={`/c/${club}`} />
 
   const page = Math.max(1, Number(query.page) || 1)
   const categoryId = Number(query.categoria) || undefined

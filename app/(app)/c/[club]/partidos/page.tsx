@@ -5,6 +5,7 @@ import { CalendarView } from '@/components/club/matches/calendar-view'
 import { NewEventButtons } from '@/components/club/matches/new-event-buttons'
 import { TrainingSheet } from '@/components/club/matches/training-sheet'
 import { NoAccess } from '@/components/club/no-access'
+import { canOpenModule } from '@/lib/modules'
 import { CalendarShareButton } from '@/components/club/matches/calendar-share'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { listCategories, listCompetitions, listVenues } from '@/lib/api/club'
@@ -38,7 +39,7 @@ export default async function MatchesPage({ params, searchParams }: Props) {
   const session = await requireSession()
   const permissions = new Set(session.permissions ?? [])
   const can = (p: string) => permissions.has(p)
-  if (!can('matches.view') && !can('trainings.view')) return <NoAccess moduleName="Partidos" homeHref={`/c/${club}`} />
+  if (!canOpenModule('partidos', session.permissions ?? [])) return <NoAccess moduleName="Partidos" homeHref={`/c/${club}`} />
 
   const view = query.vista === 'mes' ? 'mes' : 'semana'
   const anchor = isValidDay(query.desde) ? query.desde : today()
