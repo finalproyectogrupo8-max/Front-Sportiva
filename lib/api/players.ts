@@ -36,6 +36,8 @@ export type PlayerInput = {
   gender: 'female' | 'male' | 'other' | null
   status?: PlayerStatus
   notes: string | null
+  /** Posiciones del deporte (las de Configuración → Deportes). Sin la clave, no se tocan. */
+  position_ids?: number[]
 }
 
 export type ContactInput = {

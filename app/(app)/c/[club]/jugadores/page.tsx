@@ -9,7 +9,8 @@ import { PlayerSheet, type PlayerDetail } from '@/components/club/players/player
 import { PlayersTable } from '@/components/club/players/players-table'
 import { ModuleHeader, PageBody } from '@/components/club/shared'
 import { buttonVariants } from '@/components/ui/button'
-import { listCategories, listSports, type Category } from '@/lib/api/club'
+import { listCategories, listPositions, listSports, type Category } from '@/lib/api/club'
+import type { PositionOption } from '@/lib/player-labels'
 import { clubEligibility, playerEligibility } from '@/lib/api/eligibility'
 import { getPlayer, listContacts, listPlayerMemberships, listPlayers } from '@/lib/api/players'
 import { isGender, withBranch } from '@/lib/branches'
@@ -34,6 +35,14 @@ async function categoryOptions(): Promise<(Category & { label: string })[]> {
       ...c,
       label: manySports && sportName.get(c.sport_id) ? `${withBranch(c.name, c.branch)} · ${sportName.get(c.sport_id)}` : withBranch(c.name, c.branch),
     }))
+}
+
+/** Posiciones activas de cada deporte, para elegirlas en la ficha. Sin permiso, la ficha usa el texto libre. */
+async function positionOptions(): Promise<PositionOption[]> {
+  const [positions, sports] = await Promise.all([listPositions({ is_active: true }), listSports()])
+  if (!positions.ok) return []
+  const sportName = new Map(sports.ok ? sports.data.data.map((s) => [s.id, s.name]) : [])
+  return positions.data.data.map((p) => ({ id: p.id, name: p.name, sport_id: p.sport_id, sport: sportName.get(p.sport_id) ?? 'Deporte' }))
 }
 
 async function loadDetail(id: number, canSeeContacts: boolean, canSeeEligibility: boolean): Promise<PlayerDetail | null> {
@@ -67,12 +76,14 @@ export default async function PlayersPage({ params, searchParams }: Props) {
   const categoryId = Number(query.categoria) || undefined
   const selectedId = Number(query.id) || null
 
-  let players, categories, detail
+  const editsPlayers = can('players.create') || can('players.update')
+  let players, categories, detail, positions
   try {
-    ;[players, categories, detail] = await Promise.all([
+    ;[players, categories, detail, positions] = await Promise.all([
       listPlayers({ search: query.q?.trim() || undefined, category_id: categoryId, gender: isGender(query.genero) ? query.genero : undefined, status: query.estado === 'todos' ? undefined : query.estado || 'active', page }),
       categoryOptions(),
       selectedId ? loadDetail(selectedId, can('player_contacts.view'), can('player_requirements.view')) : Promise.resolve(null),
+      editsPlayers && can('positions.view') ? positionOptions().catch(() => []) : Promise.resolve([]),
     ])
   } catch {
     players = null
@@ -108,7 +119,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
                 </a>
               </>
             )}
-            {flags.create && <NewPlayerButton categories={categories ?? []} />}
+            {flags.create && <NewPlayerButton categories={categories ?? []} positions={positions ?? []} />}
           </>
         }
       >
@@ -138,6 +149,7 @@ export default async function PlayersPage({ params, searchParams }: Props) {
         detail={detail ?? null}
         notFound={Boolean(selectedId && !detail)}
         categories={categories ?? []}
+        positions={positions ?? []}
         can={flags}
       />
     </>

@@ -27,6 +27,9 @@ import {
   type CompetitionInput,
   type SeasonInput,
   type SeasonStatus,
+  createPosition,
+  deletePosition,
+  updatePosition,
 } from '@/lib/api/club'
 
 // Configuración del club (FRO-16). Cada acción devuelve el resultado al formulario: los 422 van
@@ -102,6 +105,22 @@ export async function deleteSportAction(id: number): Promise<ConfigResult> {
     [],
     'No se puede dar de baja: el deporte tiene categorías activas. Desactivá primero sus categorías.',
   )
+}
+
+/* Posiciones de cada deporte */
+
+export async function savePositionAction(id: number | null, sportId: number, name: string): Promise<ConfigResult> {
+  const clean = name.trim().slice(0, 80)
+  if (!clean) return { ok: false, fieldErrors: { name: 'Escribí el nombre de la posición.' } }
+  return id
+    ? run(() => updatePosition(id, { name: clean }), `Posición "${clean}" actualizada.`, ['name'])
+    : run(() => createPosition({ sport_id: sportId, name: clean }), `Posición "${clean}" agregada.`, ['name'])
+}
+
+export async function setPositionActiveAction(id: number, isActive: boolean): Promise<ConfigResult> {
+  return isActive
+    ? run(() => updatePosition(id, { is_active: true }), 'Posición activada.', [])
+    : run(() => deletePosition(id), 'Posición desactivada: ya no aparece al cargar jugadores.', [])
 }
 
 /* Temporadas */

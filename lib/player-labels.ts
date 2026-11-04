@@ -1,4 +1,5 @@
 import type { Tone } from '@/components/club/shared'
+import type { Schemas } from '@/lib/api/client'
 
 // Textos de la UI para los valores que guarda la API (jugadores y profes, FRO-17).
 
@@ -46,4 +47,14 @@ export function photoUrl(club: string, documentId: number | null | undefined): s
 /** "Ana Pérez" → "AP". */
 export function initials(first: string, last: string): string {
   return `${first.trim()[0] ?? ''}${last.trim()[0] ?? ''}`.toUpperCase()
+}
+
+/** Posición elegible en la ficha, con su deporte para agruparlas. */
+export type PositionOption = { id: number; name: string; sport_id: number; sport: string }
+
+type PositionRef = { id: number; name: string; sport_id: number }
+
+/** Las posiciones que trae la ficha del jugador (la API las incluye en el detalle y en la lista). */
+export function playerPositions(player: Schemas['PlayerResource']): PositionRef[] {
+  return ((player as Schemas['PlayerResource'] & { positions?: PositionRef[] }).positions ?? []).map((p) => ({ id: p.id, name: p.name, sport_id: p.sport_id }))
 }
