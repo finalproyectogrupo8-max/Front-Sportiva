@@ -47,6 +47,7 @@ export function TopBar({
   const current = getModule(section)
   const isTeamPage = section === 'equipo'
   const inConfig = section === 'configuracion'
+  const inProfile = section === 'perfil'
   const showConfig = CONFIG_PERMISSIONS.some(can)
   const quickCreate = QUICK_CREATE.filter((q) => can(q.permission) && canSee(q.module))
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -131,10 +132,10 @@ export function TopBar({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" className="hidden h-9 gap-2 px-2 md:inline-flex" />}
-            aria-label={`Cambiar de módulo (ahora: ${isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')})`}
+            aria-label={`Cambiar de módulo (ahora: ${isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : inProfile ? 'Mi perfil' : 'Hoy')})`}
           >
             <CurrentIcon className="size-4 text-primary" aria-hidden="true" />
-            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : 'Hoy')}</span>
+            <span className="font-medium">{isTeamPage ? 'Equipo del club' : current?.name ?? (inConfig ? 'Configuración' : inProfile ? 'Mi perfil' : 'Hoy')}</span>
             <ChevronsUpDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-[min(92vw,30rem)] p-2">
@@ -248,7 +249,7 @@ export function TopBar({
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem render={<Link href={`/perfil?volver=${encodeURIComponent(`/c/${tenant.slug}`)}`} />}>
+              <DropdownMenuItem render={<Link href={`${base}/perfil`} />}>
                 <UserRound className="size-4" aria-hidden="true" />
                 Mi perfil
               </DropdownMenuItem>
