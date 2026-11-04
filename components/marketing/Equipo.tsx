@@ -14,6 +14,7 @@ export const miembrosEquipo: MiembroEquipo[] = [
     nombre: 'Martín',
     rol: 'Arquitectura de Base de Datos y Gestión ABM',
     inicial: 'M',
+    imagen: '/images/equipo/martin.jpg',
     descripcion:
       'Colaboró en la arquitectura de datos y lideró la construcción de los módulos ABM. Optimizó los flujos de carga y validaciones para garantizar un registro muy ágil y robusto.',
   },

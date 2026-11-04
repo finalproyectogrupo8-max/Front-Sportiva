@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Barlow_Condensed, Inter } from 'next/font/google'
+
 import './marketing.css'
 
 // Root layout de la landing pública (/, /funciones, /quienes-somos, /contacto).
@@ -8,12 +8,8 @@ import './marketing.css'
 // Pasar de acá al sistema interno (app/(app)) hace una recarga completa, así que
 // los estilos de la landing no llegan al panel.
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const barlow = Barlow_Condensed({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-barlow',
-})
+const inter = { variable: '' };
+const barlow = { variable: '' };
 
 export const metadata: Metadata = {
   title: 'Sportiva — Gestión operativa para clubes',

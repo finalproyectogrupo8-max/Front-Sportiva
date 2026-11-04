@@ -164,18 +164,6 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
                 <ArrowUpRight />
               </Link>
 
-              <div className="trust-line">
-                <div className="avatar-stack">
-                  <span>RB</span>
-                  <span>CA</span>
-                  <span>+8</span>
-                </div>
-                <p>
-                  <strong>Todo el club, alineado.</strong>
-                  <br />
-                  Desde la comisión hasta la cancha.
-                </p>
-              </div>
             </div>
           </div>
 
@@ -232,11 +220,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
                 </article>
               ))}
             </div>
-            <div className="carousel-controls">
-              <button type="button" onClick={() => scrollCards(-1)} aria-label="Tarjetas anteriores">←</button>
-              <div><i /><span>Deslizá para explorar</span></div>
-              <button type="button" onClick={() => scrollCards(1)} aria-label="Tarjetas siguientes">→</button>
-            </div>
+
           </div>
         </section>
 
