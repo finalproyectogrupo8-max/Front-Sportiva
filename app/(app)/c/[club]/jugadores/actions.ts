@@ -27,6 +27,7 @@ const PLAYER_FIELDS = [
   'document_number',
   'registration_number',
   'preferred_position',
+  'position_ids',
   'dominant_side',
   'gender',
   'status',
@@ -51,6 +52,10 @@ function playerInput(formData: FormData): { input: PlayerInput; errors: Record<s
     gender: isGender(text(formData, 'gender')) ? (text(formData, 'gender') as PlayerInput['gender']) : null,
     notes: text(formData, 'notes') || null,
     ...(STATUSES.includes(status) ? { status } : {}),
+    // Solo si el formulario mostró las posiciones: si no, la API deja las que tenía.
+    ...(formData.has('positions_field')
+      ? { position_ids: [...new Set(formData.getAll('position_ids').map(Number).filter((n) => Number.isInteger(n) && n > 0))] }
+      : {}),
   }
 
   const errors: Record<string, string> = {}

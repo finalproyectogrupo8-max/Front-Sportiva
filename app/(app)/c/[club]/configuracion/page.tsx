@@ -15,6 +15,7 @@ import {
   listCategories,
   listCompetitions,
   listSeasons,
+  listPositions,
   listSports,
   listVenues,
   type Category,
@@ -172,11 +173,15 @@ async function loadTab(
     }
 
     if (tab === 'deportes') {
-      const [sports, categories] = await Promise.all([
+      const seesPositions = access.permissions.includes('positions.view')
+      const [sports, categories, activePositions, inactivePositions] = await Promise.all([
         listSports(),
         access.permissions.includes('categories.view') ? listCategories() : Promise.resolve(null),
+        seesPositions ? listPositions({ is_active: true }) : Promise.resolve(null),
+        seesPositions ? listPositions({ is_active: false }) : Promise.resolve(null),
       ])
       if (!sports.ok) return { tab: 'error', result: sports }
+      const positions = [...(activePositions?.ok ? activePositions.data.data : []), ...(inactivePositions?.ok ? inactivePositions.data.data : [])]
       if (categories && !categories.ok) return { tab: 'error', result: categories }
       const active = categories?.ok ? categories.data.data.filter((c) => c.is_active) : null
       const assignedIds = new Set(access.assignedSports.map((sport) => sport.id))
@@ -189,6 +194,7 @@ async function loadTab(
         sports: visibleSports.map((sport) => ({
           ...sport,
           categories: active ? active.filter((category) => category.sport_id === sport.id).length : null,
+          positions: seesPositions ? positions.filter((p) => p.sport_id === sport.id) : null,
         })),
       }
     }
@@ -300,7 +306,7 @@ async function TabContent({
     case 'sedes':
       return <VenuesSection club={club} venues={data.venues} can={crud('venues')} />
     case 'deportes':
-      return <SportsSection sports={data.sports} can={crud('sports')} />
+      return <SportsSection sports={data.sports} can={crud('sports')} canPositions={crud('positions')} />
     case 'temporadas':
       return <SeasonsSection seasons={data.seasons} can={crud('seasons')} />
     case 'categorias':

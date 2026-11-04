@@ -112,6 +112,23 @@ export function deleteCategory(id: number): Promise<ApiResult<void>> {
   return apiFetch(`/categories/${id}`, { method: 'DELETE' })
 }
 
+/* Posiciones de cada deporte (TIZ, PR #98 de la API). Desactivar una la saca de los selectores. */
+
+export type Position = { id: number; sport_id: number; name: string; is_active: boolean }
+
+export function listPositions(query: { sport_id?: number; is_active?: boolean } = {}): Promise<ApiResult<Page<Position>>> {
+  return apiFetch('/positions', { query: { sort: 'name', per_page: 100, ...query } })
+}
+export function createPosition(input: { sport_id: number; name: string }): Promise<ApiResult<One<Position>>> {
+  return apiFetch('/positions', { method: 'POST', body: input })
+}
+export function updatePosition(id: number, input: { name?: string; is_active?: boolean }): Promise<ApiResult<One<Position>>> {
+  return apiFetch(`/positions/${id}`, { method: 'PATCH', body: input })
+}
+export function deletePosition(id: number): Promise<ApiResult<void>> {
+  return apiFetch(`/positions/${id}`, { method: 'DELETE' })
+}
+
 /* Competencias y requisitos de habilitación (FRO-33) */
 
 export type Competition = Schemas['CompetitionResource']

@@ -40,6 +40,7 @@ import { formatDay } from '@/lib/format-date'
 import { DOMINANT_SIDE, PLAYER_STATUS, RELATIONSHIP, photoUrl } from '@/lib/player-labels'
 import { cn } from '@/lib/utils'
 import { PlayerAvatar } from './player-avatar'
+import { playerPositions, type PositionOption } from '@/lib/player-labels'
 import { PlayerForm } from './player-form'
 
 export type PlayerDetail = {
@@ -75,12 +76,14 @@ export function PlayerSheet({
   detail,
   notFound,
   categories,
+  positions,
   can,
 }: {
   club: string
   detail: PlayerDetail | null
   notFound: boolean
   categories: { id: number; label: string; sport_id: number }[]
+  positions: PositionOption[]
   can: Flags
 }) {
   const router = useRouter()
@@ -141,7 +144,7 @@ export function PlayerSheet({
               </div>
             </SheetHeader>
             <div className="flex flex-1 flex-col pt-4">
-              {mode.kind === 'edit' && <PlayerForm player={detail.player} onDone={back} />}
+              {mode.kind === 'edit' && <PlayerForm player={detail.player} categories={categories} positions={positions} onDone={back} />}
               {mode.kind === 'contact' && <ContactForm playerId={detail.player.id} contact={mode.contact} onDone={back} />}
               {mode.kind === 'category' && (
                 <CategoryForm
@@ -222,7 +225,11 @@ function PlayerView({
             <Datum label="Nacimiento" value={formatDay(player.birth_date)} />
             <Datum label="DNI" value={player.document_number} />
             <Datum label="Ficha federativa" value={player.registration_number} />
-            <Datum label="Puesto" value={player.preferred_position} />
+            <Datum
+              label={playerPositions(player).length > 1 ? 'Posiciones' : 'Posición'}
+              value={playerPositions(player).map((p) => p.name).join(', ') || player.preferred_position}
+              wide={playerPositions(player).length > 1}
+            />
             <Datum label="Perfil hábil" value={player.dominant_side ? DOMINANT_SIDE[player.dominant_side] : null} />
           </dl>
           {player.notes && <p className="whitespace-pre-line rounded-lg bg-muted p-3 text-sm leading-relaxed">{player.notes}</p>}
@@ -476,11 +483,11 @@ function Section({ title, action, children }: { title: string; action?: React.Re
   )
 }
 
-function Datum({ label, value }: { label: string; value: string | null | undefined }) {
+function Datum({ label, value, wide = false }: { label: string; value: string | null | undefined; wide?: boolean }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-lg bg-muted p-3">
+    <div className={cn('flex flex-col gap-0.5 rounded-lg bg-muted p-3', wide && 'col-span-2')}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={cn('truncate text-sm font-semibold', !value && 'font-normal text-muted-foreground')}>{value || '—'}</dd>
+      <dd className={cn('text-sm font-semibold', wide ? 'text-pretty' : 'truncate', !value && 'font-normal text-muted-foreground')}>{value || '—'}</dd>
     </div>
   )
 }
