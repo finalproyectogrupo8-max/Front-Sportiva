@@ -138,7 +138,7 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
         <section className="hero" id="inicio">
           <div className="hero-background-wrap">
             <HeroVideoBackground fallbackImage={heroImage} />
-            <div className="hero-grain" />
+
           </div>
 
           <div className="hero-content">
