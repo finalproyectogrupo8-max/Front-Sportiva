@@ -16,8 +16,11 @@ import {
   UserX,
 } from 'lucide-react'
 import { Pill, type Tone } from '@/components/club/shared'
+import { categoryStats, type CategoryStats } from '@/lib/api/analytics'
+import { listBalances } from '@/lib/api/inventory'
+import { AttendanceByCategory, CampaignByCategory, type CategoryRow } from './home-charts'
 import { clubEligibility, type CategoryEligibility } from '@/lib/api/eligibility'
-import { listNotifications, listOrders, lowStock, type InventoryBalance, type Notification, type Order } from '@/lib/api/home'
+import { listNotifications, listOrders, type InventoryBalance, type Notification, type Order } from '@/lib/api/home'
 import { calendar, getCallup, type CalendarEvent, type CallupSheet } from '@/lib/api/matches'
 import { addDays, dayKey, formatTime, today } from '@/lib/club-time'
 import { visibleModules } from '@/lib/modules'
@@ -65,13 +68,17 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
   const base = `/c/${club}`
 
   const day = today()
+  const seesStats = can('physical_evaluations.view')
+  // Indicadores de los últimos 90 días, como el período por defecto de Análisis.
+  const statsRange = { from: addDays(day, -90), to: day }
   // La API filtra por día UTC: se pide de más y se recorta por día de Argentina.
-  const [events, eligibility, notifications, orders, stock] = await Promise.all([
+  const [events, eligibility, notifications, orders, stock, stats] = await Promise.all([
     safe(seesCalendar, () => calendar({ from: addDays(day, -1), to: addDays(day, 8) })),
     safe(can('player_requirements.view'), () => clubEligibility()),
     safe(true, () => listNotifications({ unread: true, per_page: 20 })),
     safe(seesOrders, () => listOrders({ per_page: 50 })),
-    safe(can('inventory.view'), () => lowStock()),
+    safe(can('inventory.view'), () => listBalances()),
+    safe(seesStats, () => categoryStats(statsRange)),
   ])
 
   const upcoming = (events?.data ?? []).filter((e) => dayKey(e.starts_at) >= day && dayKey(e.starts_at) <= addDays(day, 7) && e.status !== 'cancelled')
@@ -90,7 +97,46 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
   const atRisk = alerts.filter((n) => n.type === 'attendance_drop')
   const otherAlerts = alerts.filter((n) => n.type !== 'attendance_drop')
   const openOrders = (orders?.data ?? []).filter((o) => TO_APPROVE.has(o.status) || TO_DELIVER.has(o.status))
-  const lowItems = stock?.data ?? []
+  const materials = stockByMaterial(stock?.data ?? [])
+  const lowCount = materials.filter((m) => m.low).length
+  const categories = stats?.data ?? []
+  const rows = categories.map(toRow)
+  const totals = clubTotals(categories)
+  const eligible = (eligibility?.data ?? []).reduce((acc, c) => ({ eligible: acc.eligible + c.eligible, players: acc.players + c.players }), { eligible: 0, players: 0 })
+  const toApprove = openOrders.filter((o) => TO_APPROVE.has(o.status)).length
+  const chartCount = (seesStats ? 2 : 0) + (can('inventory.view') ? 1 : 0)
+  const chartLayout = chartCount === 3 ? 'lg:grid-cols-2 xl:grid-cols-3 lg:max-xl:[&>*:last-child]:col-span-2' : chartCount === 2 ? 'lg:grid-cols-2' : ''
+  // Hasta 3 listas van lado a lado; con más, en mosaico de columnas para que no queden huecos.
+  const listCount = [can('matches.view'), atRisk.length > 0, true, seesOrders, can('player_requirements.view') && !!eligibility].filter(Boolean).length
+  const listLayout = listCount > 3 ? 'gap-6 lg:columns-2 2xl:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid' : 'grid items-start gap-6 lg:grid-cols-[repeat(auto-fit,minmax(24rem,1fr))]'
+
+  const kpis: { label: string; value: React.ReactNode; hint: string; href?: string; tone?: 'warn' | 'bad' }[] = []
+  if (seesStats && categories.length > 0) {
+    kpis.push({ label: 'Jugadores', value: totals.players, hint: `en ${categories.length} ${categories.length === 1 ? 'categoría' : 'categorías'}`, href: `${base}/jugadores` })
+    kpis.push({
+      label: 'Asistencia',
+      value: totals.rate === null ? '—' : `${totals.rate}%`,
+      hint: totals.rate === null ? 'sin registros en 90 días' : `${totals.present} de ${totals.recorded} registros, 90 días`,
+      href: `${base}/analisis`,
+      tone: totals.rate !== null && totals.rate < 60 ? 'bad' : undefined,
+    })
+    kpis.push({ label: 'Partidos jugados', value: totals.played, hint: totals.played ? `${totals.won} G · ${totals.drawn} E · ${totals.lost} P en 90 días` : 'ninguno en 90 días', href: `${base}/partidos` })
+  }
+  if (can('player_requirements.view') && eligible.players > 0) {
+    const pct = Math.round((eligible.eligible / eligible.players) * 100)
+    kpis.push({ label: 'Habilitados', value: `${pct}%`, hint: `${eligible.eligible} de ${eligible.players} jugadores`, href: `${base}/habilitacion`, tone: pct < 60 ? 'bad' : pct < 90 ? 'warn' : undefined })
+  }
+  if (can('inventory.view') && materials.length > 0) {
+    kpis.push({ label: 'Para reponer', value: lowCount, hint: lowCount ? `de ${materials.length} materiales, bajo el mínimo` : `los ${materials.length} materiales están bien`, href: `${base}/materiales`, tone: lowCount ? 'warn' : undefined })
+  }
+  if (seesOrders && kpis.length < 5) {
+    const approves = can('apparel_orders.approve') || can('material_orders.approve')
+    kpis.push(
+      approves
+        ? { label: 'Pedidos para aprobar', value: toApprove, hint: `${openOrders.length - toApprove} para entregar`, tone: toApprove ? 'warn' : undefined }
+        : { label: 'Pedidos en curso', value: openOrders.length, hint: `${toApprove} esperando aprobación · ${openOrders.length - toApprove} para entregar` },
+    )
+  }
   const modules = visibleModules(permissions)
   const firstName = userName.split(' ')[0]
 
@@ -140,8 +186,40 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-[120rem] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] 2xl:grid-cols-[minmax(0,1fr)_26rem] lg:px-10">
-        <div className="flex min-w-0 flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
+        {kpis.length > 0 && (
+          <section aria-label="El club en números" className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] max-md:[&>*:last-child:nth-child(odd)]:col-span-2">
+            {kpis.map((k) => (
+              <Kpi key={k.label} {...k} />
+            ))}
+          </section>
+        )}
+
+        {chartCount > 0 && (
+          <div className={cn('grid gap-6', chartLayout)}>
+            {seesStats && (
+              <Card title="Asistencia por categoría" icon={ClipboardCheck} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
+                <div className="px-4 py-4">
+                  <AttendanceByCategory rows={rows} />
+                </div>
+              </Card>
+            )}
+            {seesStats && (
+              <Card title="Campaña por categoría" icon={Swords} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
+                <div className="px-4 py-4">
+                  <CampaignByCategory rows={rows} />
+                </div>
+              </Card>
+            )}
+            {can('inventory.view') && (
+              <Card title="Stock de materiales" icon={Package} action={{ href: `${base}/materiales`, label: 'Materiales' }} subtitle="Todos los depósitos">
+                {materials.length === 0 ? <Empty>Todavía no hay materiales cargados.</Empty> : <StockLevels materials={materials.slice(0, 8)} />}
+              </Card>
+            )}
+          </div>
+        )}
+
+        <div className={listLayout}>
           {can('matches.view') && (
             <Card title="Partidos de la semana" icon={CalendarDays} action={{ href: `${base}/partidos`, label: 'Calendario' }}>
               {weekMatches.length === 0 ? (
@@ -156,60 +234,6 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
             </Card>
           )}
 
-          {seesOrders && (
-            <Card
-              title="Pedidos"
-              icon={Shirt}
-              action={{ href: `${base}/${can('apparel_orders.view') ? 'indumentaria' : 'materiales'}`, label: 'Ver pedidos' }}
-            >
-              {openOrders.length === 0 ? (
-                <Empty>No hay pedidos para aprobar ni para entregar.</Empty>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-3 px-4 pt-4">
-                    <Counter value={openOrders.filter((o) => TO_APPROVE.has(o.status)).length} label="para aprobar" attention />
-                    <Counter value={openOrders.filter((o) => TO_DELIVER.has(o.status)).length} label="para entregar" />
-                  </div>
-                  <ul className="flex flex-col divide-y">
-                    {openOrders.slice(0, 5).map((o) => (
-                      <OrderRow key={o.id} order={o} href={`${base}/${o.type === 'apparel' ? 'indumentaria' : 'materiales'}?pedido=${o.id}`} />
-                    ))}
-                  </ul>
-                </>
-              )}
-            </Card>
-          )}
-
-          {can('inventory.view') && (
-            <Card title="Stock bajo" icon={Package} action={{ href: `${base}/materiales`, label: 'Materiales' }}>
-              {lowItems.length === 0 ? (
-                <Empty>Todo el stock está por encima del mínimo.</Empty>
-              ) : (
-                <ul className="flex flex-col divide-y">
-                  {lowItems.slice(0, 6).map((b) => (
-                    <StockRow key={b.id} balance={b} />
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
-
-          {can('player_requirements.view') && eligibility && (
-            <Card title="Habilitación" icon={ShieldCheck} action={{ href: `${base}/habilitacion`, label: 'Tablero' }}>
-              {eligibility.data.length === 0 ? (
-                <Empty>Ninguna categoría juega competencias con requisitos todavía.</Empty>
-              ) : (
-                <ul className="flex flex-col divide-y">
-                  {eligibility.data.map((c) => (
-                    <EligibilityRow key={c.category_id} row={c} href={`${base}/habilitacion?categoria=${c.category_id}`} />
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
-        </div>
-
-        <aside className="flex min-w-0 flex-col gap-6">
           {atRisk.length > 0 && (
             <Card title="En riesgo de abandono" icon={UserX}>
               <ul className="flex flex-col divide-y">
@@ -232,29 +256,60 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
             )}
           </Card>
 
-          {modules.length > 0 && (
-            <nav aria-labelledby="accesos" className="flex flex-col gap-2">
-              <h2 id="accesos" className="px-1 text-sm font-medium text-muted-foreground">
-                Módulos
-              </h2>
-              <ul className="grid grid-cols-2 gap-2">
-                {modules.map((m) => (
-                  <li key={m.id}>
-                    <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-sm font-medium transition hover:border-primary/40">
-                      <m.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                      <span className="truncate">{m.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+          {seesOrders && (
+            <Card title="Pedidos" icon={Shirt} action={{ href: `${base}/${can('apparel_orders.view') ? 'indumentaria' : 'materiales'}`, label: 'Ver pedidos' }}>
+              {openOrders.length === 0 ? (
+                <Empty>No hay pedidos para aprobar ni para entregar.</Empty>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-3 px-4 pt-4">
+                    <Counter value={toApprove} label="para aprobar" attention />
+                    <Counter value={openOrders.length - toApprove} label="para entregar" />
+                  </div>
+                  <ul className="flex flex-col divide-y">
+                    {openOrders.slice(0, 5).map((o) => (
+                      <OrderRow key={o.id} order={o} href={`${base}/${o.type === 'apparel' ? 'indumentaria' : 'materiales'}?pedido=${o.id}`} />
+                    ))}
+                  </ul>
+                </>
+              )}
+            </Card>
           )}
-          {modules.length === 0 && (
-            <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-              Tu rol todavía no tiene módulos habilitados. Pedile a un administrador del club que te asigne un rol.
-            </p>
+
+          {can('player_requirements.view') && eligibility && (
+            <Card title="Habilitación" icon={ShieldCheck} action={{ href: `${base}/habilitacion`, label: 'Tablero' }}>
+              {eligibility.data.length === 0 ? (
+                <Empty>Ninguna categoría juega competencias con requisitos todavía.</Empty>
+              ) : (
+                <ul className="flex flex-col divide-y">
+                  {eligibility.data.map((c) => (
+                    <EligibilityRow key={c.category_id} row={c} href={`${base}/habilitacion?categoria=${c.category_id}`} />
+                  ))}
+                </ul>
+              )}
+            </Card>
           )}
-        </aside>
+        </div>
+
+        {modules.length > 0 ? (
+          <nav aria-labelledby="accesos" className="flex flex-col gap-2">
+            <h2 id="accesos" className="px-1 text-sm font-medium text-muted-foreground">
+              Módulos
+            </h2>
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
+              {modules.map((m) => (
+                <li key={m.id}>
+                  <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-sm font-medium transition hover:border-primary/40">
+                    <m.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                    <span className="truncate">{m.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : (
+          <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">Tu rol todavía no tiene módulos habilitados. Pedile a un administrador del club que te asigne un rol.</p>
+        )}
       </div>
     </div>
   )
@@ -360,20 +415,99 @@ function OrderRow({ order, href }: { order: Order; href: string }) {
   )
 }
 
-function StockRow({ balance }: { balance: InventoryBalance }) {
-  const min = balance.material?.minimum_stock ?? 0
+type MaterialStock = { id: number; name: string; unit: string; quantity: number; minimum: number; low: boolean }
+
+/** Suma el stock de cada material en todos los depósitos. Los que están bajo el mínimo van primero. */
+function stockByMaterial(balances: InventoryBalance[]): MaterialStock[] {
+  const byId = new Map<number, MaterialStock>()
+  for (const b of balances) {
+    if (b.material && !b.material.is_active) continue
+    const current = byId.get(b.material_id) ?? { id: b.material_id, name: b.material?.name ?? `Material ${b.material_id}`, unit: b.material?.unit ?? '', quantity: 0, minimum: Number(b.material?.minimum_stock ?? 0), low: false }
+    current.quantity += Number(b.quantity)
+    byId.set(b.material_id, current)
+  }
+  return [...byId.values()]
+    .map((m) => ({ ...m, low: m.quantity < m.minimum }))
+    .sort((a, b) => Number(b.low) - Number(a.low) || a.quantity / Math.max(a.minimum, 1) - b.quantity / Math.max(b.minimum, 1))
+}
+
+/** Barra de stock por material con una marca en el mínimo. Lo que falta se marca con ícono y texto, no solo color. */
+function StockLevels({ materials }: { materials: MaterialStock[] }) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
-      <AlertTriangle className="size-4 shrink-0 text-warning" aria-hidden="true" />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-medium">{balance.material?.name ?? `Material ${balance.material_id}`}</span>
-        <span className="truncate text-xs text-muted-foreground">{balance.location?.name ?? 'Depósito'}</span>
-      </span>
-      <span className="shrink-0 text-right text-sm">
-        <span className="font-display text-lg font-bold tabular-nums text-destructive">{balance.quantity}</span>
-        <span className="text-xs text-muted-foreground"> / mín. {min}</span>
-      </span>
-    </li>
+    <ul className="flex flex-col gap-3 px-4 py-4">
+      {materials.map((m) => {
+        const scale = Math.max(m.minimum * 2, m.quantity, 1)
+        return (
+          <li key={m.id} className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="flex min-w-0 items-center gap-1.5 font-medium">
+                {m.low && <AlertTriangle className="size-3.5 shrink-0 text-warning" aria-hidden="true" />}
+                <span className="truncate">{m.name}</span>
+              </span>
+              <span className="shrink-0 tabular-nums">
+                <span className={cn('font-semibold', m.low && 'text-destructive')}>{m.quantity}</span>
+                <span className="text-xs text-muted-foreground"> / mín. {m.minimum} {m.unit}</span>
+                {m.low && <span className="sr-only"> (bajo el mínimo)</span>}
+              </span>
+            </div>
+            <div className="relative h-2 rounded-full bg-muted" aria-hidden="true">
+              <div className={cn('h-full rounded-full', m.low ? 'bg-destructive' : 'bg-primary')} style={{ width: `${(m.quantity / scale) * 100}%` }} />
+              {m.minimum > 0 && <span className="absolute -top-1 h-4 w-0.5 rounded-full bg-foreground/60" style={{ left: `calc(${(m.minimum / scale) * 100}% - 1px)` }} title={`Mínimo: ${m.minimum}`} />}
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function toRow(c: CategoryStats): CategoryRow {
+  const r = c.results
+  return {
+    name: c.category_name,
+    rate: c.attendance.rate,
+    present: c.attendance.present,
+    recorded: c.attendance.recorded,
+    goalsFor: r.goals_for,
+    goalsAgainst: r.goals_against,
+    played: r.played,
+    won: r.won,
+    drawn: r.drawn,
+    lost: r.lost,
+  }
+}
+
+function clubTotals(categories: CategoryStats[]) {
+  const t = categories.reduce(
+    (acc, c) => ({
+      players: acc.players + c.players,
+      present: acc.present + c.attendance.present,
+      recorded: acc.recorded + c.attendance.recorded,
+      played: acc.played + c.results.played,
+      won: acc.won + c.results.won,
+      drawn: acc.drawn + c.results.drawn,
+      lost: acc.lost + c.results.lost,
+    }),
+    { players: 0, present: 0, recorded: 0, played: 0, won: 0, drawn: 0, lost: 0 },
+  )
+  return { ...t, rate: t.recorded > 0 ? Math.round((t.present / t.recorded) * 100) : null }
+}
+
+function Kpi({ label, value, hint, href, tone }: { label: string; value: React.ReactNode; hint: string; href?: string; tone?: 'warn' | 'bad' }) {
+  const body = (
+    <>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <span className={cn('font-display text-4xl font-bold leading-none tabular-nums', tone === 'warn' && 'text-warning', tone === 'bad' && 'text-destructive')}>{value}</span>
+      <span className="text-xs text-muted-foreground">{hint}</span>
+    </>
+  )
+  const className = 'flex flex-col gap-1.5 rounded-xl border bg-card p-4'
+  return href ? (
+    <Link href={href} className={cn(className, 'transition hover:border-primary/40')}>
+      {body}
+    </Link>
+  ) : (
+    <div className={className}>{body}</div>
   )
 }
 
@@ -442,18 +576,23 @@ function Card({
   title,
   icon: Icon,
   action,
+  subtitle,
   children,
 }: {
   title: string
   icon: React.ComponentType<{ className?: string }>
   action?: { href: string; label: string }
+  subtitle?: string
   children: React.ReactNode
 }) {
   return (
     <section className="flex flex-col overflow-hidden rounded-xl border bg-card">
       <header className="flex items-center gap-2 border-b px-4 py-3">
         <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
-        <h2 className="flex-1 text-sm font-semibold">{title}</h2>
+        <h2 className="flex flex-1 items-baseline gap-2 text-sm font-semibold">
+          {title}
+          {subtitle && <span className="text-xs font-normal text-muted-foreground">{subtitle}</span>}
+        </h2>
         {action && (
           <Link href={action.href} className="text-xs font-medium text-primary hover:underline">
             {action.label}
