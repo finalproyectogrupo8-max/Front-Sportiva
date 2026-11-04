@@ -5,7 +5,7 @@ import Image from 'next/image'
 // URL del video. Se puede sobrescribir mediante variable de entorno NEXT_PUBLIC_HERO_VIDEO_URL
 const DEFAULT_VIDEO_URL =
   process.env.NEXT_PUBLIC_HERO_VIDEO_URL ??
-  'https://ulaiskmixjtowlmoejke.supabase.co/storage/v1/object/public/fondo-sportiva/sportiva-hero-muted.mp4'
+  'https://ulaiskmixjtowlmoejke.supabase.co/storage/v1/object/public/fondo-sportiva/sportiva-hero.mp4'
 
 /**
  * Componente que muestra un video de fondo en el hero.
@@ -13,6 +13,7 @@ const DEFAULT_VIDEO_URL =
  * - Si la preferencia del usuario es "reduced motion" o la pantalla es < md (768px), muestra solo la imagen estática.
  * - Utiliza IntersectionObserver para pausar el video cuando el hero sale del viewport.
  * - Mientras el video carga o ocurre un error, muestra la imagen estática de fallback.
+ * - Se añaden atributos `width` y `height` al video (1920x1080) y `preload="auto"` para evitar que el navegador use una versión de baja calidad.
  */
 export default function HeroVideoBackground({
   fallbackImage = '/hero-court.jpg', // la imagen estática actual
@@ -80,12 +81,17 @@ export default function HeroVideoBackground({
           ref={videoRef}
           src={DEFAULT_VIDEO_URL}
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(0.9) contrast(1.2)' }}
+
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
+          width={1920}
+          height={1080}
           aria-hidden="true"
+          poster={fallbackImage}
           onError={handleError}
         />
       )}
