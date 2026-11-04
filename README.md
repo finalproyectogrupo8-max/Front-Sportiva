@@ -23,6 +23,8 @@ Hecho con **Next.js 16** (App Router + Turbopack), **React 19**, **TypeScript**,
 
 El front no funciona solo: necesita la API corriendo. Son cuatro pasos y en una hora tenés todo andando.
 
+> **¿Querés instalar todo de una?** En Windows, un script instala WSL, Docker, la API y este front, y los levanta con datos de demo. Si preferís hacerlo a mano, o estás en Linux o macOS, está el paso a paso completo. Las dos opciones están en la [guía de instalación](https://github.com/finalproyectogrupo8-max/API_Sportiva/blob/main/docs/instalacion.md).
+
 ### Requisitos previos
 
 | Herramienta | Versión | Cómo verificarla |

@@ -17,6 +17,17 @@ Las capturas son de un club de ejemplo, con datos inventados.
 
 ---
 
+## Instalar Sportiva en una PC
+
+Para probarlo en tu computadora hay dos caminos. Los dos están en la [guía de instalación](https://github.com/finalproyectogrupo8-max/API_Sportiva/blob/main/docs/instalacion.md):
+
+- **Con un comando (Windows):** un script instala WSL, Ubuntu, Docker, los dos proyectos y los levanta. Solo pide aceptar un aviso de Windows, reiniciar una vez y elegir un usuario de Linux.
+- **Paso a paso, a mano:** lo mismo, comando por comando, para quien prefiere ver cada paso. También sirve para Linux y macOS.
+
+Al terminar, la app queda en <http://127.0.0.1:3000>, con un club de demo y un usuario por cada rol.
+
+---
+
 ## Primeros pasos (todos los roles)
 
 ### Entrar
