@@ -18,12 +18,12 @@ import {
 import { Pill, type Tone } from '@/components/club/shared'
 import { categoryStats, type CategoryStats } from '@/lib/api/analytics'
 import { listBalances } from '@/lib/api/inventory'
-import { AttendanceByCategory, CampaignByCategory, type CategoryRow } from './home-charts'
+import { AttendanceByCategory, CampaignByCategory, CampaignLegend, type CategoryRow } from './home-charts'
 import { clubEligibility, type CategoryEligibility } from '@/lib/api/eligibility'
 import { listNotifications, listOrders, type InventoryBalance, type Notification, type Order } from '@/lib/api/home'
 import { calendar, getCallup, type CalendarEvent, type CallupSheet } from '@/lib/api/matches'
 import { addDays, dayKey, formatTime, today } from '@/lib/club-time'
-import { visibleModules } from '@/lib/modules'
+import { homeShortcuts, type ModuleDef } from '@/lib/modules'
 import { notificationHref } from '@/lib/notification-links'
 import { cn } from '@/lib/utils'
 
@@ -105,7 +105,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
   const eligible = (eligibility?.data ?? []).reduce((acc, c) => ({ eligible: acc.eligible + c.eligible, players: acc.players + c.players }), { eligible: 0, players: 0 })
   const toApprove = openOrders.filter((o) => TO_APPROVE.has(o.status)).length
   const chartCount = (seesStats ? 2 : 0) + (can('inventory.view') ? 1 : 0)
-  const chartLayout = chartCount === 3 ? 'lg:grid-cols-2 xl:grid-cols-3 lg:max-xl:[&>*:last-child]:col-span-2' : chartCount === 2 ? 'lg:grid-cols-2' : ''
+  const chartLayout = chartCount === 3 ? 'lg:grid-cols-2 2xl:grid-cols-3 lg:max-2xl:[&>*:last-child]:col-span-2' : chartCount === 2 ? 'lg:grid-cols-2' : ''
   // Hasta 3 listas van lado a lado; con más, en mosaico de columnas para que no queden huecos.
   const listCount = [can('matches.view'), atRisk.length > 0, true, seesOrders, can('player_requirements.view') && !!eligibility].filter(Boolean).length
   const listLayout = listCount > 3 ? 'gap-6 lg:columns-2 2xl:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid' : 'grid items-start gap-6 lg:grid-cols-[repeat(auto-fit,minmax(24rem,1fr))]'
@@ -137,7 +137,7 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
         : { label: 'Pedidos en curso', value: openOrders.length, hint: `${toApprove} esperando aprobación · ${openOrders.length - toApprove} para entregar` },
     )
   }
-  const modules = visibleModules(permissions)
+  const shortcuts = homeShortcuts(permissions)
   const firstName = userName.split(' ')[0]
 
   const summary = [
@@ -186,130 +186,116 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-[120rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10">
-        {kpis.length > 0 && (
-          <section aria-label="El club en números" className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] max-md:[&>*:last-child:nth-child(odd)]:col-span-2">
-            {kpis.map((k) => (
-              <Kpi key={k.label} {...k} />
-            ))}
-          </section>
-        )}
+      <div className="mx-auto grid w-full max-w-[120rem] items-start gap-6 px-4 py-6 sm:px-6 lg:px-10 xl:grid-cols-[minmax(0,1fr)_17rem] 2xl:grid-cols-[minmax(0,1fr)_19rem]">
+        <Shortcuts base={base} work={shortcuts.work} consult={shortcuts.consult} />
 
-        {chartCount > 0 && (
-          <div className={cn('grid gap-6', chartLayout)}>
-            {seesStats && (
-              <Card title="Asistencia por categoría" icon={ClipboardCheck} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
-                <div className="px-4 py-4">
-                  <AttendanceByCategory rows={rows} />
-                </div>
+        <div className="flex min-w-0 flex-col gap-6 xl:row-start-1">
+          {kpis.length > 0 && (
+            <section aria-label="El club en números" className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] max-md:[&>*:last-child:nth-child(odd)]:col-span-2">
+              {kpis.map((k) => (
+                <Kpi key={k.label} {...k} />
+              ))}
+            </section>
+          )}
+
+          {chartCount > 0 && (
+            <div className={cn('grid gap-6', chartLayout)}>
+              {seesStats && (
+                <Card title="Asistencia por categoría" icon={ClipboardCheck} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
+                  <div className="px-4 py-4">
+                    <AttendanceByCategory rows={rows} />
+                  </div>
+                </Card>
+              )}
+              {seesStats && (
+                <Card title="Campaña por categoría" icon={Swords} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
+                  <div className="flex flex-col gap-3 px-4 py-4">
+                    <CampaignLegend />
+                    <CampaignByCategory rows={rows} />
+                  </div>
+                </Card>
+              )}
+              {can('inventory.view') && (
+                <Card title="Stock de materiales" icon={Package} action={{ href: `${base}/materiales`, label: 'Materiales' }} subtitle="Todos los depósitos">
+                  {materials.length === 0 ? <Empty>Todavía no hay materiales cargados.</Empty> : <StockLevels materials={materials.slice(0, 8)} />}
+                </Card>
+              )}
+            </div>
+          )}
+
+          <div className={listLayout}>
+            {can('matches.view') && (
+              <Card title="Partidos de la semana" icon={CalendarDays} action={{ href: `${base}/partidos`, label: 'Calendario' }}>
+                {weekMatches.length === 0 ? (
+                  <Empty>No hay partidos en los próximos 7 días.{can('matches.create') && ' Cargalos desde el calendario.'}</Empty>
+                ) : (
+                  <ul className="flex flex-col divide-y">
+                    {weekMatches.map((m) => (
+                      <WeekMatch key={m.id} match={m} base={base} sheet={callups.get(m.id)} showCallup={can('callups.view')} />
+                    ))}
+                  </ul>
+                )}
               </Card>
             )}
-            {seesStats && (
-              <Card title="Campaña por categoría" icon={Swords} action={{ href: `${base}/analisis`, label: 'Análisis' }} subtitle="Últimos 90 días">
-                <div className="px-4 py-4">
-                  <CampaignByCategory rows={rows} />
-                </div>
+
+            {atRisk.length > 0 && (
+              <Card title="En riesgo de abandono" icon={UserX}>
+                <ul className="flex flex-col divide-y">
+                  {atRisk.slice(0, 6).map((n) => (
+                    <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
+                  ))}
+                </ul>
               </Card>
             )}
-            {can('inventory.view') && (
-              <Card title="Stock de materiales" icon={Package} action={{ href: `${base}/materiales`, label: 'Materiales' }} subtitle="Todos los depósitos">
-                {materials.length === 0 ? <Empty>Todavía no hay materiales cargados.</Empty> : <StockLevels materials={materials.slice(0, 8)} />}
+
+            <Card title="Alertas" icon={Bell}>
+              {otherAlerts.length === 0 ? (
+                <Empty>Sin alertas pendientes.</Empty>
+              ) : (
+                <ul className="flex flex-col divide-y">
+                  {otherAlerts.slice(0, 6).map((n) => (
+                    <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            {seesOrders && (
+              <Card title="Pedidos" icon={Shirt} action={{ href: `${base}/${can('apparel_orders.view') ? 'indumentaria' : 'materiales'}`, label: 'Ver pedidos' }}>
+                {openOrders.length === 0 ? (
+                  <Empty>No hay pedidos para aprobar ni para entregar.</Empty>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-3 px-4 pt-4">
+                      <Counter value={toApprove} label="para aprobar" attention />
+                      <Counter value={openOrders.length - toApprove} label="para entregar" />
+                    </div>
+                    <ul className="flex flex-col divide-y">
+                      {openOrders.slice(0, 5).map((o) => (
+                        <OrderRow key={o.id} order={o} href={`${base}/${o.type === 'apparel' ? 'indumentaria' : 'materiales'}?pedido=${o.id}`} />
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </Card>
+            )}
+
+            {can('player_requirements.view') && eligibility && (
+              <Card title="Habilitación" icon={ShieldCheck} action={{ href: `${base}/habilitacion`, label: 'Tablero' }}>
+                {eligibility.data.length === 0 ? (
+                  <Empty>Ninguna categoría juega competencias con requisitos todavía.</Empty>
+                ) : (
+                  <ul className="flex flex-col divide-y">
+                    {eligibility.data.map((c) => (
+                      <EligibilityRow key={c.category_id} row={c} href={`${base}/habilitacion?categoria=${c.category_id}`} />
+                    ))}
+                  </ul>
+                )}
               </Card>
             )}
           </div>
-        )}
 
-        <div className={listLayout}>
-          {can('matches.view') && (
-            <Card title="Partidos de la semana" icon={CalendarDays} action={{ href: `${base}/partidos`, label: 'Calendario' }}>
-              {weekMatches.length === 0 ? (
-                <Empty>No hay partidos en los próximos 7 días.{can('matches.create') && ' Cargalos desde el calendario.'}</Empty>
-              ) : (
-                <ul className="flex flex-col divide-y">
-                  {weekMatches.map((m) => (
-                    <WeekMatch key={m.id} match={m} base={base} sheet={callups.get(m.id)} showCallup={can('callups.view')} />
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
-
-          {atRisk.length > 0 && (
-            <Card title="En riesgo de abandono" icon={UserX}>
-              <ul className="flex flex-col divide-y">
-                {atRisk.slice(0, 6).map((n) => (
-                  <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
-                ))}
-              </ul>
-            </Card>
-          )}
-
-          <Card title="Alertas" icon={Bell}>
-            {otherAlerts.length === 0 ? (
-              <Empty>Sin alertas pendientes.</Empty>
-            ) : (
-              <ul className="flex flex-col divide-y">
-                {otherAlerts.slice(0, 6).map((n) => (
-                  <AlertRow key={n.id} alert={n} href={notificationHref(club, n)} />
-                ))}
-              </ul>
-            )}
-          </Card>
-
-          {seesOrders && (
-            <Card title="Pedidos" icon={Shirt} action={{ href: `${base}/${can('apparel_orders.view') ? 'indumentaria' : 'materiales'}`, label: 'Ver pedidos' }}>
-              {openOrders.length === 0 ? (
-                <Empty>No hay pedidos para aprobar ni para entregar.</Empty>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-3 px-4 pt-4">
-                    <Counter value={toApprove} label="para aprobar" attention />
-                    <Counter value={openOrders.length - toApprove} label="para entregar" />
-                  </div>
-                  <ul className="flex flex-col divide-y">
-                    {openOrders.slice(0, 5).map((o) => (
-                      <OrderRow key={o.id} order={o} href={`${base}/${o.type === 'apparel' ? 'indumentaria' : 'materiales'}?pedido=${o.id}`} />
-                    ))}
-                  </ul>
-                </>
-              )}
-            </Card>
-          )}
-
-          {can('player_requirements.view') && eligibility && (
-            <Card title="Habilitación" icon={ShieldCheck} action={{ href: `${base}/habilitacion`, label: 'Tablero' }}>
-              {eligibility.data.length === 0 ? (
-                <Empty>Ninguna categoría juega competencias con requisitos todavía.</Empty>
-              ) : (
-                <ul className="flex flex-col divide-y">
-                  {eligibility.data.map((c) => (
-                    <EligibilityRow key={c.category_id} row={c} href={`${base}/habilitacion?categoria=${c.category_id}`} />
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
         </div>
-
-        {modules.length > 0 ? (
-          <nav aria-labelledby="accesos" className="flex flex-col gap-2">
-            <h2 id="accesos" className="px-1 text-sm font-medium text-muted-foreground">
-              Módulos
-            </h2>
-            <ul className="flex flex-wrap gap-2">
-              {modules.map((m) => (
-                <li key={m.id}>
-                  <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-full border bg-card py-2 pl-3 pr-4 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/5">
-                    <m.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                    <span>{m.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : (
-          <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">Tu rol todavía no tiene módulos habilitados. Pedile a un administrador del club que te asigne un rol.</p>
-        )}
       </div>
     </div>
   )
@@ -431,32 +417,30 @@ function stockByMaterial(balances: InventoryBalance[]): MaterialStock[] {
     .sort((a, b) => Number(b.low) - Number(a.low) || a.quantity / Math.max(a.minimum, 1) - b.quantity / Math.max(b.minimum, 1))
 }
 
-/** Barra de stock por material con una marca en el mínimo. Lo que falta se marca con ícono y texto, no solo color. */
+/** Stock por material: cantidad contra el mínimo. Los que hay que reponer llevan ícono y texto. */
 function StockLevels({ materials }: { materials: MaterialStock[] }) {
   return (
-    <ul className="flex flex-col gap-3 px-4 py-4">
-      {materials.map((m) => {
-        const scale = Math.max(m.minimum * 2, m.quantity, 1)
-        return (
-          <li key={m.id} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="flex min-w-0 items-center gap-1.5 font-medium">
-                {m.low && <AlertTriangle className="size-3.5 shrink-0 text-warning" aria-hidden="true" />}
-                <span className="truncate">{m.name}</span>
+    <ul className="flex flex-col divide-y">
+      {materials.map((m) => (
+        <li key={m.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+          <span className="min-w-0 truncate font-medium">{m.name}</span>
+          <span className="flex shrink-0 items-center gap-2 tabular-nums">
+            {m.low && (
+              <span className="flex items-center gap-1 text-xs font-medium text-destructive">
+                <AlertTriangle className="size-3.5" aria-hidden="true" />
+                Reponer
               </span>
-              <span className="shrink-0 tabular-nums">
-                <span className={cn('font-semibold', m.low && 'text-destructive')}>{m.quantity}</span>
-                <span className="text-xs text-muted-foreground"> / mín. {m.minimum} {m.unit}</span>
-                {m.low && <span className="sr-only"> (bajo el mínimo)</span>}
+            )}
+            <span>
+              <span className={cn('font-semibold', m.low && 'text-destructive')}>{m.quantity}</span>
+              <span className="text-xs text-muted-foreground">
+                {' '}
+                / mín. {m.minimum} {m.unit}
               </span>
-            </div>
-            <div className="relative h-2 rounded-full bg-muted" aria-hidden="true">
-              <div className={cn('h-full rounded-full', m.low ? 'bg-destructive' : 'bg-primary')} style={{ width: `${(m.quantity / scale) * 100}%` }} />
-              {m.minimum > 0 && <span className="absolute -top-1 h-4 w-0.5 rounded-full bg-foreground/60" style={{ left: `calc(${(m.minimum / scale) * 100}% - 1px)` }} title={`Mínimo: ${m.minimum}`} />}
-            </div>
-          </li>
-        )
-      })}
+            </span>
+          </span>
+        </li>
+      ))}
     </ul>
   )
 }
@@ -513,18 +497,19 @@ function Kpi({ label, value, hint, href, tone }: { label: string; value: React.R
 
 function EligibilityRow({ row, href }: { row: CategoryEligibility; href: string }) {
   const pct = row.players > 0 ? Math.round((row.eligible / row.players) * 100) : 0
+  const missing = row.players - row.eligible
   return (
     <li>
-      <Link href={href} className="flex flex-col gap-2 px-4 py-3 transition hover:bg-muted/50">
-        <div className="flex items-baseline justify-between gap-3">
+      <Link href={href} className="flex flex-col gap-1 px-4 py-3 transition hover:bg-muted/50">
+        <div className="flex items-center justify-between gap-3">
           <span className="truncate font-medium">{row.category_name}</span>
-          <span className="shrink-0 text-sm">
-            <span className="font-display text-lg font-bold tabular-nums">{row.eligible}</span>
-            <span className="text-muted-foreground"> de {row.players} habilitados</span>
+          <span className="flex shrink-0 items-center gap-2 text-sm">
+            <span className="tabular-nums">
+              <span className="font-semibold">{row.eligible}</span>
+              <span className="text-muted-foreground"> de {row.players}</span>
+            </span>
+            <Pill tone={missing === 0 ? 'ok' : pct >= 60 ? 'warn' : 'bad'}>{missing === 0 ? 'Completa' : `${missing === 1 ? 'Falta' : 'Faltan'} ${missing}`}</Pill>
           </span>
-        </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="presentation">
-          <div className={cn('h-full rounded-full', pct >= 90 ? 'bg-success' : pct >= 60 ? 'bg-warning' : 'bg-destructive')} style={{ width: `${pct}%` }} />
         </div>
         {(row.days_to_deadline != null || row.expiring_soon > 0) && (
           <span className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
@@ -623,4 +608,54 @@ function eventHref(base: string, event: CalendarEvent): string {
 
 function joinList(items: string[]): string {
   return items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} y ${items.at(-1)}`
+}
+
+/**
+ * Accesos según el rol. "Tu trabajo": módulos donde carga, pide o registra algo, con su descripción.
+ * "Para consultar": lo que solo puede ver, como enlaces simples. En pantallas anchas va a la derecha y
+ * queda a mano al bajar; en angostas va arriba, antes de los números.
+ */
+function Shortcuts({ base, work, consult }: { base: string; work: ModuleDef[]; consult: ModuleDef[] }) {
+  if (work.length === 0 && consult.length === 0) {
+    return <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground xl:col-start-2">Tu rol todavía no tiene módulos habilitados. Pedile a un administrador del club que te asigne un rol.</p>
+  }
+  return (
+    <nav aria-label="Tus módulos" className="flex flex-col gap-5 rounded-xl border bg-card p-3 xl:sticky xl:top-20 xl:col-start-2 xl:max-h-[calc(100dvh-6rem)] xl:overflow-y-auto">
+      {work.length > 0 && (
+        <section className="flex flex-col gap-1">
+          <h2 className="px-2 pb-1 text-sm font-semibold">Tu trabajo</h2>
+          <ul className="grid grid-cols-2 gap-1 md:grid-cols-3 xl:grid-cols-1">
+            {work.map((m) => (
+              <li key={m.id}>
+                <Link href={`${base}/${m.id}`} className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-muted/60">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                    <m.icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm font-medium">{m.name}</span>
+                    <span className="hidden truncate text-xs text-muted-foreground md:block">{m.description}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {consult.length > 0 && (
+        <section className={cn('flex flex-col gap-1', work.length > 0 && 'border-t pt-4')}>
+          <h2 className="px-2 pb-1 text-sm font-semibold">{work.length > 0 ? 'Para consultar' : 'Tus módulos'}</h2>
+          <ul className="flex flex-wrap gap-x-1 gap-y-0.5 xl:flex-col">
+            {consult.map((m) => (
+              <li key={m.id}>
+                <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition hover:bg-muted/60 hover:text-foreground">
+                  <m.icon className="size-4 shrink-0" aria-hidden="true" />
+                  {m.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </nav>
+  )
 }
