@@ -296,12 +296,12 @@ export async function ClubHome({ club, userName, permissions }: { club: string; 
             <h2 id="accesos" className="px-1 text-sm font-medium text-muted-foreground">
               Módulos
             </h2>
-            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
+            <ul className="flex flex-wrap gap-2">
               {modules.map((m) => (
                 <li key={m.id}>
-                  <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-sm font-medium transition hover:border-primary/40">
+                  <Link href={`${base}/${m.id}`} className="flex items-center gap-2 rounded-full border bg-card py-2 pl-3 pr-4 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/5">
                     <m.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                    <span className="truncate">{m.name}</span>
+                    <span>{m.name}</span>
                   </Link>
                 </li>
               ))}
