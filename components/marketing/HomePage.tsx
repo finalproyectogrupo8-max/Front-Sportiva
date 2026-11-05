@@ -285,11 +285,6 @@ export default function HomePage({ hasSession = false }: HomePageProps) {
           <div className="footer-brand">
             <Brand />
             <p>La plataforma operativa que convierte el esfuerzo de todos los días en un club mejor organizado.</p>
-            <div className="social-links">
-              <a href="#" aria-label="Instagram">Ig</a>
-              <a href="#" aria-label="LinkedIn">Li</a>
-              <a href="#" aria-label="X">X</a>
-            </div>
           </div>
           <div className="footer-nav">
             <span>Explorá</span>
