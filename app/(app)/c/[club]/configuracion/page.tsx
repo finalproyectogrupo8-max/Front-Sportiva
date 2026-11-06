@@ -141,7 +141,10 @@ async function loadSportsFor(
 ): Promise<{ ok: true; sports: SportOption[] } | { ok: false; result: Failure }> {
   const assigned = access.assignedSports
   if (!access.permissions.includes('sports.view')) {
-    return { ok: true, sports: assigned }
+    // Sin sports.view (el coordinador), los deportes salen de /me, que no trae is_active: sin
+    // marcarlos, los formularios no ofrecen deportes y Categorías y Competencias ocultan el alta.
+    // Sus deportes asignados son los que coordina; la API igual valida cada alta.
+    return { ok: true, sports: assigned.map((sport) => ({ ...sport, is_active: true })) }
   }
 
   const result = await listSports()
