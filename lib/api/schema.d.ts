@@ -204,6 +204,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin.auditLog.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["club.auditLog.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -1488,6 +1520,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["playerContact.update"];
+        trace?: never;
+    };
+    "/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["positions.index"];
+        put?: never;
+        post: operations["positions.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/positions/{position}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["positions.show"];
+        put: operations["positions.update"];
+        post?: never;
+        delete: operations["positions.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/public/calendar/{token}.ics": {
@@ -2787,6 +2851,7 @@ export interface components {
             document_number: string | null;
             registration_number: string | null;
             preferred_position: string | null;
+            positions?: (components["schemas"]["PositionResource"] & Record<string, never>)[];
             dominant_side: string | null;
             status: string;
             /** @description Id del documento con la foto (`GET /api/documents/{id}/download`), si se cargó y tiene. */
@@ -2796,6 +2861,16 @@ export interface components {
             memberships?: components["schemas"]["MembershipResource"][];
             created_at: string | null;
             updated_at: string | null;
+        };
+        /** PositionResource */
+        PositionResource: {
+            id: number;
+            sport_id: number;
+            sport?: components["schemas"]["SportResource"];
+            name: string;
+            is_active: boolean;
+            created_at: string;
+            updated_at: string;
         };
         /** PreviewAnnouncementAudienceRequest */
         PreviewAnnouncementAudienceRequest: {
@@ -2904,6 +2979,12 @@ export interface components {
         /** SeasonResource */
         SeasonResource: {
             id: number;
+            /** @description null: temporada de todo el club. */
+            sport_id: number | null;
+            sport?: {
+                id: number;
+                name: string;
+            } | null;
             name: string;
             start_date: string;
             end_date: string;
@@ -3259,6 +3340,7 @@ export interface components {
             document_number?: string | null;
             registration_number?: string | null;
             preferred_position?: string | null;
+            position_ids?: number[];
             /** @enum {string|null} */
             dominant_side?: "left" | "right" | "both" | null;
             /**
@@ -3270,6 +3352,12 @@ export interface components {
             status?: "active" | "inactive" | "transferred";
             /** @description Nada médico: eso va en los requisitos y documentos. */
             notes?: string | null;
+        };
+        /** StorePositionRequest */
+        StorePositionRequest: {
+            sport_id: number;
+            name: string;
+            is_active?: boolean;
         };
         /** StoreRepairRequestRequest */
         StoreRepairRequestRequest: {
@@ -3312,6 +3400,8 @@ export interface components {
         };
         /** StoreSeasonRequest */
         StoreSeasonRequest: {
+            /** @description Sin deporte, la temporada es de todo el club (solo con alcance "todo el club"). */
+            sport_id?: number | null;
             name: string;
             /** Format: date-time */
             start_date: string;
@@ -3680,6 +3770,7 @@ export interface components {
             document_number?: string | null;
             registration_number?: string | null;
             preferred_position?: string | null;
+            position_ids?: number[];
             /** @enum {string|null} */
             dominant_side?: "left" | "right" | "both" | null;
             /**
@@ -3690,6 +3781,12 @@ export interface components {
             /** @enum {string} */
             status?: "active" | "inactive" | "transferred";
             notes?: string | null;
+        };
+        /** UpdatePositionRequest */
+        UpdatePositionRequest: {
+            sport_id?: number;
+            name?: string;
+            is_active?: boolean;
         };
         /** UpdateRepairRequestRequest */
         UpdateRepairRequestRequest: {
@@ -3716,6 +3813,7 @@ export interface components {
         };
         /** UpdateSeasonRequest */
         UpdateSeasonRequest: {
+            sport_id?: number | null;
             name?: string;
             /** Format: date-time */
             start_date?: string;
@@ -4659,6 +4757,106 @@ export interface operations {
             };
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "admin.auditLog.index": {
+        parameters: {
+            query?: {
+                subject_type?: "tenant" | "user" | "membership" | "document" | "auth" | null;
+                actor_id?: number | null;
+                from?: string | null;
+                to?: string | null;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            action: string;
+                            subject_type: string;
+                            subject_id: string;
+                            /** @description Qué se tocó, en palabras: el club, el email del usuario o "usuario en club". */
+                            subject_label: string | null;
+                            actor: {
+                                id: string;
+                                name: string;
+                                email: string;
+                            } | null;
+                            /** @description Antes y después de cada campo: {campo: {from, to}}. */
+                            changes: string;
+                            created_at: string | null;
+                        }[];
+                        meta: {
+                            total: number;
+                            current_page: number;
+                            last_page: number;
+                            from: number | null;
+                            to: number | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "club.auditLog.index": {
+        parameters: {
+            query?: {
+                /** @description Prefijo de la acción: `order`, `player`, `club_user`, `announcement`. */
+                type?: string | null;
+                club_user_id?: number | null;
+                from?: string | null;
+                to?: string | null;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: number;
+                            action: string;
+                            entity_type: string;
+                            entity_id: number | null;
+                            actor: {
+                                id: number;
+                                name: string;
+                            } | null;
+                            /** @description Lo que hace falta para leer la acción, con {from, to} cuando algo cambió. */
+                            metadata: {
+                                [key: string]: unknown;
+                            } | null;
+                            created_at: string | null;
+                        }[];
+                        meta: {
+                            total: number;
+                            current_page: number;
+                            last_page: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
             422: components["responses"]["ValidationException"];
         };
     };
@@ -8623,7 +8821,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["PlayerResource"];
+                        data: components["schemas"]["PlayerResource"] & Record<string, never>;
                     };
                 };
             };
@@ -8825,6 +9023,176 @@ export interface operations {
             401: components["responses"]["AuthenticationException"];
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
+        };
+    };
+    "positions.index": {
+        parameters: {
+            query?: {
+                sport_id?: number;
+                search?: string;
+                is_active?: boolean;
+                sort?: "name" | "-name" | "created_at" | "-created_at";
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated set of `PositionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: (components["schemas"]["PositionResource"] & Record<string, never>)[];
+                        links: {
+                            first: string | null;
+                            last: string | null;
+                            prev: string | null;
+                            next: string | null;
+                        };
+                        meta: {
+                            current_page: number;
+                            from: number | null;
+                            last_page: number;
+                            /** @description Generated paginator links. */
+                            links: {
+                                url: string | null;
+                                label: string;
+                                active: boolean;
+                            }[];
+                            /** @description Base path for paginator generated URLs. */
+                            path: string | null;
+                            /** @description Number of items shown per page. */
+                            per_page: number;
+                            /** @description Number of the last item in the slice. */
+                            to: number | null;
+                            /** @description Total number of items being paginated. */
+                            total: number;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "positions.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorePositionRequest"];
+            };
+        };
+        responses: {
+            /** @description `PositionResource` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PositionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "positions.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The position ID */
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `PositionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PositionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "positions.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The position ID */
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdatePositionRequest"];
+            };
+        };
+        responses: {
+            /** @description `PositionResource` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PositionResource"] & Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "positions.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The position ID */
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
         };
     };
     "publicCalendar.show": {
@@ -9584,6 +9952,8 @@ export interface operations {
         parameters: {
             query?: {
                 search?: string;
+                /** @description Las temporadas que puede usar ese deporte: las suyas y las del club. */
+                sport_id?: number;
                 status?: "planned" | "active" | "closed";
                 sort?: "name" | "-name" | "start_date" | "-start_date" | "created_at" | "-created_at";
                 per_page?: number;
@@ -9601,7 +9971,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["SeasonResource"][];
+                        data: (components["schemas"]["SeasonResource"] & Record<string, never>)[];
                         links: {
                             first: string | null;
                             last: string | null;
@@ -9655,7 +10025,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["SeasonResource"];
+                        data: components["schemas"]["SeasonResource"] & Record<string, never>;
                     };
                 };
             };
@@ -9683,7 +10053,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["SeasonResource"];
+                        data: components["schemas"]["SeasonResource"] & Record<string, never>;
                     };
                 };
             };
@@ -9715,7 +10085,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: components["schemas"]["SeasonResource"];
+                        data: components["schemas"]["SeasonResource"] & Record<string, never>;
                     };
                 };
             };

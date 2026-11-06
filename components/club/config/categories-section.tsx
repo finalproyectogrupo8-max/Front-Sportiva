@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Layers, Pencil, Plus, Power } from 'lucide-react'
 import { saveCategoryAction, setCategoryActiveAction } from '@/app/(app)/c/[club]/configuracion/actions'
 import { FormSelect, Pill } from '@/components/club/shared'
+import { pickSeason, seasonsForSport } from '@/lib/seasons'
 import { BRANCHES, isBranch } from '@/lib/branches'
 import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
@@ -236,15 +237,19 @@ function CategoryForm({
 }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
   const activeSports = sports.filter((s) => s.is_active === true || s.id === category?.sport_id)
-  const currentSeason = seasons.find((s) => s.status === 'active') ?? seasons[0]
-
   const [sportId, setSportId] = useState(
     category ? String(category.sport_id) : defaults.sport !== ALL ? defaults.sport : String(activeSports[0]?.id ?? ''),
   )
+  // Solo las temporadas de ese deporte o de todo el club.
+  const sportSeasons = seasonsForSport(seasons, Number(sportId) || null)
   const [branch, setBranch] = useState<string>(category?.branch ?? NO_BRANCH)
   const [seasonId, setSeasonId] = useState(
-    category ? String(category.season_id) : defaults.season !== ALL ? defaults.season : String(currentSeason?.id ?? ''),
+    pickSeason(sportSeasons, category ? String(category.season_id) : defaults.season !== ALL ? defaults.season : ''),
   )
+  const changeSport = (value: string) => {
+    setSportId(value)
+    setSeasonId((current) => pickSeason(seasonsForSport(seasons, Number(value) || null), current))
+  }
 
   return (
     <form
@@ -264,7 +269,7 @@ function CategoryForm({
             id="category-sport"
             label="Deporte"
             value={sportId}
-            onChange={setSportId}
+            onChange={changeSport}
             options={activeSports.map((s) => ({ value: String(s.id), label: s.name }))}
           />
           {fieldErrors.sport_id && <p className="text-xs text-destructive">{fieldErrors.sport_id}</p>}
@@ -275,7 +280,7 @@ function CategoryForm({
             label="Temporada"
             value={seasonId}
             onChange={setSeasonId}
-            options={seasons.map((s) => ({ value: String(s.id), label: s.name }))}
+            options={sportSeasons.map((s) => ({ value: String(s.id), label: s.name }))}
           />
           {fieldErrors.season_id && <p className="text-xs text-destructive">{fieldErrors.season_id}</p>}
         </div>

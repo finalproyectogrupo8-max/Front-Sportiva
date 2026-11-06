@@ -125,10 +125,13 @@ export async function setPositionActiveAction(id: number, isActive: boolean): Pr
 
 /* Temporadas */
 
-const SEASON_FIELDS = ['name', 'start_date', 'end_date', 'status']
+const SEASON_FIELDS = ['sport_id', 'name', 'start_date', 'end_date', 'status']
 
 export async function saveSeasonAction(id: number | null, formData: FormData): Promise<ConfigResult> {
+  // Vacío: temporada de todo el club.
+  const sport = text(formData, 'sport_id')
   const input: SeasonInput = {
+    sport_id: sport ? Number(sport) : null,
     name: text(formData, 'name'),
     start_date: text(formData, 'start_date'),
     end_date: text(formData, 'end_date'),
