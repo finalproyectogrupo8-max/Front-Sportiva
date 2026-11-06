@@ -25,7 +25,7 @@ export type ClubProfileInput = {
 }
 
 export type SportInput = { name?: string; is_active?: boolean }
-export type SeasonInput = { name?: string; start_date?: string; end_date?: string; status?: SeasonStatus }
+export type SeasonInput = { sport_id?: number | null; name?: string; start_date?: string; end_date?: string; status?: SeasonStatus }
 export type CategoryInput = {
   sport_id?: number
   season_id?: number

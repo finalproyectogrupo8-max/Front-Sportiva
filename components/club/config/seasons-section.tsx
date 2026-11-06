@@ -6,7 +6,7 @@ import { deleteSeasonAction, saveSeasonAction } from '@/app/(app)/c/[club]/confi
 import { FormSelect, Pill, type Tone } from '@/components/club/shared'
 import { Button } from '@/components/ui/button'
 import { SheetFooter } from '@/components/ui/sheet'
-import type { Season } from '@/lib/api/club'
+import type { Season, SportOption } from '@/lib/api/club'
 import { formatDay } from '@/lib/format-date'
 import { ConfigSheet, ConfigTable, ConfirmDialog, Field, FormError, RowActions, SubmitButton, useConfigAction } from '@/components/club/forms'
 import { EmptyConfig } from '@/components/club/empty-state'
@@ -25,11 +25,20 @@ const STATUS_OPTIONS = [
 
 export type SeasonRow = Season & { categories: number }
 
+/** Valor del selector para una temporada de todo el club (sin deporte). */
+const CLUB = 'club'
+
 export function SeasonsSection({
   seasons,
+  sports,
+  sportRequired,
   can,
 }: {
   seasons: SeasonRow[]
+  /** Deportes que puede elegir al crear o editar. */
+  sports: SportOption[]
+  /** Con alcance "sus deportes" (coordinador) no puede crear temporadas de todo el club. */
+  sportRequired: boolean
   can: { create: boolean; update: boolean; delete: boolean }
 }) {
   const [editing, setEditing] = useState<Season | 'new' | null>(null)
@@ -46,7 +55,7 @@ export function SeasonsSection({
     <section className="flex flex-col gap-4" aria-label="Temporadas">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-sm text-muted-foreground">
-          La temporada en curso es la que usan las categorías, las competencias y la habilitación de los jugadores.
+          Cada deporte arma sus temporadas con sus categorías y competencias. Una temporada de todo el club la puede usar cualquier deporte.
         </p>
         {seasons.length > 0 && addButton}
       </div>
@@ -64,6 +73,7 @@ export function SeasonsSection({
           head={
             <tr>
               <th scope="col" className="px-4 py-3">Temporada</th>
+              <th scope="col" className="px-4 py-3">Deporte</th>
               <th scope="col" className="hidden px-4 py-3 sm:table-cell">Fechas</th>
               <th scope="col" className="hidden px-4 py-3 md:table-cell">Categorías</th>
               <th scope="col" className="px-4 py-3">Estado</th>
@@ -73,6 +83,8 @@ export function SeasonsSection({
         >
           {seasons.map((season) => {
             const status = SEASON_STATUS[season.status] ?? { label: season.status, tone: 'neutral' as Tone }
+            // El coordinador ve las temporadas de todo el club, pero solo cambia las de su deporte.
+            const changeable = !sportRequired || season.sport_id != null
             return (
               <tr key={season.id} className="transition-colors hover:bg-muted/40">
                 <td className="px-4 py-3">
@@ -81,6 +93,7 @@ export function SeasonsSection({
                     {formatDay(season.start_date)} – {formatDay(season.end_date)}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-muted-foreground">{season.sport?.name ?? 'Todo el club'}</td>
                 <td className="hidden whitespace-nowrap px-4 py-3 text-muted-foreground sm:table-cell">
                   {formatDay(season.start_date)} – {formatDay(season.end_date)}
                 </td>
@@ -90,13 +103,13 @@ export function SeasonsSection({
                 </td>
                 <td className="px-4 py-3">
                   <RowActions>
-                    {can.update && (
+                    {can.update && changeable && (
                       <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setEditing(season)}>
                         <Pencil className="size-3.5" aria-hidden="true" />
                         <span className="sr-only sm:not-sr-only">Editar</span>
                       </Button>
                     )}
-                    {can.delete && (
+                    {can.delete && changeable && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -121,7 +134,12 @@ export function SeasonsSection({
         title={editing === 'new' ? 'Nueva temporada' : 'Editar temporada'}
       >
         {editing !== null && (
-          <SeasonForm season={editing === 'new' ? null : editing} onDone={() => setEditing(null)} />
+          <SeasonForm
+            season={editing === 'new' ? null : editing}
+            sports={sports}
+            sportRequired={sportRequired}
+            onDone={() => setEditing(null)}
+          />
         )}
       </ConfigSheet>
 
@@ -137,9 +155,26 @@ export function SeasonsSection({
   )
 }
 
-function SeasonForm({ season, onDone }: { season: Season | null; onDone: () => void }) {
+function SeasonForm({
+  season,
+  sports,
+  sportRequired,
+  onDone,
+}: {
+  season: Season | null
+  sports: SportOption[]
+  sportRequired: boolean
+  onDone: () => void
+}) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
   const [status, setStatus] = useState(season?.status ?? 'active')
+  const [sportId, setSportId] = useState(
+    season?.sport_id ? String(season.sport_id) : sportRequired ? String(sports[0]?.id ?? '') : CLUB,
+  )
+  const sportOptions = [
+    ...(sportRequired ? [] : [{ value: CLUB, label: 'Todo el club' }]),
+    ...sports.map((s) => ({ value: String(s.id), label: s.name })),
+  ]
   const year = new Date().getFullYear()
 
   return (
@@ -149,10 +184,15 @@ function SeasonForm({ season, onDone }: { season: Season | null; onDone: () => v
         e.preventDefault()
         const data = new FormData(e.currentTarget)
         data.set('status', status)
+        data.set('sport_id', sportId === CLUB ? '' : sportId)
         execute(() => saveSeasonAction(season?.id ?? null, data), onDone)
       }}
     >
       <fieldset disabled={pending} className="flex flex-col gap-4 px-4 pb-4">
+        <div className="flex flex-col gap-1.5">
+          <FormSelect id="season-sport" label="Deporte" value={sportId} onChange={setSportId} options={sportOptions} />
+          {fieldErrors.sport_id && <p className="text-xs text-destructive">{fieldErrors.sport_id}</p>}
+        </div>
         <Field
           id="season-name"
           name="name"

@@ -21,6 +21,7 @@ import {
   saveCompetitionAction,
 } from '@/app/(app)/c/[club]/configuracion/actions'
 import { FormSelect, Pill, type Tone } from '@/components/club/shared'
+import { pickSeason, seasonsForSport } from '@/lib/seasons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -347,14 +348,18 @@ function CompetitionForm({
 }) {
   const { pending, fieldErrors, error, execute } = useConfigAction()
   const activeSports = sports.filter((s) => s.is_active === true || s.id === competition?.sport_id)
-  const currentSeason = seasons.find((s) => s.status === 'active') ?? seasons[0]
-
   const [sportId, setSportId] = useState(
     competition ? String(competition.sport_id) : defaults.sport !== ALL ? defaults.sport : String(activeSports[0]?.id ?? ''),
   )
+  // Solo las temporadas de ese deporte o de todo el club.
+  const sportSeasons = seasonsForSport(seasons, Number(sportId) || null)
   const [seasonId, setSeasonId] = useState(
-    competition ? String(competition.season_id) : defaults.season !== ALL ? defaults.season : String(currentSeason?.id ?? ''),
+    pickSeason(sportSeasons, competition ? String(competition.season_id) : defaults.season !== ALL ? defaults.season : ''),
   )
+  const changeSport = (value: string) => {
+    setSportId(value)
+    setSeasonId((current) => pickSeason(seasonsForSport(seasons, Number(value) || null), current))
+  }
   const [categoryIds, setCategoryIds] = useState<number[]>(competition?.categories?.map((c) => c.id) ?? [])
   const [rows, setRows] = useState<RequirementRow[]>(() => (competition?.requirements ?? []).map(toRow))
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -429,7 +434,7 @@ function CompetitionForm({
                 id="comp-sport"
                 label="Deporte"
                 value={sportId}
-                onChange={setSportId}
+                onChange={changeSport}
                 options={activeSports.map((s) => ({ value: String(s.id), label: s.name }))}
               />
               {fieldErrors.sport_id && <p className="text-xs text-destructive">{fieldErrors.sport_id}</p>}
@@ -440,7 +445,7 @@ function CompetitionForm({
                 label="Temporada"
                 value={seasonId}
                 onChange={setSeasonId}
-                options={seasons.map((s) => ({ value: String(s.id), label: s.name }))}
+                options={sportSeasons.map((s) => ({ value: String(s.id), label: s.name }))}
               />
               {fieldErrors.season_id && <p className="text-xs text-destructive">{fieldErrors.season_id}</p>}
             </div>
@@ -703,7 +708,7 @@ function CopyForm({ competition, seasons, onDone }: { competition: Competition; 
             label="Temporada"
             value={seasonId}
             onChange={setSeasonId}
-            options={seasons.map((s) => ({ value: String(s.id), label: s.id === competition.season_id ? `${s.name} (la misma)` : s.name }))}
+            options={seasonsForSport(seasons, competition.sport_id).map((s) => ({ value: String(s.id), label: s.id === competition.season_id ? `${s.name} (la misma)` : s.name }))}
           />
           {fieldErrors.season_id && <p className="text-xs text-destructive">{fieldErrors.season_id}</p>}
         </div>

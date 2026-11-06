@@ -31,6 +31,7 @@ import { isBranch } from '@/lib/branches'
 import { requireSession } from '@/lib/session'
 import { cn } from '@/lib/utils'
 import type { Schemas } from '@/lib/api/client'
+import { seasonsForSport } from '@/lib/seasons'
 
 export const metadata: Metadata = { title: 'Configuración del club — Sportiva' }
 
@@ -121,7 +122,7 @@ type TabData =
   | { tab: 'perfil'; club: Club }
   | { tab: 'sedes'; venues: Venue[] }
   | { tab: 'deportes'; sports: SportRow[] }
-  | { tab: 'temporadas'; seasons: SeasonRow[] }
+  | { tab: 'temporadas'; seasons: SeasonRow[]; sports: SportOption[]; sportRequired: boolean }
   | { tab: 'categorias'; categories: Category[]; sports: SportOption[]; seasons: Season[]; sport?: number; season?: number; branch?: string }
   | {
       tab: 'competencias'
@@ -200,16 +201,21 @@ async function loadTab(
     }
 
     if (tab === 'temporadas') {
-      const [seasons, categories] = await Promise.all([
+      const [seasons, categories, sports] = await Promise.all([
         listSeasons(),
         access.permissions.includes('categories.view') ? listCategories() : Promise.resolve(null),
+        loadSportsFor('seasons.create', access),
       ])
       if (!seasons.ok) return { tab: 'error', result: seasons }
       if (categories && !categories.ok) return { tab: 'error', result: categories }
+      if (!sports.ok) return { tab: 'error', result: sports.result }
       const all = categories?.ok ? categories.data.data : []
       return {
         tab,
         seasons: seasons.data.data.map((s) => ({ ...s, categories: all.filter((c) => c.season_id === s.id).length })),
+        sports: sports.sports.filter((sport) => sport.is_active !== false),
+        // Con alcance "sus deportes" no puede crear temporadas de todo el club.
+        sportRequired: access.permissionScopes['seasons.create'] !== 'all',
       }
     }
 
@@ -223,12 +229,14 @@ async function loadTab(
       if (seasonsResult && !seasonsResult.ok) return { tab: 'error', result: seasonsResult }
       if (categories && !categories.ok) return { tab: 'error', result: categories }
       const seasonList = seasonsResult?.ok ? seasonsResult.data.data : []
-      // Por defecto, la temporada en curso.
+      const sport = Number(filters.sport) || undefined
+      // Por defecto, la temporada en curso (la del deporte filtrado o la del club).
       const season =
         filters.season === 'todos'
           ? undefined
-          : Number(filters.season) || seasonList.find((s) => s.status === 'active')?.id
-      const sport = Number(filters.sport) || undefined
+          : Number(filters.season) ||
+            (seasonsForSport(seasonList, sport ?? null).find((s) => s.status === 'active')?.id ??
+              seasonList.find((s) => s.status === 'active')?.id)
       const competitions = await listCompetitions({ season_id: season, sport_id: sport })
       if (!competitions.ok) return { tab: 'error', result: competitions }
       return {
@@ -308,7 +316,7 @@ async function TabContent({
     case 'deportes':
       return <SportsSection sports={data.sports} can={crud('sports')} canPositions={crud('positions')} />
     case 'temporadas':
-      return <SeasonsSection seasons={data.seasons} can={crud('seasons')} />
+      return <SeasonsSection seasons={data.seasons} sports={data.sports} sportRequired={data.sportRequired} can={crud('seasons')} />
     case 'categorias':
       return (
         <CategoriesSection
