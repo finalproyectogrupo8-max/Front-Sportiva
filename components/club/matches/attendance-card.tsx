@@ -46,8 +46,12 @@ export function AttendanceCard({
             Asistencia
           </h2>
         </div>
-        {marked.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Todavía no se tomó. {rows.length} jugadores en la categoría.</p>
+        {rows.length === 0 && kind === 'matches' ? (
+          <p className="text-sm text-muted-foreground">Se toma a los convocados. Armá la convocatoria para poder tomarla.</p>
+        ) : marked.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Todavía no se tomó. {rows.length} {kind === 'matches' ? 'convocados' : 'jugadores en la categoría'}.
+          </p>
         ) : (
           <div className="flex flex-col gap-2">
             <p>
@@ -60,10 +64,12 @@ export function AttendanceCard({
             {marked.length < rows.length && <p className="text-xs text-muted-foreground">{rows.length - marked.length} sin marcar</p>}
           </div>
         )}
-        <Button size="lg" className="h-11 gap-2" onClick={() => setOpen(true)}>
-          <ClipboardCheck className="size-4" aria-hidden="true" />
-          {canRecord ? (marked.length > 0 ? 'Editar asistencia' : 'Tomar asistencia') : 'Ver asistencia'}
-        </Button>
+        {rows.length > 0 && (
+          <Button size="lg" className="h-11 gap-2" onClick={() => setOpen(true)}>
+            <ClipboardCheck className="size-4" aria-hidden="true" />
+            {canRecord ? (marked.length > 0 ? 'Editar asistencia' : 'Tomar asistencia') : 'Ver asistencia'}
+          </Button>
+        )}
       </section>
 
       <Sheet open={open} onOpenChange={setOpen}>

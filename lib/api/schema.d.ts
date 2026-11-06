@@ -4631,6 +4631,7 @@ export interface operations {
                         data: {
                             player_id: number;
                             player_name: string;
+                            /** @description En un partido, el número de la convocatoria; si no tiene, el del plantel. */
                             shirt_number: number | null;
                             /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
                             photo_document_id: number;
@@ -4670,6 +4671,7 @@ export interface operations {
                         data: {
                             player_id: number;
                             player_name: string;
+                            /** @description En un partido, el número de la convocatoria; si no tiene, el del plantel. */
                             shirt_number: number | null;
                             /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
                             photo_document_id: number;
@@ -4706,6 +4708,7 @@ export interface operations {
                         data: {
                             player_id: number;
                             player_name: string;
+                            /** @description En un partido, el número de la convocatoria; si no tiene, el del plantel. */
                             shirt_number: number | null;
                             /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
                             photo_document_id: number;
@@ -4745,6 +4748,7 @@ export interface operations {
                         data: {
                             player_id: number;
                             player_name: string;
+                            /** @description En un partido, el número de la convocatoria; si no tiene, el del plantel. */
                             shirt_number: number | null;
                             /** @description Documento con la foto del jugador (se baja con `GET /documents/{id}/download`). */
                             photo_document_id: number;
@@ -6509,6 +6513,21 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            /** @description An error */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Error overview.
+                         * @example
+                         */
+                        message: string;
+                    };
+                };
+            };
             404: components["responses"]["ModelNotFoundException"];
             422: components["responses"]["ValidationException"];
         };

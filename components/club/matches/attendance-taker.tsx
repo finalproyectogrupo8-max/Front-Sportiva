@@ -167,7 +167,9 @@ export function AttendanceTaker({
   if (rows.length === 0) {
     return (
       <p className="rounded-xl border border-dashed bg-card/50 p-8 text-center text-sm text-muted-foreground">
-        La categoría no tiene jugadores. Sumalos desde el módulo Jugadores.
+        {kind === 'matches'
+          ? 'Todavía no hay convocados. La asistencia del partido se toma a los convocados: armá la convocatoria primero.'
+          : 'La categoría no tiene jugadores. Sumalos desde el módulo Jugadores.'}
       </p>
     )
   }
